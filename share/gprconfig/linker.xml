@@ -933,7 +933,6 @@
 
    for Shared_Library_Suffix use ".dylib";
    for Library_Auto_Init_Supported use "true";
-   for Archive_Indexer use project'Archive_Indexer &amp; ("-c");
    for Shared_Library_Minimum_Switches use
          ("-dynamiclib", "-shared-libgcc");
    for Library_Encapsulated_Options use ("-shared", "-static-libgcc");
