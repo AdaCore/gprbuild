@@ -1,0 +1,8 @@
+Code-Review+1: Joel Brobecker <brobecker@adacore.com>
+Code-Review+1: Jerome Guitton <guitton@adacore.com>
+Code-Review+2: Vasiliy Fofanov <fofanov@adacore.com>
+Submitted-by: Vasiliy Fofanov <fofanov@adacore.com>
+Submitted-at: Fri, 16 Dec 2016 12:08:10 +0100
+Reviewed-on: https://git.adacore.com/20817
+Project: gprbuild
+Branch: refs/heads/master
