@@ -53,6 +53,10 @@ package body GPR.Snames is
          return;
       end if;
 
+      if Last_Id = Name_Id'First then
+         Add_Name ("");
+      end if;
+
       Add_Name ("a");
       Add_Name ("b");
       Add_Name ("c");
