@@ -354,6 +354,8 @@ package body GPR.Names is
 
       Name_Chars.Append (ASCII.NUL);
 
+      Last_Id := Name_Entries.Last;
+
       return Name_Entries.Last;
    end Name_Enter;
 
@@ -426,6 +428,8 @@ package body GPR.Names is
       end loop;
 
       Name_Chars.Append (ASCII.NUL);
+
+      Last_Id := Name_Entries.Last;
 
       return Name_Entries.Last;
    end Name_Find;
