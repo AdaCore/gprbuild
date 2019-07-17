@@ -267,78 +267,8 @@
   </configuration>
 
   <!--  Archiver.  -->
-  <configuration>
-    <targets>
-      <target name="^x86_64-elf$" />
-    </targets>
-    <config>
-   for Archive_Builder  use ("x86_64-elf-ar", "cr");
-   for Archive_Builder_Append_Option use ("q");
-   for Archive_Indexer  use ("x86_64-elf-ranlib");
-   for Archive_Suffix   use ".a";
-    </config>
-  </configuration>
 
-  <configuration>
-    <targets>
-      <target name="^visium-elf$" />
-    </targets>
-    <config>
-   for Archive_Builder  use ("visium-elf-ar", "cr");
-   for Archive_Builder_Append_Option use ("q");
-   for Archive_Indexer  use ("visium-elf-ranlib");
-   for Archive_Suffix   use ".a";
-    </config>
-  </configuration>
-
-  <configuration>
-    <targets>
-      <target name="^riscv64-elf$" />
-    </targets>
-    <config>
-   for Archive_Builder  use ("riscv64-elf-ar", "cr");
-   for Archive_Builder_Append_Option use ("q");
-   for Archive_Indexer  use ("riscv64-elf-ranlib");
-   for Archive_Suffix   use ".a";
-    </config>
-  </configuration>
-
-  <configuration>
-    <targets>
-      <target name="^riscv32-elf$" />
-    </targets>
-    <config>
-   for Archive_Builder  use ("riscv32-elf-ar", "cr");
-   for Archive_Builder_Append_Option use ("q");
-   for Archive_Indexer  use ("riscv32-elf-ranlib");
-   for Archive_Suffix   use ".a";
-    </config>
-  </configuration>
-
-  <configuration>
-    <targets>
-      <target name="^m68020-elf$" />
-    </targets>
-    <config>
-   for Archive_Builder  use ("m68020-elf-ar", "cr");
-   for Archive_Builder_Append_Option use ("q");
-   for Archive_Indexer  use ("m68020-elf-ranlib");
-   for Archive_Suffix   use ".a";
-    </config>
-  </configuration>
-
-  <configuration>
-    <targets>
-      <target name="^powerpc-elf$" />
-    </targets>
-    <config>
-   for Archive_Builder  use ("powerpc-elf-ar", "cr");
-   for Archive_Builder_Append_Option use ("q");
-   for Archive_Indexer  use ("powerpc-elf-ranlib");
-   for Archive_Suffix   use ".a";
-    </config>
-  </configuration>
-
+  <!-- Append 's' to 'ar' options. -->
   <configuration>
     <targets>
       <target name="^powerpc-elf-lynxos$" />
@@ -352,24 +282,18 @@
 
   <configuration>
     <targets>
-      <target name="^powerpc-xcoff-lynxos178$" />
+      <target name="^i686-pc-mingw32$" />
+      <target name="^x86_64-pc-mingw32$" />
     </targets>
+    <!-- Cross compiler case -->
+    <hosts negate="true">
+      <host name="^i686-pc-mingw32$" />
+      <host name="^x86_64-pc-mingw32$" />
+    </hosts>
     <config>
-   for Archive_Builder  use ("powerpc-xcoff-lynxos178-ar", "cr");
+   for Archive_Builder  use ("$TARGET-ar", "cr");
    for Archive_Builder_Append_Option use ("q");
-   for Archive_Indexer  use ("powerpc-xcoff-lynxos178-ranlib");
-   for Archive_Suffix   use ".a";
-    </config>
-  </configuration>
-
-  <configuration>
-    <targets>
-      <target name="^powerpc-eabispe$" />
-    </targets>
-    <config>
-   for Archive_Builder  use ("powerpc-eabispe-ar", "cr");
-   for Archive_Builder_Append_Option use ("q");
-   for Archive_Indexer  use ("powerpc-eabispe-ranlib");
+   for Archive_Indexer  use ("$TARGET-ranlib");
    for Archive_Suffix   use ".a";
     </config>
   </configuration>
@@ -377,55 +301,9 @@
   <configuration>
     <targets>
       <target name="^i686-pc-mingw32$" />
-    </targets>
-    <hosts negate="true">
-      <host name="^i686-pc-mingw32$" />
-      <host name="^x86_64-pc-mingw32$" />
-    </hosts>
-    <config>
-   for Archive_Builder  use ("i686-pc-mingw32-ar", "cr");
-   for Archive_Builder_Append_Option use ("q");
-   for Archive_Indexer  use ("i686-pc-mingw32-ranlib");
-   for Archive_Suffix   use ".a";
-    </config>
-  </configuration>
-
-  <configuration>
-    <targets>
-      <target name="^i686-pc-mingw32$" />
-    </targets>
-    <hosts>
-      <host name="^i686-pc-mingw32$" />
-      <host name="^x86_64-pc-mingw32$" />
-    </hosts>
-    <config>
-   for Archive_Builder  use ("ar", "cr");
-   for Archive_Builder_Append_Option use ("q");
-   for Archive_Indexer  use ("ranlib");
-   for Archive_Suffix   use ".a";
-    </config>
-  </configuration>
-
-  <configuration>
-    <targets>
       <target name="^x86_64-pc-mingw32$" />
     </targets>
-    <hosts negate="true">
-      <host name="^i686-pc-mingw32$" />
-      <host name="^x86_64-pc-mingw32$" />
-    </hosts>
-    <config>
-   for Archive_Builder  use ("x86_64-pc-mingw32-ar", "cr");
-   for Archive_Builder_Append_Option use ("q");
-   for Archive_Indexer  use ("x86_64-pc-mingw32-ranlib");
-   for Archive_Suffix   use ".a";
-    </config>
-  </configuration>
-
-  <configuration>
-    <targets>
-      <target name="^x86_64-pc-mingw32$" />
-    </targets>
+    <!-- Native compiler case -->
     <hosts>
       <host name="^i686-pc-mingw32$" />
       <host name="^x86_64-pc-mingw32$" />
@@ -442,14 +320,15 @@
     <targets>
       <target name="^powerpc-generic-linux-gnu$" />
     </targets>
+    <!-- Cross compiler case -->
     <hosts negate="true">
       <!-- Cross compiler case -->
       <host name="^(ppc|powerpc)-.*linux.*$" />
     </hosts>
     <config>
-   for Archive_Builder  use ("powerpc-generic-linux-gnu-ar", "cr");
+   for Archive_Builder  use ("$TARGET-ar", "cr");
    for Archive_Builder_Append_Option use ("q");
-   for Archive_Indexer  use ("powerpc-generic-linux-gnu-ranlib");
+   for Archive_Indexer  use ("$TARGET-ranlib");
    for Archive_Suffix   use ".a";
     </config>
   </configuration>
@@ -466,222 +345,6 @@
    for Archive_Builder  use ("ar", "cr");
    for Archive_Builder_Append_Option use ("q");
    for Archive_Indexer  use ("ranlib");
-   for Archive_Suffix   use ".a";
-    </config>
-  </configuration>
-
-  <configuration>
-    <targets>
-      <target name="^powerpc64-generic-linux-gnu$" />
-    </targets>
-    <config>
-   for Archive_Builder  use ("powerpc64-generic-linux-gnu-ar", "cr");
-   for Archive_Builder_Append_Option use ("q");
-   for Archive_Indexer  use ("powerpc64-generic-linux-gnu-ranlib");
-   for Archive_Suffix   use ".a";
-    </config>
-  </configuration>
-
-  <configuration>
-    <targets>
-      <target name="^arm-linux-androideabi$" />
-    </targets>
-    <config>
-   for Archive_Builder  use ("arm-linux-androideabi-ar", "cr");
-   for Archive_Builder_Append_Option use ("q");
-   for Archive_Indexer  use ("arm-linux-androideabi-ranlib");
-   for Archive_Suffix   use ".a";
-    </config>
-  </configuration>
-
-  <configuration>
-    <targets>
-      <target name="^arm-linux-gnueabi$" />
-    </targets>
-    <config>
-   for Archive_Builder  use ("arm-linux-gnueabi-ar", "cr");
-   for Archive_Builder_Append_Option use ("q");
-   for Archive_Indexer  use ("arm-linux-gnueabi-ranlib");
-   for Archive_Suffix   use ".a";
-    </config>
-  </configuration>
-
-  <configuration>
-    <targets>
-      <target name="^arm-linux-gnueabihf$" />
-    </targets>
-    <config>
-   for Archive_Builder  use ("arm-linux-gnueabihf-ar", "cr");
-   for Archive_Builder_Append_Option use ("q");
-   for Archive_Indexer  use ("arm-linux-gnueabihf-ranlib");
-   for Archive_Suffix   use ".a";
-    </config>
-  </configuration>
-
-  <configuration>
-    <targets>
-      <target name="^aarch64-linux-gnu$" />
-    </targets>
-    <config>
-   for Archive_Builder  use ("aarch64-linux-gnu-ar", "cr");
-   for Archive_Builder_Append_Option use ("q");
-   for Archive_Indexer  use ("aarch64-linux-gnu-ranlib");
-   for Archive_Suffix   use ".a";
-    </config>
-  </configuration>
-
-  <configuration>
-    <targets>
-      <target name="^aarch64-nto-qnx$" />
-    </targets>
-    <config>
-   for Archive_Builder  use ("aarch64-nto-qnx-ar", "cr");
-   for Archive_Builder_Append_Option use ("q");
-   for Archive_Indexer  use ("aarch64-nto-qnx-ranlib");
-   for Archive_Suffix   use ".a";
-    </config>
-  </configuration>
-
-  <configuration>
-    <targets>
-      <target name="^e500v2-gnu-linux$" />
-    </targets>
-    <config>
-   for Archive_Builder  use ("e500v2-gnu-linux-ar", "cr");
-   for Archive_Builder_Append_Option use ("q");
-   for Archive_Indexer  use ("e500v2-gnu-linux-ranlib");
-   for Archive_Suffix   use ".a";
-    </config>
-  </configuration>
-
-  <configuration>
-    <targets>
-      <target name="^erc32-elf$" />
-    </targets>
-    <config>
-   for Archive_Builder  use ("erc32-elf-ar", "cr");
-   for Archive_Builder_Append_Option use ("q");
-   for Archive_Indexer  use ("erc32-elf-ranlib");
-   for Archive_Suffix   use ".a";
-    </config>
-  </configuration>
-
-  <configuration>
-    <targets>
-      <target name="^leon-elf$" />
-    </targets>
-    <config>
-   for Archive_Builder  use ("leon-elf-ar", "cr");
-   for Archive_Builder_Append_Option use ("q");
-   for Archive_Indexer  use ("leon-elf-ranlib");
-   for Archive_Suffix   use ".a";
-    </config>
-  </configuration>
-
-  <configuration>
-    <targets>
-      <target name="^leon3-elf$" />
-    </targets>
-    <config>
-   for Archive_Builder  use ("leon3-elf-ar", "cr");
-   for Archive_Builder_Append_Option use ("q");
-   for Archive_Indexer  use ("leon3-elf-ranlib");
-   for Archive_Suffix   use ".a";
-    </config>
-  </configuration>
-
-  <configuration>
-    <targets>
-      <target name="^arm-eabi$" />
-    </targets>
-    <config>
-   for Archive_Builder  use ("arm-eabi-ar", "cr");
-   for Archive_Builder_Append_Option use ("q");
-   for Archive_Indexer  use ("arm-eabi-ranlib");
-   for Archive_Suffix   use ".a";
-    </config>
-  </configuration>
-
-  <configuration>
-    <targets>
-      <target name="^aarch64-elf$" />
-    </targets>
-    <config>
-   for Archive_Builder  use ("aarch64-elf-ar", "cr");
-   for Archive_Builder_Append_Option use ("q");
-   for Archive_Indexer  use ("aarch64-elf-ranlib");
-   for Archive_Suffix   use ".a";
-    </config>
-  </configuration>
-
-  <configuration>
-    <targets>
-      <target name="^avr$" />
-    </targets>
-    <config>
-   for Archive_Builder  use ("avr-ar", "cr");
-   for Archive_Builder_Append_Option use ("q");
-   for Archive_Indexer  use ("avr-ranlib");
-   for Archive_Suffix   use ".a";
-    </config>
-  </configuration>
-
-  <configuration>
-    <targets>
-      <target name="^arm-sysgo-pikeos$" />
-    </targets>
-    <config>
-   for Archive_Builder  use ("arm-sysgo-pikeos-ar", "cr");
-   for Archive_Builder_Append_Option use ("q");
-   for Archive_Indexer  use ("arm-sysgo-pikeos-ranlib");
-   for Archive_Suffix   use ".a";
-    </config>
-  </configuration>
-
-  <configuration>
-    <targets>
-      <target name="^arm-sysgo-pikeos4$" />
-    </targets>
-    <config>
-   for Archive_Builder  use ("arm-sysgo-pikeos4-ar", "cr");
-   for Archive_Builder_Append_Option use ("q");
-   for Archive_Indexer  use ("arm-sysgo-pikeos4-ranlib");
-   for Archive_Suffix   use ".a";
-    </config>
-  </configuration>
-
-  <configuration>
-    <targets>
-      <target name="^arm-sysgo-pikeos5$" />
-    </targets>
-    <config>
-   for Archive_Builder  use ("arm-sysgo-pikeos5-ar", "cr");
-   for Archive_Builder_Append_Option use ("q");
-   for Archive_Indexer  use ("arm-sysgo-pikeos5-ranlib");
-   for Archive_Suffix   use ".a";
-    </config>
-  </configuration>
-
-  <configuration>
-    <targets>
-      <target name="^i586-sysgo-pikeos$" />
-    </targets>
-    <config>
-   for Archive_Builder  use ("i586-sysgo-pikeos-ar", "cr");
-   for Archive_Builder_Append_Option use ("q");
-   for Archive_Indexer  use ("i586-sysgo-pikeos-ranlib");
-   for Archive_Suffix   use ".a";
-    </config>
-  </configuration>
-
-  <configuration>
-    <targets>
-      <target name="^powerpc-sysgo-pikeos$" />
-    </targets>
-    <config>
-   for Archive_Builder  use ("powerpc-sysgo-pikeos-ar", "cr");
-   for Archive_Builder_Append_Option use ("q");
-   for Archive_Indexer  use ("powerpc-sysgo-pikeos-ranlib");
    for Archive_Suffix   use ".a";
     </config>
   </configuration>
@@ -727,86 +390,87 @@
     </config>
   </configuration>
 
+  <!-- When no other expression matches, assume a native build. -->
   <configuration>
     <targets negate="true">
-      <target name="^x86_64-elf$"/>
-      <target name="^.*-wrs-vxworks.*$" />
-      <target name="^visium-elf$"/>
-      <target name="^riscv64-elf$"/>
-      <target name="^riscv32-elf$"/>
-      <target name="^m68020-elf$"/>
-      <target name="^powerpc-elf$"/>
-      <target name="^powerpc-elf-lynxos$" />
-      <target name="^powerpc-xcoff-lynxos178$" />
-      <target name="^powerpc-eabispe$"/>
-      <target name="^avr$"/>
-      <target name="^erc32-elf$"/>
-      <target name="^leon-elf$"/>
-      <target name="^leon3-elf$"/>
-      <target name="^arm-eabi$"/>
-      <target name="^aarch64-elf$"/>
+      <target name="^x86_64-elf$" />
       <target name="^.*aix.*$" />
       <target name="^.*ia64.*hpux.*$" />
-      <target name="^.*pc-mingw32$" />
-      <target name="^.*-pikeos.*$" />
-      <target name="^.*-linux.*" />
-      <target name="^.*-gnueabihf$" />
-      <target name="^.*-gnueabi$" />
+      <target name="^aarch64-elf$"/>
+      <target name="^aarch64-linux-gnu$" />
+      <target name="^aarch64-nto-qnx$" />
+      <target name="^arm-eabi$"/>
+      <target name="^arm-linux-androideabi$" />
+      <target name="^arm-linux-gnueabi$" />
+      <target name="^arm-linux-gnueabihf$" />
+      <target name="^arm-sysgo-pikeos$" />
+      <target name="^arm-sysgo-pikeos4$" />
+      <target name="^avr$"/>
       <target name="^c$" />
-      <target name="^.*-qnx[0-9]*$"/>
-    </targets>
-    <config>
-   for Archive_Builder  use ("ar", "cr");
-   for Archive_Builder_Append_Option use ("q");
-   for Archive_Indexer  use ("ranlib");
-   for Archive_Suffix   use ".a";
-    </config>
-  </configuration>
-
-  <!-- Do not use the native ar on cross linuxes.
-       ??? This will be simplified when switching to the new scheme for
-       cross linuxes; then we'll have a simple way to check if a toolchain
-       is native or cross.  -->
-
-  <configuration>
-    <targets>
-      <target name="^i.86-.*linux.*" />
-      <target name="^x86_64-.*linux.*" />
-    </targets>
-    <hosts>
-      <host name="^i.86-.*linux.*" />
-      <host name="^x86_64-.*linux.*" />
-    </hosts>
-    <config>
-   for Archive_Builder  use ("ar", "cr");
-   for Archive_Builder_Append_Option use ("q");
-   for Archive_Indexer  use ("ranlib");
-   for Archive_Suffix   use ".a";
-    </config>
-  </configuration>
-
-  <!-- powerpc-elf-lynxos178e, after the previous one
-       to overwrite the attributes -->
-  <configuration>
-    <targets>
-      <target name="^powerpc-elf-lynxos178e$" />
-    </targets>
-    <config>
-   for Archive_Builder  use ("powerpc-elf-lynxos178e-ar", "cr");
-   for Archive_Builder_Append_Option use ("q");
-   for Archive_Indexer  use ("powerpc-elf-lynxos178e-ranlib");
-   for Archive_Suffix   use ".a";
-    </config>
-  </configuration>
-
-  <configuration>
-    <targets>
+      <target name="^e500v2-gnu-linux$" />
+      <target name="^erc32-elf$"/>
       <target name="^i586-elf-lynxos178e$" />
+      <target name="^i586-sysgo-pikeos$" />
+      <target name="^i686-pc-mingw32$" />
+      <target name="^leon-elf$"/>
+      <target name="^leon3-elf$"/>
+      <target name="^m68020-elf$"/>
+      <target name="^powerpc-eabispe$"/>
+      <target name="^powerpc-elf$"/>
+      <target name="^powerpc-elf-lynxos$" />
+      <target name="^powerpc-elf-lynxos178e$" />
+      <target name="^powerpc-generic-linux-gnu$" />
+      <target name="^powerpc-sysgo-pikeos$" />
+      <target name="^powerpc-xcoff-lynxos178$" />
+      <target name="^powerpc64-generic-linux-gnu$" />
+      <target name="^riscv32-elf$"/>
+      <target name="^riscv64-elf$"/>
+      <target name="^visium-elf$"/>
+      <target name="^x86_64-pc-mingw32$" />
     </targets>
     <config>
-   for Archive_Builder  use ("i586-elf-lynxos178e-ar", "cr");
+   for Archive_Builder  use ("ar", "cr");
    for Archive_Builder_Append_Option use ("q");
-   for Archive_Indexer  use ("i586-elf-lynxos178e-ranlib");
+   for Archive_Indexer  use ("ranlib");
+   for Archive_Suffix   use ".a";
+    </config>
+  </configuration>
+
+  <configuration>
+    <targets>
+      <target name="^aarch64-elf$" />
+      <target name="^aarch64-linux-gnu$" />
+      <target name="^aarch64-nto-qnx$" />
+      <target name="^arm-eabi$" />
+      <target name="^arm-linux-androideabi$" />
+      <target name="^arm-linux-gnueabi$" />
+      <target name="^arm-linux-gnueabihf$" />
+      <target name="^arm-sysgo-pikeos$" />
+      <target name="^arm-sysgo-pikeos4$" />
+      <target name="^arm-sysgo-pikeos5$" />
+      <target name="^avr$" />
+      <target name="^e500v2-gnu-linux$" />
+      <target name="^erc32-elf$" />
+      <target name="^i586-elf-lynxos178e$" />
+      <target name="^i586-sysgo-pikeos$" />
+      <target name="^leon-elf$" />
+      <target name="^leon3-elf$" />
+      <target name="^m68020-elf$"/>
+      <target name="^powerpc-eabispe$" />
+      <target name="^powerpc-elf$" />
+      <target name="^powerpc-elf-lynxos178e$" />
+      <target name="^powerpc-sysgo-pikeos$" />
+      <target name="^powerpc-xcoff-lynxos178$" />
+      <target name="^powerpc64-generic-linux-gnu$" />
+      <target name="^riscv32-elf$" />
+      <target name="^riscv64-elf$" />
+      <target name="^visium-elf$" />
+      <target name="^x86_64-elf$" />
+    </targets>
+    <config>
+   for Archive_Builder  use ("$TARGET-ar", "cr");
+   for Archive_Builder_Append_Option use ("q");
+   for Archive_Indexer  use ("$TARGET-ranlib");
    for Archive_Suffix   use ".a";
     </config>
   </configuration>
