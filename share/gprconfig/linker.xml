@@ -991,13 +991,14 @@
     </config>
   </configuration>
 
-  <!-- linux, freebsd, Irix, QNX -->
+  <!-- linux, freebsd, Irix, QNX, Hurd -->
   <configuration>
     <targets>
        <target name="^.*linux.*$" />
        <target name="^.*freebsd.*$" />
        <target name="^.*irix.*$" />
        <target name="^.*qnx[0-9]*$" />
+       <target name="^.*gnu.*$" />
     </targets>
     <config>
    for Library_Builder  use "${GPRCONFIG_PREFIX}libexec/gprbuild/gprlib";
