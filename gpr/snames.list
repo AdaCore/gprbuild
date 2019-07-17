@@ -290,3 +290,5 @@ Canonical_Target
 Warning_Message
 Only_Dirs_With_Sources
 Include_Switches_Via_Spec
+Required_Toolchain_Version
+Toolchain_Name
