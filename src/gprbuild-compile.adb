@@ -2228,23 +2228,6 @@ package body Gprbuild.Compile is
             end loop;
          end if;
 
-         --  4) The PIC option if it exists, for shared and "static-pic"
-         --     libraries.
-
-         if Id.Project.Library
-           and then Id.Project.Library_Kind /= Static
-         then
-            List := Config.Compilation_PIC_Option;
-            while List /= No_Name_List loop
-               Nam_Nod := Project_Tree.Shared.Name_Lists.Table (List);
-               Add_Option_Internal_Codepeer
-                 (Value   => Get_Name_String (Nam_Nod.Name),
-                  To      => Compilation_Options,
-                  Display => True);
-               List := Nam_Nod.Next;
-            end loop;
-         end if;
-
          --  5) Compiler'Switches(<source file name>), if it is
          --  defined, otherwise Compiler'Switches (<language name>),
          --  if defined.
@@ -2271,6 +2254,23 @@ package body Gprbuild.Compile is
                  (Value   => Opt,
                   To      => Compilation_Options,
                   Display => True);
+            end loop;
+         end if;
+
+         --  4) The PIC option if it exists, for shared and "static-pic"
+         --     libraries.
+
+         if Id.Project.Library
+           and then Id.Project.Library_Kind /= Static
+         then
+            List := Config.Compilation_PIC_Option;
+            while List /= No_Name_List loop
+               Nam_Nod := Project_Tree.Shared.Name_Lists.Table (List);
+               Add_Option_Internal_Codepeer
+                 (Value   => Get_Name_String (Nam_Nod.Name),
+                  To      => Compilation_Options,
+                  Display => True);
+               List := Nam_Nod.Next;
             end loop;
          end if;
       end Set_Options_For_File;
