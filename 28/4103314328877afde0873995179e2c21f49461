@@ -1,0 +1,7 @@
+Code-Review+2: Olivier Hainque <hainque@adacore.com>
+Code-Review-1: Dmitriy Anisimkov <anisimko@adacore.com>
+Submitted-by: Vasiliy Fofanov <fofanov@adacore.com>
+Submitted-at: Tue, 26 Nov 2019 15:43:40 +0100
+Reviewed-on: https://git.adacore.com/63623
+Project: gprbuild
+Branch: refs/heads/master
