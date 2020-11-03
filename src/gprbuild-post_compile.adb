@@ -2,7 +2,7 @@
 --                                                                          --
 --                             GPR TECHNOLOGY                               --
 --                                                                          --
---                     Copyright (C) 2011-2020, AdaCore                     --
+--                     Copyright (C) 2011-2021, AdaCore                     --
 --                                                                          --
 -- This is  free  software;  you can redistribute it and/or modify it under --
 -- terms of the  GNU  General Public License as published by the Free Soft- --
@@ -5224,13 +5224,17 @@ package body Gprbuild.Post_Compile is
 
                   B_Data := Builder_Data (Main_File.Tree).Binding;
                   while B_Data /= null loop
-                     Wait_For_Slots_Less_Than (Opt.Maximum_Processes);
-                     exit when Stop_Spawning;
-                     Change_To_Object_Directory (Main_Proj);
-                     Bind_Language
-                       (Main_Proj, Main, Main_Base_Name_Index,
-                        Main_File, Main_Id, B_Data);
-                     exit when Stop_Spawning;
+                     if B_Data.Language.Config.Compiler_Driver /= Empty_File
+                     then
+                        Wait_For_Slots_Less_Than (Opt.Maximum_Processes);
+                        exit when Stop_Spawning;
+                        Change_To_Object_Directory (Main_Proj);
+                        Bind_Language
+                          (Main_Proj, Main, Main_Base_Name_Index,
+                           Main_File, Main_Id, B_Data);
+                        exit when Stop_Spawning;
+                     end if;
+
                      B_Data := B_Data.Next;
                   end loop;
                end;

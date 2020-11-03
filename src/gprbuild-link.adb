@@ -2,7 +2,7 @@
 --                                                                          --
 --                             GPR TECHNOLOGY                               --
 --                                                                          --
---                     Copyright (C) 2011-2020, AdaCore                     --
+--                     Copyright (C) 2011-2021, AdaCore                     --
 --                                                                          --
 -- This is  free  software;  you can redistribute it and/or modify it under --
 -- terms of the  GNU  General Public License as published by the Free Soft- --
@@ -3430,6 +3430,8 @@ package body Gprbuild.Link is
 
                if Main_File.Tree = Tree
                  and then not Project_Compilation_Failed (Main_File.Project)
+                 and then Main_File.Source.Language.Config.Compiler_Driver
+                          /= Empty_File
                then
                   Wait_For_Available_Slot;
                   exit when Stop_Spawning;
