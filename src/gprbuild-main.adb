@@ -2,7 +2,7 @@
 --                                                                          --
 --                             GPR TECHNOLOGY                               --
 --                                                                          --
---                     Copyright (C) 2011-2020, AdaCore                     --
+--                     Copyright (C) 2011-2021, AdaCore                     --
 --                                                                          --
 -- This is  free  software;  you can redistribute it and/or modify it under --
 -- terms of the  GNU  General Public License as published by the Free Soft- --
@@ -1333,10 +1333,10 @@ procedure Gprbuild.Main is
                if Processed then
                   if Max_Proc = 0 then
                      Max_Proc := Natural (Number_Of_CPUs);
-                  end if;
 
-                  if Max_Proc = 0 then
-                     Max_Proc := 1;
+                     if Max_Proc = 0 then
+                        Max_Proc := 1;
+                     end if;
                   end if;
 
                   Opt.Maximum_Processes := Max_Proc;
