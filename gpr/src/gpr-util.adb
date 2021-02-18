@@ -5613,12 +5613,12 @@ package body GPR.Util is
    -- Check_Maximum_Processes --
    -----------------------------
 
-   procedure Check_Maximum_Processes is
+   procedure Check_Maximum_Processes (Value : in out Positive) is
    begin
-      if On_Windows and then Opt.Maximum_Processes > 63 then
+      if On_Windows and then Value > 63 then
          Put_Line
            ("On Windows the maximum number of simultaneous processes is 63");
-         Opt.Maximum_Processes := 63;
+         Value := 63;
       end if;
    end Check_Maximum_Processes;
 

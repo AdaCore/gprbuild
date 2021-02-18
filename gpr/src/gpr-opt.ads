@@ -2,7 +2,7 @@
 --                                                                          --
 --                           GPR PROJECT MANAGER                            --
 --                                                                          --
---          Copyright (C) 2001-2020, Free Software Foundation, Inc.         --
+--          Copyright (C) 2001-2021, Free Software Foundation, Inc.         --
 --                                                                          --
 -- This library is free software;  you can redistribute it and/or modify it --
 -- under terms of the  GNU General Public License  as published by the Free --
@@ -153,9 +153,17 @@ package GPR.Opt is
    --  Set to True to skip compile and bind steps (except when Bind_Only is
    --  set to True).
 
-   Maximum_Processes : Positive := 1;
+   Maximum_Compilers : Positive := 1;
    --  Maximum number of processes that should be spawned to carry out
    --  compilations.
+
+   Maximum_Binders : Positive := 1;
+   --  Maximum number of processes that should be spawned to carry out
+   --  bindings.
+
+   Maximum_Linkers : Positive := 1;
+   --  Maximum number of processes that should be spawned to carry out
+   --  linkings.
 
    Minimal_Recompilation : Boolean := False;
    --  Set to True if minimal recompilation mode requested

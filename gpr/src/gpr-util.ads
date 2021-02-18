@@ -2,7 +2,7 @@
 --                                                                          --
 --                           GPR PROJECT MANAGER                            --
 --                                                                          --
---          Copyright (C) 2001-2020, Free Software Foundation, Inc.         --
+--          Copyright (C) 2001-2021, Free Software Foundation, Inc.         --
 --                                                                          --
 -- This library is free software;  you can redistribute it and/or modify it --
 -- under terms of the  GNU General Public License  as published by the Free --
@@ -62,7 +62,7 @@ package GPR.Util is
    procedure Set_Gprls_Mode;
    --  Set Gprls_Mode to True
 
-   procedure Check_Maximum_Processes;
+   procedure Check_Maximum_Processes (Value : in out Positive);
    --  Check that the maximum number of simultaneous processes is not too large
    --  for the platform.
 

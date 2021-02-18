@@ -3542,7 +3542,7 @@ package body Gprbuild.Post_Compile is
                   end;
                end if;
 
-               Wait_For_Slots_Less_Than (Opt.Maximum_Processes);
+               Wait_For_Slots_Less_Than (Opt.Maximum_Binders);
 
                if Stop_Spawning then
                   return;
@@ -5226,7 +5226,7 @@ package body Gprbuild.Post_Compile is
                   while B_Data /= null loop
                      if B_Data.Language.Config.Compiler_Driver /= Empty_File
                      then
-                        Wait_For_Slots_Less_Than (Opt.Maximum_Processes);
+                        Wait_For_Slots_Less_Than (Opt.Maximum_Binders);
                         exit when Stop_Spawning;
                         Change_To_Object_Directory (Main_Proj);
                         Bind_Language

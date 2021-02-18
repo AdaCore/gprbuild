@@ -147,7 +147,9 @@ procedure Gprbuild.Main is
       type Option_Type is
         (Force_Compilations_Option,
          Keep_Going_Option,
-         Maximum_Processes_Option,
+         Maximum_Compilers_Option,
+         Maximum_Binders_Option,
+         Maximum_Linkers_Option,
          Quiet_Output_Option,
          Check_Switches_Option,
          Verbose_Mode_Option,
@@ -158,6 +160,9 @@ procedure Gprbuild.Main is
          Warnings_Normal,
          Warnings_Suppress,
          Indirect_Imports);
+
+      subtype Maximum_Processes_Range is Option_Type range
+        Maximum_Compilers_Option .. Maximum_Linkers_Option;
 
       procedure Register_Command_Line_Option
         (Option : Option_Type; Value : Natural := 0);
@@ -437,8 +442,14 @@ procedure Gprbuild.Main is
                when Keep_Going_Option =>
                   Opt.Keep_Going := True;
 
-               when Maximum_Processes_Option =>
-                  Opt.Maximum_Processes := Item.Value;
+               when Maximum_Compilers_Option =>
+                  Opt.Maximum_Compilers := Item.Value;
+
+               when Maximum_Binders_Option =>
+                  Opt.Maximum_Binders := Item.Value;
+
+               when Maximum_Linkers_Option =>
+                  Opt.Maximum_Linkers := Item.Value;
 
                when Quiet_Output_Option =>
                   Opt.Quiet_Output    := True;
@@ -1317,36 +1328,49 @@ procedure Gprbuild.Main is
 
          elsif Arg'Length > 2 and then Arg (2) = 'j' then
             declare
-               Max_Proc : Natural := 0;
+               Max_Proc : Natural   := 0;
+               Phase    : Character := 'a'; -- all by default
+               First    : Positive;
             begin
-               for J in 3 .. Arg'Length loop
-                  if Arg (J) in '0' .. '9' then
-                     Max_Proc := (Max_Proc * 10) +
-                       Character'Pos (Arg (J)) -
-                       Character'Pos ('0');
-
-                  else
-                     Processed := False;
-                  end if;
-               end loop;
-
-               if Processed then
-                  if Max_Proc = 0 then
-                     Max_Proc := Natural (Number_Of_CPUs);
-
-                     if Max_Proc = 0 then
-                        Max_Proc := 1;
-                     end if;
-                  end if;
-
-                  Opt.Maximum_Processes := Max_Proc;
+               if Arg'Length > 3 and then Arg (3) not in '0' .. '9' then
+                  Phase := Arg (3);
+                  First := 4;
+               else
+                  First := 3;
                end if;
-            end;
 
-            if Processed and then Command_Line then
-               Register_Command_Line_Option
-                 (Maximum_Processes_Option, Opt.Maximum_Processes);
-            end if;
+               Max_Proc := Natural'Value (Arg (First .. Arg'Last));
+
+               if Max_Proc = 0 then
+                  Max_Proc := Natural (Number_Of_CPUs);
+
+                  if Max_Proc = 0 then
+                     Max_Proc := 1;
+                  end if;
+               end if;
+
+               case Phase is
+                  when 'a' =>
+                     for J in Maximum_Processes_Range loop
+                        Register_Command_Line_Option (J, Max_Proc);
+                     end loop;
+                  when 'c' =>
+                     Register_Command_Line_Option
+                       (Maximum_Compilers_Option, Max_Proc);
+                  when 'b' =>
+                     Register_Command_Line_Option
+                       (Maximum_Binders_Option, Max_Proc);
+                  when 'l' =>
+                     Register_Command_Line_Option
+                       (Maximum_Linkers_Option, Max_Proc);
+                  when others =>
+                     Processed := False;
+               end case;
+
+            exception
+               when Constraint_Error =>
+                  Processed := False;
+            end;
 
          elsif Arg = "-k" then
             Opt.Keep_Going := True;
@@ -2183,7 +2207,16 @@ procedure Gprbuild.Main is
 
          --  Line for -jnnn
 
-         Put ("  -jnum    Use num processes to compile");
+         Put ("  -j<num>    Use <num> processes to compile, bind, and link");
+         New_Line;
+
+         Put ("  -jc<num>    Use <num> processes to compile");
+         New_Line;
+
+         Put ("  -jb<num>    Use <num> processes to bind");
+         New_Line;
+
+         Put ("  -jl<num>    Use <num> processes to link");
          New_Line;
 
          --  Line for -k
@@ -2648,7 +2681,9 @@ begin
 
    Options.Process_Command_Line_Options;
 
-   Check_Maximum_Processes;
+   Check_Maximum_Processes (Opt.Maximum_Compilers);
+   Check_Maximum_Processes (Opt.Maximum_Binders);
+   Check_Maximum_Processes (Opt.Maximum_Linkers);
 
    --  If a build script is declared, try to create the file. Fail if the file
    --  cannot be created.
@@ -2670,7 +2705,7 @@ begin
    if Debug.Debug_Flag_M then
       Put_Line
         ("Maximum number of simultaneous compilations ="
-         & Opt.Maximum_Processes'Img);
+         & Opt.Maximum_Compilers'Img);
    end if;
 
    --  Warn if --create-map-file is not supported
@@ -2708,7 +2743,8 @@ begin
 
    if Is_Open (Build_Script_File) then
       Close (Build_Script_File);
-      Opt.Maximum_Processes := 1;
+      Opt.Maximum_Binders := 1;
+      Opt.Maximum_Linkers := 1;
    end if;
 
    Post_Compile.Run;

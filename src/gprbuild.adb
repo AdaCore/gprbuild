@@ -2,7 +2,7 @@
 --                                                                          --
 --                             GPR TECHNOLOGY                               --
 --                                                                          --
---                     Copyright (C) 2004-2019, AdaCore                     --
+--                     Copyright (C) 2004-2021, AdaCore                     --
 --                                                                          --
 -- This is  free  software;  you can redistribute it and/or modify it under --
 -- terms of the  GNU  General Public License as published by the Free Soft- --
@@ -489,7 +489,9 @@ package body Gprbuild is
 
    procedure Display_Processes (Name : String) is
    begin
-      if Opt.Maximum_Processes > 1
+      if (if Name = "bind" then Opt.Maximum_Binders
+          elsif Name = "link" then Opt.Maximum_Linkers
+          else Opt.Maximum_Compilers) > 1
         and then Opt.Verbose_Mode
         and then Current_Verbosity = High
       then

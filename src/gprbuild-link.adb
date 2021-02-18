@@ -3034,12 +3034,12 @@ package body Gprbuild.Link is
                      Stack_Op := True;
                   end if;
 
-               elsif Opt.Maximum_Processes > 1 then
+               elsif Opt.Maximum_Linkers > 1 then
                   if Other_Arguments (J).Name = "--lto" or else
                      Other_Arguments (J).Name = "-flto"
                   then
                      declare
-                        Img : String := Opt.Maximum_Processes'Img;
+                        Img : String := Opt.Maximum_Linkers'Img;
                         Arg : Option_Type renames Other_Arguments.Element (J);
                      begin
                         Img (1) := '=';
@@ -3450,7 +3450,7 @@ package body Gprbuild.Link is
 
       procedure Wait_For_Available_Slot is
       begin
-         while Outstanding_Processes >= Opt.Maximum_Processes loop
+         while Outstanding_Processes >= Opt.Maximum_Linkers loop
             Await_Link;
          end loop;
       end Wait_For_Available_Slot;

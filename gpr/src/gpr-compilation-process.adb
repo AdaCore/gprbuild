@@ -2,7 +2,7 @@
 --                                                                          --
 --                           GPR PROJECT MANAGER                            --
 --                                                                          --
---          Copyright (C) 2012-2018, Free Software Foundation, Inc.         --
+--          Copyright (C) 2012-2021, Free Software Foundation, Inc.         --
 --                                                                          --
 -- This library is free software;  you can redistribute it and/or modify it --
 -- under terms of the  GNU General Public License  as published by the Free --
@@ -119,7 +119,7 @@ package body GPR.Compilation.Process is
 
    function Get_Maximum_Processes return Positive is
    begin
-      return Opt.Maximum_Processes + Slave.Get_Max_Processes;
+      return Opt.Maximum_Compilers + Slave.Get_Max_Processes;
    end Get_Maximum_Processes;
 
    -------------
@@ -279,7 +279,7 @@ package body GPR.Compilation.Process is
 
       if Force_Local
         or else not Distributed_Mode
-        or else Local_Process.Count < Opt.Maximum_Processes
+        or else Local_Process.Count < Opt.Maximum_Compilers
         or else Output_File /= ""
         or else Language = ""
       then

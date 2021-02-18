@@ -2652,10 +2652,12 @@ once.
 
 .. index:: -j
 
-Since there is no ambiguity as to which switches should be used, files
-can be compiled in parallel (through the usual :option:`-j` switch) and
-this can be done while maximizing the use of CPUs (compared to launching
-multiple *GPRbuild* commands in parallel).
+Since there is no ambiguity as to which switches should be used, individual
+compilations, binds and links can be performed in parallel (through the usual
+:option:`-j` switch) and this can be done while maximizing the use of CPUs
+(compared to launching multiple *GPRbuild* commands in parallel). The -j
+option can control parallelization of compilation, binding, and linking
+separately with -jc, -jb, and -jl variants accordingly.
 
 
 .. _Syntax_of_aggregate_projects:
