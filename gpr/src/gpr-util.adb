@@ -5624,15 +5624,16 @@ package body GPR.Util is
       --------------
 
       procedure Check_It (Value : in out Positive) is
+         Max_Proc : constant := 63;
       begin
-         if Value > 63 then
-            Value := 63;
+         if Value > Max_Proc then
+            Value := Max_Proc;
 
             if not Already_Reported then
                Already_Reported := True;
                Put_Line
                  ("On Windows the maximum number of simultaneous processes is"
-                  & " 63");
+                  & Max_Proc'Img);
             end if;
          end if;
       end Check_It;
