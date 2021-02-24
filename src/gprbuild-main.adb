@@ -2681,9 +2681,7 @@ begin
 
    Options.Process_Command_Line_Options;
 
-   Check_Maximum_Processes (Opt.Maximum_Compilers);
-   Check_Maximum_Processes (Opt.Maximum_Binders);
-   Check_Maximum_Processes (Opt.Maximum_Linkers);
+   Check_Maximum_Processes;
 
    --  If a build script is declared, try to create the file. Fail if the file
    --  cannot be created.

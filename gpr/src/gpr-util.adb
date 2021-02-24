@@ -5613,12 +5613,35 @@ package body GPR.Util is
    -- Check_Maximum_Processes --
    -----------------------------
 
-   procedure Check_Maximum_Processes (Value : in out Positive) is
+   procedure Check_Maximum_Processes is
+
+      Already_Reported : Boolean := False;
+
+      procedure Check_It (Value : in out Positive);
+
+      --------------
+      -- Check_It --
+      --------------
+
+      procedure Check_It (Value : in out Positive) is
+      begin
+         if Value > 63 then
+            Value := 63;
+
+            if not Already_Reported then
+               Already_Reported := True;
+               Put_Line
+                 ("On Windows the maximum number of simultaneous processes is"
+                  & " 63");
+            end if;
+         end if;
+      end Check_It;
+
    begin
-      if On_Windows and then Value > 63 then
-         Put_Line
-           ("On Windows the maximum number of simultaneous processes is 63");
-         Value := 63;
+      if On_Windows then
+         Check_It (Opt.Maximum_Compilers);
+         Check_It (Opt.Maximum_Binders);
+         Check_It (Opt.Maximum_Linkers);
       end if;
    end Check_Maximum_Processes;
 
