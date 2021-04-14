@@ -109,11 +109,11 @@ procedure Build_Shared_Lib is
       Arguments := String_Vectors.Empty_Vector;
       --  Argument_Length := Driver'Length;
 
-      --  The minimum arguments
-      Arguments.Append (Shared_Lib_Minimum_Options);
-
       --  The leading library options, if any
       Arguments.Append (Leading_Library_Options_Table);
+
+      --  The minimum arguments
+      Arguments.Append (Shared_Lib_Minimum_Options);
 
       --  -o <library file name>
 
