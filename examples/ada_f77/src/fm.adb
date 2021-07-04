@@ -33,7 +33,11 @@
 
 with Ada.Text_IO; use Ada.Text_IO;
 with Ada.Integer_Text_IO;
+pragma Warnings (Off, """System.Parameters"" is An Internal GNAT Unit");
+pragma Warnings (Off, "use of This Unit is Non-Portable and Version-dependent");
 with System.Parameters;
+pragma Warnings (On, """System.Parameters"" is An Internal GNAT Unit");
+pragma Warnings (On, "use of This Unit is Non-Portable and Version-dependent");
 package body FM is
 
    Init_Error : exception;
