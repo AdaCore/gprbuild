@@ -1818,6 +1818,7 @@ package body GPR.Knowledge is
                Search      : Search_Type;
                File        : Directory_Entry_Type;
                Filter      : Ada.Directories.Filter_Type;
+               ContinueSearch  : Boolean := True;
             begin
                if Current_Verbosity /= Default and then File_Re = ".." then
                   Put_Verbose
@@ -1843,68 +1844,78 @@ package body GPR.Knowledge is
                   Filter    => Filter,
                   Pattern   => "");
 
-               while More_Entries (Search) loop
-                  Get_Next_Entry (Search, File);
-                  if Simple_Name (File) /= "."
-                    and then Simple_Name (File) /= ".."
-                  then
-                     declare
-                        Matched : Match_Array (0 .. Integer'Max (Group, 0));
-                        Simple  : constant String := Simple_Name (File);
-                        Count   : constant Natural :=
-                                    Paren_Count (File_Regexp);
-                     begin
-                        Match (File_Regexp, Simple, Matched);
-                        if Matched (0) /= No_Match then
-                           Put_Verbose
-                             ("<dir>: Matched " & Simple_Name (File));
+               while ContinueSearch loop begin
+                   while More_Entries (Search) loop
+                      Get_Next_Entry (Search, File);
+                      if Simple_Name (File) /= "."
+                        and then Simple_Name (File) /= ".."
+                      then
+                         declare
+                            Matched : Match_Array (0 .. Integer'Max (Group, 0));
+                            Simple  : constant String := Simple_Name (File);
+                            Count   : constant Natural :=
+                                        Paren_Count (File_Regexp);
+                         begin
+                            Match (File_Regexp, Simple, Matched);
+                            if Matched (0) /= No_Match then
+                               Put_Verbose
+                                 ("<dir>: Matched " & Simple_Name (File));
 
-                           if Group_Count < Group
-                             and then Group_Count + Count >= Group
-                           then
-                              Put_Verbose
-                                ("<dir>: Found matched group: "
-                                 & Simple (Matched (Group - Group_Count).First
-                                   .. Matched (Group - Group_Count).Last));
-                              Parse_All_Dirs
-                                (Processed_Value => Processed_Value,
-                                 Visited         => Visited,
-                                 Current_Dir     =>
-                                   Full_Name (File) & Directory_Separator,
-                                 Path_To_Check   => Path_To_Check
-                                   (Last + 1 .. Path_To_Check'Last),
-                                 Regexp          => Regexp,
-                                 Regexp_Str      => Regexp_Str,
-                                 Value_If_Match  => Value_If_Match,
-                                 Group           => Group,
-                                 Group_Match     =>
-                                   Simple (Matched (Group - Group_Count).First
-                                       .. Matched (Group - Group_Count).Last),
-                                 Group_Count     => Group_Count + Count,
-                                 Contents        => Contents,
-                                 Merge_Same_Dirs => Merge_Same_Dirs);
+                               if Group_Count < Group
+                                 and then Group_Count + Count >= Group
+                               then
+                                  Put_Verbose
+                                    ("<dir>: Found matched group: "
+                                     & Simple (Matched (Group - Group_Count).First
+                                       .. Matched (Group - Group_Count).Last));
+                                  Parse_All_Dirs
+                                    (Processed_Value => Processed_Value,
+                                     Visited         => Visited,
+                                     Current_Dir     =>
+                                       Full_Name (File) & Directory_Separator,
+                                     Path_To_Check   => Path_To_Check
+                                       (Last + 1 .. Path_To_Check'Last),
+                                     Regexp          => Regexp,
+                                     Regexp_Str      => Regexp_Str,
+                                     Value_If_Match  => Value_If_Match,
+                                     Group           => Group,
+                                     Group_Match     =>
+                                       Simple (Matched (Group - Group_Count).First
+                                           .. Matched (Group - Group_Count).Last),
+                                     Group_Count     => Group_Count + Count,
+                                     Contents        => Contents,
+                                     Merge_Same_Dirs => Merge_Same_Dirs);
 
-                           else
-                              Parse_All_Dirs
-                                (Processed_Value => Processed_Value,
-                                 Visited         => Visited,
-                                 Current_Dir     =>
-                                   Full_Name (File) & Directory_Separator,
-                                 Path_To_Check   => Path_To_Check
-                                   (Last + 1 .. Path_To_Check'Last),
-                                 Regexp          => Regexp,
-                                 Regexp_Str      => Regexp_Str,
-                                 Value_If_Match  => Value_If_Match,
-                                 Group           => Group,
-                                 Group_Match     => Group_Match,
-                                 Group_Count     => Group_Count + Count,
-                                 Contents        => Contents,
-                                 Merge_Same_Dirs => Merge_Same_Dirs);
-                           end if;
-                        end if;
-                     end;
-                  end if;
+                               else
+                                  Parse_All_Dirs
+                                    (Processed_Value => Processed_Value,
+                                     Visited         => Visited,
+                                     Current_Dir     =>
+                                       Full_Name (File) & Directory_Separator,
+                                     Path_To_Check   => Path_To_Check
+                                       (Last + 1 .. Path_To_Check'Last),
+                                     Regexp          => Regexp,
+                                     Regexp_Str      => Regexp_Str,
+                                     Value_If_Match  => Value_If_Match,
+                                     Group           => Group,
+                                     Group_Match     => Group_Match,
+                                     Group_Count     => Group_Count + Count,
+                                     Contents        => Contents,
+                                     Merge_Same_Dirs => Merge_Same_Dirs);
+                               end if;
+                            end if;
+                         end;
+                      end if;
+                   end loop;
+                   ContinueSearch := False;
+               exception
+                  when Ada.Directories.Name_Error =>
+                      null;
+                  when Ada.Directories.Use_Error =>
+                      null;
+               end;
                end loop;
+               End_Search (Search);
             end;
          end if;
       end if;
