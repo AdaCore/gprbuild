@@ -1775,84 +1775,70 @@ package body Gprbuild.Post_Compile is
 
       procedure Write_Library_Options (Success : out Boolean) is
 
-         procedure Write_All_Linker_Options (Project : Project_Id);
-         --  Write all linker options for all project imported by Project. This
-         --  is called only when building an encapsulated library.
+         procedure Write_Linker_Options (P : Project_Id);
+         --  Write linker options for Project
 
          ------------------------------
-         -- Write_All_Linker_Options --
+         -- Write_Linker_Options --
          ------------------------------
 
-         procedure Write_All_Linker_Options (Project : Project_Id) is
-            L : Project_List := Project.All_Imported_Projects;
+         procedure Write_Linker_Options (P : Project_Id) is
+            Linker_Package : constant Package_Id :=
+                               Value_Of
+                                 (Name        => Name_Linker,
+                                  In_Packages => P.Decl.Packages,
+                                  Shared      => Project_Tree.Shared);
          begin
-            --  For all imported projects
+            --  Check linker package for a definition of Linker_Options
 
-            while L /= null loop
-               Check_Package : declare
-                  P              : constant Project_Id := L.Project;
-                  Linker_Package : constant Package_Id :=
-                                     Value_Of
-                                       (Name        => Name_Linker,
-                                        In_Packages => P.Decl.Packages,
-                                        Shared      => Project_Tree.Shared);
+            if Linker_Package /= No_Package then
+               Check_Attribute : declare
+                  Opts : constant Variable_Value :=
+                           Value_Of
+                             (Variable_Name => Name_Linker_Options,
+                              In_Variables  =>
+                                Project_Tree.Shared.Packages.Table
+                                  (Linker_Package).Decl.Attributes,
+                              Shared => Project_Tree.Shared);
+
                begin
-                  --  Check linker package for a definition of Linker_Options
+                  --  If a Linker_Options attribute is found, output it
+                  --  into the Library_Options section.
 
-                  if Linker_Package /= No_Package then
-                     Check_Attribute : declare
-                        Opts : constant Variable_Value :=
-                                 Value_Of
-                                   (Variable_Name => Name_Linker_Options,
-                                    In_Variables  =>
-                                      Project_Tree.Shared.Packages.Table
-                                        (Linker_Package).Decl.Attributes,
-                                    Shared => Project_Tree.Shared);
-
+                  if not Opts.Default then
+                     Output_Options : declare
+                        List : String_List_Id := Opts.Values;
+                        Elem : String_Element;
                      begin
-                        --  If a Linker_Options attribute is found, output it
-                        --  into the Library_Options section.
+                        if List /= Nil_String then
+                           --  First ensure the section is opended
 
-                        if not Opts.Default then
-                           Output_Options : declare
-                              List : String_List_Id := Opts.Values;
-                              Elem : String_Element;
-                           begin
-                              if List /= Nil_String then
-                                 --  First ensure the section is opended
+                           Check_Section (Library_Options);
 
-                                 Check_Section (Library_Options);
+                           if P.Library_Dir.Name /= No_Path then
+                              Put_Line
+                                (Exchange_File,
+                                 "-L" & Get_Name_String (P.Library_Dir.Name));
+                           end if;
 
-                                 if P.Library_Dir.Name /= No_Path then
-                                    Put_Line
-                                      (Exchange_File,
-                                       "-L"
-                                       & Get_Name_String (P.Library_Dir.Name));
-                                 end if;
+                           loop
+                              Elem :=
+                                Project_Tree.Shared.String_Elements.Table
+                                  (List);
 
-                                 loop
-                                    Elem :=
-                                      Project_Tree.Shared.String_Elements.Table
-                                        (List);
+                              Put_Line
+                                (Exchange_File, Get_Name_String (Elem.Value));
 
-                                    Put_Line
-                                      (Exchange_File,
-                                       Get_Name_String (Elem.Value));
+                              List := Elem.Next;
 
-                                    List := Elem.Next;
-
-                                    exit when List = Nil_String;
-                                 end loop;
-                              end if;
-                           end Output_Options;
+                              exit when List = Nil_String;
+                           end loop;
                         end if;
-                     end Check_Attribute;
+                     end Output_Options;
                   end if;
-               end Check_Package;
-
-               L := L.Next;
-            end loop;
-         end Write_All_Linker_Options;
+               end Check_Attribute;
+            end if;
+         end Write_Linker_Options;
 
          Library_Options : Variable_Value := Nil_Variable_Value;
 
@@ -1913,11 +1899,20 @@ package body Gprbuild.Post_Compile is
             end if;
          end if;
 
-         --  For encapsulated libraries we also want to add the Linker_Options
-         --  for all imported projects.
+         --  For encapsulated and shared libraries we also want to add the
+         --  Linker_Options for all imported projects.
 
-         if For_Project.Standalone_Library = Encapsulated then
-            Write_All_Linker_Options (For_Project);
+         if not Is_Static (For_Project)
+           or else For_Project.Standalone_Library = Encapsulated
+         then
+            declare
+               L : Project_List := For_Project.All_Imported_Projects;
+            begin
+               while L /= null loop
+                  Write_Linker_Options (L.Project);
+                  L := L.Next;
+               end loop;
+            end;
          end if;
       end Write_Library_Options;
 
@@ -3296,9 +3291,7 @@ package body Gprbuild.Post_Compile is
 
             --  Relocatable
 
-            if not Is_Static (For_Project) then
-               Put_Line (Exchange_File, Library_Label (Relocatable));
-            end if;
+            Put_Line (Exchange_File, Library_Label (Relocatable));
 
             --  Auto_init
 
