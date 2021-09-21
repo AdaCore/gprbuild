@@ -4602,17 +4602,16 @@ package body GPR.Util is
                                  return True;
 
                               else
-                                 Name_Len := Src_Name'Length;
-                                 Name_Buffer (1 .. Name_Len) := Src_Name;
                                  Source_2 := Source_Paths_Htable.Get
-                                   (Tree.Source_Paths_HT, Name_Find);
+                                   (Tree.Source_Paths_HT,
+                                    Get_Path_Name_Id (C_Src_Name));
 
                                  if Source_2 /= No_Source
                                    and then Source_2.Replaced_By /= No_Source
                                  then
                                     if Opt.Verbosity_Level > Opt.Low then
-                                       Put  ("      -> source ");
-                                       Put  (Src_Name);
+                                       Put ("      -> source ");
+                                       Put (Src_Name);
                                        Put_Line (" has been replaced");
                                     end if;
 
