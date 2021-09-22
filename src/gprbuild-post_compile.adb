@@ -1864,7 +1864,7 @@ package body Gprbuild.Post_Compile is
             --  than object files may be specified for the partial linking.
 
             if For_Project.Standalone_Library = No
-              and then For_Project.Library_Kind in Static | Static_Pic
+              and then Is_Static (For_Project)
             then
                declare
                   List : String_List_Id := Library_Options.Values;
@@ -1913,6 +1913,15 @@ package body Gprbuild.Post_Compile is
                   L := L.Next;
                end loop;
             end;
+         end if;
+
+         --  Get -largs section from command line for shared libraries
+
+         if not Is_Static (For_Project) then
+            for Arg of Command_Line_Linker_Options loop
+               Check_Section (Gprexch.Library_Options);
+               Put_Line (Exchange_File, Arg);
+            end loop;
          end if;
       end Write_Library_Options;
 
