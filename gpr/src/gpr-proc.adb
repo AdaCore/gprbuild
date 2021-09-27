@@ -2547,15 +2547,22 @@ package body GPR.Proc is
 
             --  Get the case variable
 
-            The_Variable := Shared.Variable_Elements. Table (Var_Id).Value;
+            The_Variable := Shared.Variable_Elements.Table (Var_Id).Value;
 
             if The_Variable.Kind /= Single then
+               if Node_Tree.Incomplete_With
+                 and then The_Variable.Kind = Undefined
+               then
+                  return;
+               end if;
 
                --  Should never happen, because this has already been checked
                --  during parsing.
 
-               Write_Line ("variable""" & Get_Name_String (Name) &
-                           """ is not a single string variable");
+               Write_Line
+                 ("variable """ & Get_Name_String (Name)
+                  & """ is not a single string variable");
+
                raise Program_Error;
             end if;
 
