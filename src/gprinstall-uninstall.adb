@@ -2,7 +2,7 @@
 --                                                                          --
 --                             GPR TECHNOLOGY                               --
 --                                                                          --
---                     Copyright (C) 2012-2020, AdaCore                     --
+--                     Copyright (C) 2012-2021, AdaCore                     --
 --                                                                          --
 -- This is  free  software;  you can redistribute it and/or modify it under --
 -- terms of the  GNU  General Public License as published by the Free Soft- --
@@ -16,7 +16,6 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 
-with Ada.Containers.Indefinite_Ordered_Sets; use Ada;
 with Ada.Directories;                        use Ada.Directories;
 with Ada.Strings.Unbounded;                  use Ada.Strings.Unbounded;
 with Ada.Text_IO;                            use Ada.Text_IO;
@@ -29,7 +28,7 @@ with GPR.Util;  use GPR.Util;
 
 package body Gprinstall.Uninstall is
 
-   package File_Set is new Containers.Indefinite_Ordered_Sets (String);
+   package File_Set renames GPR.String_Sets;
 
    -------------
    -- Process --

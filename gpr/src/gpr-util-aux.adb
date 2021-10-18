@@ -2,7 +2,7 @@
 --                                                                          --
 --                           GPR PROJECT MANAGER                            --
 --                                                                          --
---          Copyright (C) 2017-2020, Free Software Foundation, Inc.         --
+--          Copyright (C) 2017-2021, Free Software Foundation, Inc.         --
 --                                                                          --
 -- This library is free software;  you can redistribute it and/or modify it --
 -- under terms of the  GNU General Public License  as published by the Free --
@@ -23,7 +23,6 @@
 ------------------------------------------------------------------------------
 
 with Ada.Command_Line;                       use Ada.Command_Line;
-with Ada.Containers.Indefinite_Ordered_Sets;
 with Ada.Directories;
 with Ada.Environment_Variables;              use Ada.Environment_Variables;
 with Ada.Strings.Unbounded;
@@ -54,7 +53,7 @@ package body GPR.Util.Aux is
       use Ada.Text_IO;
       use type Ada.Containers.Count_Type;
 
-      package Syms_List is new Containers.Indefinite_Ordered_Sets (String);
+      package Syms_List renames String_Sets;
 
       procedure Get_Syms (Object_File : String);
       --  Read exported symbols from Object_File and add them into Syms
@@ -449,7 +448,7 @@ package body GPR.Util.Aux is
                      else User.all)
                     & '@' & GNAT.Sockets.Host_Name;
 
-      package S_Set is new Containers.Indefinite_Ordered_Sets (String);
+      package S_Set renames String_Sets;
 
       Set : S_Set.Set;
       Ctx : Context;

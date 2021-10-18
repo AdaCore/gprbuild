@@ -25,7 +25,6 @@
 with Ada.Calendar;
 with Ada.Calendar.Time_Zones;                use Ada.Calendar.Time_Zones;
 with Ada.Command_Line;                       use Ada.Command_Line;
-with Ada.Containers.Indefinite_Ordered_Sets;
 with Ada.Containers.Ordered_Sets;
 with Ada.Containers.Vectors;
 with Ada.Directories;                        use Ada.Directories;
@@ -348,8 +347,7 @@ package body GPR.Util is
 
    subtype File_Names is File_Name_Vectors.Vector;
 
-   package Path_Sets is new Ada.Containers.Indefinite_Ordered_Sets
-     (Element_Type => String);
+   package Path_Sets renames String_Sets;
 
    ---------
    -- "<" --
@@ -905,7 +903,7 @@ package body GPR.Util is
      (Tree    : Project_Tree_Ref;
       Project : Project_Id)
    is
-      package Dep_Names is new Containers.Indefinite_Ordered_Sets (String);
+      package Dep_Names renames String_Sets;
 
       function Less_Than (Left, Right : Source_Id) return Boolean is
         (Get_Name_String (Left.File) < Get_Name_String (Right.File));

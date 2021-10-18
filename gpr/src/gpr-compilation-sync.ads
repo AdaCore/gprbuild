@@ -31,7 +31,6 @@
 --    On the other side:
 --       1. call Receive_Files
 
-with Ada.Containers.Indefinite_Ordered_Sets;
 with Ada.Containers.Indefinite_Vectors;
 
 with GPR.Compilation.Protocol; use GPR.Compilation;
@@ -54,7 +53,7 @@ package GPR.Compilation.Sync is
    procedure Wait;
    --  Wait for all synchronization to be terminated
 
-   package Files is new Ada.Containers.Indefinite_Ordered_Sets (String);
+   package Files renames String_Sets;
 
    function Receive_Files
      (Channel           : Protocol.Communication_Channel;
