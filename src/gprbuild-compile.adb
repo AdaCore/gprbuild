@@ -1740,6 +1740,16 @@ package body Gprbuild.Compile is
                               then
                                  Finish := Finish + 2;
 
+                                 if Finish > Last then
+                                    Put ("file """);
+                                    Put (Dep_Path);
+                                    Put_Line (""" has wrong format");
+
+                                    Keep_Dep_File  := True;
+                                    Compilation_OK := False;
+                                    exit Big_Loop;
+                                 end if;
+
                               else
                                  Finish := Finish + 1;
                               end if;
