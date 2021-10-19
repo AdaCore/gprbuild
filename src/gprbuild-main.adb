@@ -29,6 +29,7 @@ pragma Warnings (On);
 
 with GNAT.Command_Line;         use GNAT.Command_Line;
 with GNAT.Directory_Operations; use GNAT.Directory_Operations;
+with GNAT.OS_Lib;
 
 with Gpr_Build_Util;            use Gpr_Build_Util;
 with Gprbuild.Compile;
@@ -360,8 +361,15 @@ procedure Gprbuild.Main is
             end if;
 
          when Compiler =>
-
             if Command_Line then
+               if Starts_With (Arg, "-gnatec=") then
+                  Cmd_Line_Adc_Files.Include
+                    (Get_Name_Id
+                       (GNAT.OS_Lib.Normalize_Pathname
+                          (Arg (Arg'First + 8 .. Arg'Last),
+                           Case_Sensitive => False)));
+               end if;
+
                if Current_Comp_Option_Table = No_Comp_Option_Table then
                   --  Option for all compilers
 

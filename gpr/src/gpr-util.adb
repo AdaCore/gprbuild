@@ -4889,9 +4889,8 @@ package body GPR.Util is
                                   (File, Case_Sensitive => False);
                            begin
                               for J in Conf_Paths'Range loop
-                                 if Normalize_Pathname
-                                   (Get_Name_String (Conf_Paths (J)),
-                                    Case_Sensitive => False) = Norm_Path
+                                 if Conf_Paths (J) = Get_Path_Name_Id
+                                                       (Norm_Path)
                                  then
                                     Found                := True;
                                     Conf_Paths_Found (J) := True;
@@ -4903,12 +4902,15 @@ package body GPR.Util is
                                 and then not Preps.Contains (Norm_Path)
                               then
                                  --  Config pragma file is in D line but was
-                                 --  not referenced from project.
+                                 --  not referenced from project and -gnatec=
+                                 --  command line option.
 
                                  if Opt.Verbosity_Level > Opt.Low then
                                     Put ("  -> """);
                                     Put (File);
-                                    Put_Line (""" not defined in project");
+                                    Put_Line
+                                      (""" not defined in project and -gnatec="
+                                       & " command line option");
                                  end if;
 
                                  return True;

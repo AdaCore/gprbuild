@@ -464,33 +464,16 @@ package body Gprbuild.Compile is
       Attribute_Name : Name_Id;
       Language       : Name_Id) return Path_Name_Type
    is
-      function Absolute_Path
-        (Path    : Path_Name_Type;
-         Project : Project_Id) return Path_Name_Type;
-      --  Returns an absolute path for a config file
-
-      -------------------
-      -- Absolute_Path --
-      -------------------
-
-      function Absolute_Path
+      function Normalize_Path
         (Path    : Path_Name_Type;
          Project : Project_Id) return Path_Name_Type
       is
-      begin
-         Get_Name_String (Path);
-
-         if not Is_Absolute_Path (Name_Buffer (1 .. Name_Len)) then
-            Get_Name_String (Project.Directory.Display_Name);
-            if Name_Buffer (Name_Len) /= Directory_Separator then
-               Add_Char_To_Name_Buffer (Directory_Separator);
-            end if;
-
-            Get_Name_String_And_Append (Path);
-         end if;
-
-         return Name_Find;
-      end Absolute_Path;
+        (Get_Path_Name_Id
+           (GNAT.OS_Lib.Normalize_Pathname
+              (Name           => Get_Name_String (Path),
+               Directory      => Get_Name_String (Project.Directory.Name),
+               Case_Sensitive => False)));
+      --  Returns an normalized path for a con;fig file
 
       Config_Package  : constant Package_Id :=
                           Value_Of
@@ -513,39 +496,29 @@ package body Gprbuild.Compile is
         and then Config_Package /= No_Package
         and then Language = Name_Ada
       then
-         if Attribute_Name = Name_Global_Config_File then
-            Config_Variable :=
-              Value_Of
-                (Variable_Name => Name_Global_Configuration_Pragmas,
-                 In_Variables  => Project_Tree.Shared.Packages.Table
-                   (Config_Package).Decl.Attributes,
-                 Shared        => Project_Tree.Shared);
-
-         elsif Attribute_Name = Name_Local_Config_File then
-            Config_Variable :=
-              Value_Of
-                (Variable_Name => Name_Local_Configuration_Pragmas,
-                 In_Variables  => Project_Tree.Shared.Packages.Table
-                   (Config_Package).Decl.Attributes,
-                 Shared        => Project_Tree.Shared);
-         end if;
+         Config_Variable :=
+           Value_Of
+             (Variable_Name =>
+                (if Attribute_Name = Name_Global_Config_File
+                 then Name_Global_Configuration_Pragmas
+                 elsif Attribute_Name = Name_Local_Config_File
+                 then Name_Local_Configuration_Pragmas
+                 else raise Program_Error with
+                   "Unexpected " & Get_Name_String (Attribute_Name)),
+              In_Variables => Project_Tree.Shared.Packages.Table
+                                 (Config_Package).Decl.Attributes,
+              Shared       => Project_Tree.Shared);
       end if;
 
-      if Config_Variable = Nil_Variable_Value then
+      if Config_Variable = Nil_Variable_Value
+        or else Config_Variable.Value = Snames.The_Empty_String
+      then
          return No_Path;
 
       else
-         Get_Name_String (Config_Variable.Value);
-
-         if Name_Len = 0 then
-            return No_Path;
-
-         else
-            return
-              Absolute_Path
-                (Path_Name_Type (Config_Variable.Value),
-                 Config_Variable.Project);
-         end if;
+         return Normalize_Path
+                  (Path_Name_Type (Config_Variable.Value),
+                   Config_Variable.Project);
       end if;
    end Config_File_For;
 
@@ -1262,8 +1235,11 @@ package body Gprbuild.Compile is
       Keep_Dep_File : Boolean := False;
       --  We need to keep dependency file in some error cases for diagnostic
 
-      The_Config_Paths : Config_Paths (1 .. 2);
+      The_Config_Paths : Config_Paths
+                           (1 .. 2 + Natural (Cmd_Line_Adc_Files.Length));
       --  Paths of eventual global and local configuration pragmas files
+      --  and files from -gnatec= command line parameters.
+
       Last_Config_Path : Natural := 0;
 
       procedure Add_Config_File_Switch
@@ -2588,7 +2564,10 @@ package body Gprbuild.Compile is
                  Attribute_Name => Name_Global_Config_File,
                  Language       => Id.Language.Name);
 
-            if Config_File_Path /= No_Path then
+            if Config_File_Path /= No_Path
+              and then not Cmd_Line_Adc_Files.Contains
+                             (Name_Id (Config_File_Path))
+            then
                Last_Config_Path := 1;
                The_Config_Paths (Last_Config_Path) := Config_File_Path;
             end if;
@@ -2600,11 +2579,19 @@ package body Gprbuild.Compile is
                  Attribute_Name => Name_Local_Config_File,
                  Language       => Id.Language.Name);
 
-            if Config_File_Path /= No_Path then
+            if Config_File_Path /= No_Path
+              and then not Cmd_Line_Adc_Files.Contains
+                              (Name_Id (Config_File_Path))
+            then
                Last_Config_Path := Last_Config_Path + 1;
                The_Config_Paths (Last_Config_Path) := Config_File_Path;
             end if;
          end if;
+
+         for CF of Cmd_Line_Adc_Files loop
+            Last_Config_Path := Last_Config_Path + 1;
+            The_Config_Paths (Last_Config_Path) := Path_Name_Type (CF);
+         end loop;
       end Get_Config_Paths;
 
       ------------------------------
