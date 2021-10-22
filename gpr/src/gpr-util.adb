@@ -4376,33 +4376,27 @@ package body GPR.Util is
          loop
             declare
                End_Of_File_Reached : Boolean := False;
-               Object_Found        : Boolean := False;
 
             begin
+               Skip_Loop :
                loop
                   if End_Of_File (Dep_File) then
                      End_Of_File_Reached := True;
-                     exit;
+                     exit Skip_Loop;
                   end if;
 
                   Get_Line (Dep_File, Name_Buffer, Name_Len);
 
-                  if Name_Len > 0
-                    and then Name_Buffer (1) /= '#'
-                  then
+                  if Name_Len > 0 and then Name_Buffer (1) /= '#' then
                      --  Skip a first line that is an empty continuation line
 
                      for J in 1 .. Name_Len - 1 loop
-                        if Name_Buffer (J) /= ' ' then
-                           Object_Found := True;
-                           exit;
-                        end if;
+                        exit Skip_Loop when Name_Buffer (J) /= ' ';
                      end loop;
 
-                     exit when Object_Found
-                       or else Name_Buffer (Name_Len) /= '\';
+                     exit Skip_Loop when Name_Buffer (Name_Len) /= '\';
                   end if;
-               end loop;
+               end loop Skip_Loop;
 
                --  If dependency file contains only empty lines or comments,
                --  then dependencies are unknown, and the source needs to be
@@ -4536,14 +4530,13 @@ package body GPR.Util is
 
                         while Finish < Last loop
                            if Line (Finish) = '\' then
-                              --  On Windows, a '\' is part of the path
-                              --  name, except when it is not the first
-                              --  character followed by another '\' or by a
-                              --  space. On other platforms, when we are
-                              --  getting a '\' that is not the last
-                              --  character of the line, the next character
-                              --  is part of the path name, even if it is a
-                              --  space.
+                              --  On Windows, a '\' is part of the path name,
+                              --  except when it is not the first character
+                              --  followed by another '\' or by a space.
+                              --  On other platforms, when we are getting a '\'
+                              --  that is not the last character of the line,
+                              --  the next character is part of the path name,
+                              --  even if it is a space.
 
                               if On_Windows
                                 and then Finish = Start
@@ -4551,9 +4544,19 @@ package body GPR.Util is
                               then
                                  Finish := Finish + 2;
 
+                                 if Finish > Last then
+                                    if Opt.Verbosity_Level > Opt.Low then
+                                       Put  ("      -> dependency file ");
+                                       Put  (Dep_Name);
+                                       Put_Line (" has wrong format");
+                                    end if;
+
+                                    Close (Dep_File);
+                                    return True;
+                                 end if;
+
                               elsif On_Windows
-                                and then Line (Finish + 1) /= '\'
-                                and then Line (Finish + 1) /= ' '
+                                and then Line (Finish + 1) not in '\' | ' '
                               then
                                  Finish := Finish + 1;
 

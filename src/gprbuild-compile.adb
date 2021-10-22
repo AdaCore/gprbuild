@@ -1234,16 +1234,6 @@ package body Gprbuild.Compile is
 
       Local_Projects : Local_Projects_HT.Instance;
 
-      Current_Project      : Project_Id := No_Project;
-      Current_Language_Ind : Language_Ptr := No_Language_Index;
-      --  The project for which the include path environment has been set last,
-      --  to avoid computing it several times.
-
-      Dep_File : Text_File;
-      Start    : Natural;
-      Finish   : Natural;
-      Last_Obj : Natural;
-
       Keep_Dep_File : Boolean := False;
       --  We need to keep dependency file in some error cases for diagnostic
 
@@ -1596,6 +1586,10 @@ package body Gprbuild.Compile is
         (Src_Data : Queue.Source_Info) return Boolean is
 
          Object_Path : GNAT.OS_Lib.String_Access;
+         Dep_File    : Text_File;
+         Start       : Natural;
+         Finish      : Natural;
+         Last_Obj    : Natural;
 
          type Src_Record (F_Len : Natural) is record
             File : String (1 .. F_Len);
@@ -1633,38 +1627,20 @@ package body Gprbuild.Compile is
 
             Big_Loop :
             loop
-               declare
-                  End_Of_File_Reached : Boolean := False;
-                  Object_Found        : Boolean := False;
-               begin
-                  loop
-                     if End_Of_File (Dep_File) then
-                        End_Of_File_Reached := True;
-                        exit;
-                     end if;
+               Skip_Loop :
+               while not End_Of_File (Dep_File) loop
+                  Get_Line (Dep_File, Name_Buffer, Name_Len);
 
-                     Get_Line (Dep_File, Name_Buffer, Name_Len);
+                  if Name_Len > 0 and then Name_Buffer (1) /= '#' then
+                     --  Skip a first line that is an empty continuation line
 
-                     if Name_Len > 0
-                       and then Name_Buffer (1) /= '#'
-                     then
-                        --  Skip a first line that is an empty
-                        --  continuation line.
+                     for J in 1 .. Name_Len - 1 loop
+                        exit Skip_Loop when Name_Buffer (J) /= ' ';
+                     end loop;
 
-                        for J in 1 .. Name_Len - 1 loop
-                           if Name_Buffer (J) /= ' ' then
-                              Object_Found := True;
-                              exit;
-                           end if;
-                        end loop;
-
-                        exit when Object_Found
-                          or else Name_Buffer (Name_Len) /= '\';
-                     end if;
-                  end loop;
-
-                  exit Big_Loop when End_Of_File_Reached;
-               end;
+                     exit Skip_Loop when Name_Buffer (Name_Len) /= '\';
+                  end if;
+               end loop Skip_Loop;
 
                Start  := 1;
                Finish := Index (Name_Buffer (1 .. Name_Len), ": ");
@@ -1724,15 +1700,13 @@ package body Gprbuild.Compile is
 
                         while Finish < Last loop
                            if Line (Finish) = '\' then
-                              --  On Windows, a '\' is part of the
-                              --  path name, except when it is not the
-                              --  first character followed by another
-                              --  '\' or by a space. On other
-                              --  platforms, when we are getting a '\'
-                              --  that is not the last character of
-                              --  the line, the next character is part
-                              --  of the path name, even if it is a
-                              --  space.
+                              --  On Windows, a '\' is part of the path name,
+                              --  except when it is not the first character
+                              --  followed by another '\' or by a space.
+                              --  On other platforms, when we are getting a '\'
+                              --  that is not the last character of the line,
+                              --  the next character is part of the path name,
+                              --  even if it is a space.
 
                               if On_Windows
                                 and then Finish = Start
@@ -2140,8 +2114,7 @@ package body Gprbuild.Compile is
       -- Set_Options_For_File --
       --------------------------
 
-      procedure Set_Options_For_File (Id : Source_Id)
-      is
+      procedure Set_Options_For_File (Id : Source_Id) is
          Config                   : Language_Config renames Id.Language.Config;
          Builder_Options_Instance : constant String_Vector_Access :=
                                       Builder_Compiling_Options_HTable.Get
@@ -3202,6 +3175,11 @@ package body Gprbuild.Compile is
       procedure Set_Env_For_Include_Dirs
         (Id : Source_Id; Source_Project : Project_Id)
       is
+         Current_Project      : Project_Id   := No_Project;
+         Current_Language_Ind : Language_Ptr := No_Language_Index;
+         --  The project for which the include path environment has been set
+         --  last, to avoid computing it several times.
+
          Data : Local_Project_Data :=
                   Local_Projects_HT.Get (Local_Projects, Id.Object_Project);
       begin
