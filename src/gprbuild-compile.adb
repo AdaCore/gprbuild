@@ -82,7 +82,7 @@ package body Gprbuild.Compile is
      (Project        : Project_Id;
       Package_Name   : Name_Id;
       Attribute_Name : Name_Id;
-      Language       : Name_Id) return Path_Name_Type;
+      Language       : Name_Id) return Path_Information;
    --  Returns the name of a config file. Returns No_Name if there is no
    --  config file.
 
@@ -462,18 +462,16 @@ package body Gprbuild.Compile is
      (Project        : Project_Id;
       Package_Name   : Name_Id;
       Attribute_Name : Name_Id;
-      Language       : Name_Id) return Path_Name_Type
+      Language       : Name_Id) return Path_Information
    is
       function Normalize_Path
         (Path    : Path_Name_Type;
-         Project : Project_Id) return Path_Name_Type
+         Project : Project_Id) return String
       is
-        (Get_Path_Name_Id
-           (GNAT.OS_Lib.Normalize_Pathname
-              (Name           => Get_Name_String (Path),
-               Directory      => Get_Name_String (Project.Directory.Name),
-               Case_Sensitive => False)));
-      --  Returns an normalized path for a con;fig file
+        (GNAT.OS_Lib.Normalize_Pathname
+           (Name      => Get_Name_String (Path),
+            Directory => Get_Name_String (Project.Directory.Display_Name)));
+      --  Returns an normalized path for a config file
 
       Config_Package  : constant Package_Id :=
                           Value_Of
@@ -513,12 +511,22 @@ package body Gprbuild.Compile is
       if Config_Variable = Nil_Variable_Value
         or else Config_Variable.Value = Snames.The_Empty_String
       then
-         return No_Path;
+         return No_Path_Information;
 
       else
-         return Normalize_Path
-                  (Path_Name_Type (Config_Variable.Value),
-                   Config_Variable.Project);
+         declare
+            Path : String :=
+                     Normalize_Path
+                       (Path_Name_Type (Config_Variable.Value),
+                        Config_Variable.Project);
+            Result : Path_Information;
+         begin
+            Result.Display_Name := Get_Path_Name_Id (Path);
+            Canonical_Case_File_Name (Path);
+            Result.Name := Get_Path_Name_Id (Path);
+
+            return Result;
+         end;
       end if;
    end Config_File_For;
 
@@ -720,7 +728,7 @@ package body Gprbuild.Compile is
          Config_File_Path : constant Path_Name_Type :=
                               Config_File_For
                                 (Project, Package_Name,
-                                 Attribute_Name, Language);
+                                 Attribute_Name, Language).Display_Name;
          Config_File      : Text_IO.File_Type;
          Line             : String (1 .. 1_000);
          Last             : Natural;
@@ -2544,7 +2552,7 @@ package body Gprbuild.Compile is
          Source_Project : Project_Id)
       is
          Config           : constant Language_Config := Id.Language.Config;
-         Config_File_Path : Path_Name_Type;
+         Config_File_Path : Path_Information;
       begin
          Last_Config_Path := 0;
 
@@ -2564,9 +2572,9 @@ package body Gprbuild.Compile is
                  Attribute_Name => Name_Global_Config_File,
                  Language       => Id.Language.Name);
 
-            if Config_File_Path /= No_Path
+            if Config_File_Path /= No_Path_Information
               and then not Cmd_Line_Adc_Files.Contains
-                             (Name_Id (Config_File_Path))
+                             (Name_Id (Config_File_Path.Name))
             then
                Last_Config_Path := 1;
                The_Config_Paths (Last_Config_Path) := Config_File_Path;
@@ -2579,18 +2587,20 @@ package body Gprbuild.Compile is
                  Attribute_Name => Name_Local_Config_File,
                  Language       => Id.Language.Name);
 
-            if Config_File_Path /= No_Path
+            if Config_File_Path /= No_Path_Information
               and then not Cmd_Line_Adc_Files.Contains
-                              (Name_Id (Config_File_Path))
+                             (Name_Id (Config_File_Path.Name))
             then
                Last_Config_Path := Last_Config_Path + 1;
                The_Config_Paths (Last_Config_Path) := Config_File_Path;
             end if;
          end if;
 
-         for CF of Cmd_Line_Adc_Files loop
+         for CF in Cmd_Line_Adc_Files.Iterate loop
             Last_Config_Path := Last_Config_Path + 1;
-            The_Config_Paths (Last_Config_Path) := Path_Name_Type (CF);
+            The_Config_Paths (Last_Config_Path) :=
+              (Name         => Path_Name_Type (Name_Id_Maps.Key (CF)),
+               Display_Name => Path_Name_Type (Name_Id_Maps.Element (CF)));
          end loop;
       end Get_Config_Paths;
 
@@ -2627,7 +2637,7 @@ package body Gprbuild.Compile is
             for J in 1 .. Last_Config_Path loop
                Add_Config_File_Switch
                  (Config    => Config,
-                  Path_Name => The_Config_Paths (J));
+                  Path_Name => The_Config_Paths (J).Display_Name);
             end loop;
 
 --              if not Config.Config_File_Unique then

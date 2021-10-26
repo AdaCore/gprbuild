@@ -181,7 +181,7 @@ private
 
    No_Builder_Comp_Option_Table : constant String_Vector_Access := null;
 
-   Cmd_Line_Adc_Files : Name_Id_Set.Set;
+   Cmd_Line_Adc_Files : Name_Id_Maps.Map;
    --  -gnatec command line option values
 
    package Compiling_Options_HTable is new GNAT.HTable.Simple_HTable

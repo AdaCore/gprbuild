@@ -4887,8 +4887,8 @@ package body GPR.Util is
                                   (File, Case_Sensitive => False);
                            begin
                               for J in Conf_Paths'Range loop
-                                 if Conf_Paths (J) = Get_Path_Name_Id
-                                                       (Norm_Path)
+                                 if Conf_Paths (J).Name = Get_Path_Name_Id
+                                                            (Norm_Path)
                                  then
                                     Found                := True;
                                     Conf_Paths_Found (J) := True;
@@ -5209,7 +5209,7 @@ package body GPR.Util is
                      if Opt.Verbosity_Level > Opt.Low then
                         Put_Line
                           ("   -> new config file " &
-                             Get_Name_String (Conf_Paths (J)));
+                             Get_Name_String (Conf_Paths (J).Display_Name));
                      end if;
 
                      return True;

@@ -42,7 +42,7 @@ package GPR.Util is
 
    type String_Vector_Access is access all String_Vectors.Vector;
 
-   type Config_Paths is array (Positive range <>) of Path_Name_Type;
+   type Config_Paths is array (Positive range <>) of Path_Information;
    --  type used in Need_To_Compile
 
    Default_Config_Name : constant String := "default.cgpr";

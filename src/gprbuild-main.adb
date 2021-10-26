@@ -363,11 +363,15 @@ procedure Gprbuild.Main is
          when Compiler =>
             if Command_Line then
                if Starts_With (Arg, "-gnatec=") then
-                  Cmd_Line_Adc_Files.Include
-                    (Get_Name_Id
-                       (GNAT.OS_Lib.Normalize_Pathname
-                          (Arg (Arg'First + 8 .. Arg'Last),
-                           Case_Sensitive => False)));
+                  declare
+                     Key : String :=
+                             GNAT.OS_Lib.Normalize_Pathname
+                               (Arg (Arg'First + 8 .. Arg'Last));
+                     Value : constant Name_Id := Get_Name_Id (Key);
+                  begin
+                     Canonical_Case_File_Name (Key);
+                     Cmd_Line_Adc_Files.Include (Get_Name_Id (Key), Value);
+                  end;
                end if;
 
                if Current_Comp_Option_Table = No_Comp_Option_Table then
