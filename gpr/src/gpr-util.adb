@@ -5425,7 +5425,10 @@ package body GPR.Util is
             return;
          end if;
 
-         if In_Project.Library and then Source.Unit /= No_Unit_Index then
+         if In_Project.Library
+           and then Source.Unit /= No_Unit_Index
+           and then Source.In_Interfaces
+         then
             declare
                Dep_Path : constant String :=
                             Normalize_Pathname
