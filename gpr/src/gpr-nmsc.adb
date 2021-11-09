@@ -3842,7 +3842,8 @@ package body GPR.Nmsc is
                   end if;
                end if;
 
-            elsif Project.Library_Kind /= Static
+            elsif not Extends
+              and then Project.Library_Kind /= Static
               and then not Lib_Standalone.Default
               and then
                 To_Lower (Get_Name_String (Lib_Standalone.Value)) =
