@@ -2,7 +2,7 @@
 --                                                                          --
 --                             GPR TECHNOLOGY                               --
 --                                                                          --
---                     Copyright (C) 2011-2021, AdaCore                     --
+--                     Copyright (C) 2011-2022, AdaCore                     --
 --                                                                          --
 -- This is  free  software;  you can redistribute it and/or modify it under --
 -- terms of the  GNU  General Public License as published by the Free Soft- --
@@ -196,9 +196,9 @@ procedure Gprbuild.Main is
             if Main_Id.Source.Locally_Removed then
                Fail_Program
                  (Project_Tree,
-                  "main """ &
-                  Get_Name_String (Main_Id.Source.File) &
-                  """ cannot also be an excluded file");
+                  "main """ & Get_Name_String (Main_Id.Source.File)
+                  & """ cannot also be an excluded file",
+                  Exit_Code => E_General);
             end if;
 
             if Is_Allowed_Language (Main_Id.Source.Language.Name) then
@@ -542,7 +542,8 @@ procedure Gprbuild.Main is
          if not Command_Line then
             Fail_Program
               (Project_Tree,
-               Arg & " can only be used on the command line");
+               Arg & " can only be used on the command line",
+               Exit_Code => E_General);
          end if;
       end Forbidden_In_Package_Builder;
 
@@ -561,7 +562,8 @@ procedure Gprbuild.Main is
       if Project_File_Name_Expected then
          if Arg (1) = '-' then
             Fail_Program
-              (Project_Tree, "project file name missing after -P");
+              (Project_Tree, "project file name missing after -P",
+               Exit_Code => E_General);
          else
             Project_File_Name_Expected := False;
             Project_File_Name := new String'(Arg);
@@ -573,7 +575,8 @@ procedure Gprbuild.Main is
       elsif Output_File_Name_Expected then
          if Arg (1) = '-' then
             Fail_Program
-              (Project_Tree, "output file name missing after -o");
+              (Project_Tree, "output file name missing after -o",
+               Exit_Code => E_General);
          else
             Output_File_Name_Expected := False;
             Output_File_Name := new String'(Arg);
@@ -582,7 +585,8 @@ procedure Gprbuild.Main is
       elsif Search_Project_Dir_Expected then
          if Arg (1) = '-' then
             Fail_Program
-              (Project_Tree, "directory name missing after -aP");
+              (Project_Tree, "directory name missing after -aP",
+               Exit_Code => E_General);
          else
             Search_Project_Dir_Expected := False;
             GPR.Env.Add_Directories (Root_Environment.Project_Path, Arg);
@@ -702,9 +706,10 @@ procedure Gprbuild.Main is
         and then Current_Processor = Linker
         and then Arg = "-o"
       then
-            Fail_Program
+         Fail_Program
            (Project_Tree,
-            "switch -o not allowed within a -largs. Use -o directly.");
+            "switch -o not allowed within a -largs. Use -o directly.",
+            Exit_Code => E_General);
 
          --  If current processor is not gprbuild directly, store the option
          --  in the appropriate table.
@@ -727,8 +732,9 @@ procedure Gprbuild.Main is
             if Distributed_Mode then
                Fail_Program
                  (Project_Tree,
-                  "options " & Complete_Output_Option &
-                    Distributed_Option & " are not compatible");
+                  "options " & Complete_Output_Option & Distributed_Option
+                  & " are not compatible",
+                  Exit_Code => E_General);
             end if;
 
             Complete_Output    := True;
@@ -746,7 +752,8 @@ procedure Gprbuild.Main is
             if Project_File_Name /= null then
                Fail_Program
                  (Project_Tree,
-                  "cannot specified --no-project with a project file");
+                  "cannot specified --no-project with a project file",
+                  Exit_Code => E_General);
             end if;
 
          elsif Arg'Length >= Distributed_Option'Length
@@ -760,8 +767,9 @@ procedure Gprbuild.Main is
             if Complete_Output then
                Fail_Program
                  (Project_Tree,
-                  "options " & Complete_Output_Option &
-                    Distributed_Option & " are not compatible");
+                  "options " & Complete_Output_Option & Distributed_Option
+                  & " are not compatible",
+                  Exit_Code => E_General);
             end if;
 
             if Build_Script_Name /= null then
@@ -780,7 +788,8 @@ procedure Gprbuild.Main is
                if Hosts = "" then
                   Fail_Program
                     (Project_Tree,
-                     "missing hosts for distributed mode compilation");
+                     "missing hosts for distributed mode compilation",
+                     Exit_Code => E_General);
 
                else
                   GPR.Compilation.Slave.Record_Slaves (Hosts);
@@ -855,7 +864,9 @@ procedure Gprbuild.Main is
 
             begin
                if Lang = "" or else Comp = "" then
-                  Fail_Program (Project_Tree, "invalid switch " & Arg);
+                  Fail_Program
+                    (Project_Tree, "invalid switch " & Arg,
+                     Exit_Code => E_General);
                   --  This switch is intended for internal use by ASIS tools,
                   --  so a friendlier error message isn't needed here.
                end if;
@@ -896,8 +907,9 @@ procedure Gprbuild.Main is
             if Distributed_Mode then
                Fail_Program
                  (Project_Tree,
-                  "options " & Build_Script_Option &
-                    Distributed_Option & " are not compatible");
+                  "options " & Build_Script_Option & Distributed_Option
+                  & " are not compatible",
+                  Exit_Code => E_General);
             end if;
 
             declare
@@ -952,8 +964,9 @@ procedure Gprbuild.Main is
             then
                Fail_Program
                  (Project_Tree,
-                  "several different configuration switches " &
-                  "cannot be specified");
+                  "several different configuration switches cannot be"
+                  & " specified",
+                  Exit_Code => E_General);
 
             else
                Autoconfiguration := False;
@@ -977,8 +990,9 @@ procedure Gprbuild.Main is
             then
                Fail_Program
                  (Project_Tree,
-                  "several different configuration switches " &
-                  "cannot be specified");
+                  "several different configuration switches cannot be"
+                  & " specified",
+                  Exit_Code => E_General);
 
             else
                Config_Project_File_Name :=
@@ -999,7 +1013,8 @@ procedure Gprbuild.Main is
                then
                   Fail_Program
                     (Project_Tree,
-                     "several different target switches cannot be specified");
+                     "several different target switches cannot be specified",
+                     Exit_Code => E_General);
                end if;
 
             else
@@ -1021,7 +1036,8 @@ procedure Gprbuild.Main is
                   if Set and then Old /= RTS then
                      Fail_Program
                        (Project_Tree,
-                        "several different run-times cannot be specified");
+                        "several different run-times cannot be specified",
+                        Exit_Code => E_General);
                   end if;
 
                   Set_Runtime_For (Name_Ada, RTS);
@@ -1051,7 +1067,9 @@ procedure Gprbuild.Main is
                end loop;
 
                if Language_Name = No_Name then
-                  Fail_Program (Project_Tree, "illegal switch: " & Arg);
+                  Fail_Program
+                    (Project_Tree, "illegal switch: " & Arg,
+                     Exit_Code => E_General);
 
                elsif Command_Line then
                   --  Ignore any --RTS:<lang>= switch in package Builder. These
@@ -1088,7 +1106,8 @@ procedure Gprbuild.Main is
                Fail_Program
                  (Project_Tree,
                   "several " & Implicit_With_Option
-                  & " options cannot be specified");
+                  & " options cannot be specified",
+                  Exit_Code => E_General);
             end if;
 
             Implicit_With := new String'
@@ -1300,7 +1319,9 @@ procedure Gprbuild.Main is
 
             exception
                when Constraint_Error =>
-                  Fail_Program (Project_Tree, "invalid switch " & Arg);
+                  Fail_Program
+                    (Project_Tree, "invalid switch " & Arg,
+                     Exit_Code => E_General);
             end;
 
          elsif Arg = "-eL" then
@@ -1434,12 +1455,14 @@ procedure Gprbuild.Main is
             if No_Project_File then
                Fail_Program
                  (Project_Tree,
-                  "cannot specify --no-project with a project file");
+                  "cannot specify --no-project with a project file",
+                  Exit_Code => E_General);
 
             elsif Project_File_Name /= null then
                Fail_Program
                  (Project_Tree,
-                  "cannot have several project files specified");
+                  "cannot have several project files specified",
+                  Exit_Code => E_General);
 
             elsif Arg'Length = 2 then
                Project_File_Name_Expected := True;
@@ -1529,7 +1552,8 @@ procedure Gprbuild.Main is
             else
                Fail_Program
                  (Project_Tree,
-                  "invalid verbosity level " & Arg (4 .. Arg'Last));
+                  "invalid verbosity level " & Arg (4 .. Arg'Last),
+                  Exit_Code => E_General);
             end if;
 
          elsif Arg = "-we" then
@@ -1674,12 +1698,14 @@ procedure Gprbuild.Main is
                if No_Project_File then
                   Fail_Program
                     (Project_Tree,
-                     "cannot specify --no-project with a project file");
+                     "cannot specify --no-project with a project file",
+                     Exit_Code => E_General);
 
                elsif Project_File_Name /= null then
                   Fail_Program
                     (Project_Tree,
-                     "cannot have several project files specified");
+                     "cannot have several project files specified",
+                     Exit_Code => E_General);
 
                else
                   Project_File_Name := new String'(File_Name);
@@ -1702,7 +1728,8 @@ procedure Gprbuild.Main is
          if Command_Line then
             Fail_Program
               (Project_Tree,
-               "illegal option """ & Arg & """ on the command line");
+               "illegal option """ & Arg & """ on the command line",
+               Exit_Code => E_General);
 
          else
             Success := False;
@@ -1869,23 +1896,27 @@ procedure Gprbuild.Main is
 
       if Project_File_Name_Expected then
          Fail_Program
-           (Project_Tree, "project file name missing after -P");
+           (Project_Tree, "project file name missing after -P",
+            Exit_Code => E_General);
 
          --  Or if it ended with "-o"
 
       elsif Output_File_Name_Expected then
          Fail_Program
-           (Project_Tree, "output file name missing after -o");
+           (Project_Tree, "output file name missing after -o",
+            Exit_Code => E_General);
 
          --  Or if it ended with "-aP"
 
       elsif Search_Project_Dir_Expected then
          Fail_Program
-           (Project_Tree, "directory name missing after -aP");
+           (Project_Tree, "directory name missing after -aP",
+            Exit_Code => E_General);
 
       elsif Db_Directory_Expected then
          Fail_Program
-           (Project_Tree, "directory name missing after --db");
+           (Project_Tree, "directory name missing after --db",
+            Exit_Code => E_General);
 
       elsif Slave_Env /= null and then not Distributed_Mode then
          Fail_Program
@@ -1921,7 +1952,8 @@ procedure Gprbuild.Main is
       if Root_Dir /= null and then Build_Tree_Dir = null then
          Fail_Program
            (Project_Tree,
-            "cannot use --root-dir without --relocate-build-tree option");
+            "cannot use --root-dir without --relocate-build-tree option",
+            Exit_Code => E_General);
       end if;
 
       --  Set default Root_Dir
@@ -2512,7 +2544,8 @@ begin
          Gprconfig_Options          => Command_Line_Gprconfig_Options);
    exception
       when E : GPR.Conf.Invalid_Config =>
-         Fail_Program (Project_Tree, Exception_Message (E));
+         Fail_Program
+           (Project_Tree, Exception_Message (E), Exit_Code => E_Project);
    end;
 
    if Main_Project = No_Project then
@@ -2523,7 +2556,8 @@ begin
       Fail_Program
         (Project_Tree,
          """" & Project_File_Name.all & """ processing failed",
-         Flush_Messages => Present (User_Project_Node));
+         Flush_Messages => Present (User_Project_Node),
+         Exit_Code      => E_Project);
    end if;
 
    if Configuration_Project_Path /= null then
@@ -2615,7 +2649,8 @@ begin
             Fail_Program
               (Project_Tree,
                "cannot specify a main program " &
-               "on the command line for a library project file");
+               "on the command line for a library project file",
+               Exit_Code => E_General);
 
          else
             Mains.Complete_Mains
@@ -2644,7 +2679,9 @@ begin
         and then Mains.Number_Of_Mains (null) > 1
       then
          Fail_Program
-           (Project_Tree, "cannot specify -o when there are several mains");
+           (Project_Tree,
+            "cannot specify -o when there are several mains",
+            Exit_Code => E_General);
       end if;
    end if;
 
@@ -2670,7 +2707,8 @@ begin
       Fail_Program
         (Project_Tree,
          "cannot specify a main program " &
-           "on the command line for a library project file");
+           "on the command line for a library project file",
+         Exit_Code => E_General);
    end if;
 
    Add_Mains_To_Queue;
@@ -2712,9 +2750,8 @@ begin
          when others =>
             Fail_Program
               (null,
-               "build script """ &
-               Build_Script_Name.all &
-               """ could not be created");
+               "build script """ & Build_Script_Name.all
+               & """ could not be created");
       end;
    end if;
 

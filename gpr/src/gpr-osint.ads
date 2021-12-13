@@ -2,7 +2,7 @@
 --                                                                          --
 --                           GPR PROJECT MANAGER                            --
 --                                                                          --
---          Copyright (C) 2001-2021, Free Software Foundation, Inc.         --
+--          Copyright (C) 2001-2022, Free Software Foundation, Inc.         --
 --                                                                          --
 -- This library is free software;  you can redistribute it and/or modify it --
 -- under terms of the  GNU General Public License  as published by the Free --
@@ -215,13 +215,11 @@ package GPR.Osint is
    --  Same as above for a string filename
 
    type Exit_Code_Type is
-     (E_Success,    -- No warnings or errors
-      E_Warnings,   -- Compiler warnings generated
-      E_No_Code,    -- No code generated
-      E_No_Compile, -- Compilation not needed (smart recompilation)
-      E_Errors,     -- Compiler error messages generated
-      E_Fatal,      -- Fatal (serious) error, e.g. source file not found
-      E_Abort);     -- Internally detected compiler error
+     (E_Success, -- No errors (but there may be warnings)
+      E_General, -- General tool error (invalid option, missing file, etc)
+      E_Subtool, -- Underlying tool error
+      E_Project, -- Project parsing error
+      E_Fatal);  -- Critical tool error (defensive code failures and the like)
 
    procedure Exit_Program (Exit_Code : Exit_Code_Type);
    pragma No_Return (Exit_Program);

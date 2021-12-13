@@ -2,7 +2,7 @@
 --                                                                          --
 --                             GPR TECHNOLOGY                               --
 --                                                                          --
---          Copyright (C) 2004-2021, Free Software Foundation, Inc.         --
+--          Copyright (C) 2004-2022, Free Software Foundation, Inc.         --
 --                                                                          --
 -- This library is free software;  you can redistribute it and/or modify it --
 -- under terms of the  GNU General Public License  as published by the Free --
@@ -1280,7 +1280,8 @@ package body Gpr_Build_Util is
             end if;
 
             if Total_Errors_Detected > 0 then
-               Fail_Program (Tree, "problems with main sources");
+               Fail_Program
+                 (Tree, "problems with main sources", Exit_Code => E_General);
             end if;
          end Do_Complete;
 
@@ -1292,8 +1293,10 @@ package body Gpr_Build_Util is
          for N of Names loop
             if N.Source = No_Source then
                Fail_Program
-                 (Project_Tree, '"' & Get_Name_String (N.File)
-                  & """ was not found in the sources of any project");
+                 (Project_Tree,
+                  '"' & Get_Name_String (N.File)
+                  & """ was not found in the sources of any project",
+                  Exit_Code => E_General);
             end if;
          end loop;
       end Complete_Mains;
@@ -1439,13 +1442,15 @@ package body Gpr_Build_Util is
             if Names.Last_Index = 0 then
                Fail_Program
                  (Project_Tree,
-                  "cannot specify a multi-unit index but no main "
-                  & "on the command line");
+                  "cannot specify a multi-unit index but no main on the"
+                  & " command line",
+                  Exit_Code => E_General);
 
             elsif Names.Last_Index > 1 then
                Fail_Program
                  (Project_Tree,
-                  "cannot specify several mains with a multi-unit index");
+                  "cannot specify several mains with a multi-unit index",
+                  Exit_Code => E_General);
 
             else
                Names (Names.Last_Index).Index := Index;
@@ -2660,7 +2665,8 @@ package body Gpr_Build_Util is
                      Fail_Program
                        (Project_Tree,
                         "*** illegal switch """
-                        & Get_Name_String (Element.Value) & '"');
+                        & Get_Name_String (Element.Value) & '"',
+                        Exit_Code => E_General);
                   end if;
                end if;
 

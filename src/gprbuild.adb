@@ -2,7 +2,7 @@
 --                                                                          --
 --                             GPR TECHNOLOGY                               --
 --                                                                          --
---                     Copyright (C) 2004-2021, AdaCore                     --
+--                     Copyright (C) 2004-2022, AdaCore                     --
 --                                                                          --
 -- This is  free  software;  you can redistribute it and/or modify it under --
 -- terms of the  GNU  General Public License as published by the Free Soft- --
@@ -210,7 +210,10 @@ package body Gprbuild is
            or else Project.Qualifier = Aggregate_Library
          then
             Fail_Program
-              (Project_Tree, "no project with writable object directory");
+              (Project_Tree,
+               "no project with writable object directory for project "
+               & Get_Name_String (Project.Name),
+               Exit_Code => E_General);
 
          else
             Fail_Program
@@ -219,7 +222,8 @@ package body Gprbuild is
                & Get_Name_String (Project.Object_Directory.Display_Name)
                & """ for project """
                & Get_Name_String (Project.Name)
-               & """ is not writable");
+               & """ is not writable",
+               Exit_Code => E_General);
          end if;
       end if;
 
@@ -270,7 +274,8 @@ package body Gprbuild is
 
          if List = No_Name_List then
             Fail_Program
-              (Project_Tree, "no archive builder in configuration");
+              (Project_Tree, "no archive builder in configuration",
+               Exit_Code => E_General);
 
          else
             Archive_Builder_Name :=
@@ -353,7 +358,8 @@ package body Gprbuild is
          Fail_Program
            (Project_Tree,
             "attribute export_file_format must be defined"
-            & " when export_file_switch is set.");
+            & " when export_file_switch is set.",
+            Exit_Code => E_General);
       end if;
    end Check_Export_File;
 
@@ -420,8 +426,9 @@ package body Gprbuild is
          then
             Fail_Program
               (Project_Tree,
-               "attribute object_lister_matcher must be defined"
-               & " when object_lister is set.");
+               "attribute object_lister_matcher must be defined when"
+               & " object_lister is set.",
+               Exit_Code => E_General);
          end if;
       end if;
    end Check_Object_Lister;
@@ -670,7 +677,9 @@ package body Gprbuild is
          Stop_Spawning := True;
       end if;
 
-      Exit_Code := Osint.E_Fatal;
+      if Exit_Code = E_Success then
+         Exit_Code := Osint.E_Fatal;
+      end if;
    end Record_Failure;
 
    ------------------------

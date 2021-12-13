@@ -2,7 +2,7 @@
 --                                                                          --
 --                           GPR PROJECT MANAGER                            --
 --                                                                          --
---          Copyright (C) 2001-2021, Free Software Foundation, Inc.         --
+--          Copyright (C) 2001-2022, Free Software Foundation, Inc.         --
 --                                                                          --
 -- This library is free software;  you can redistribute it and/or modify it --
 -- under terms of the  GNU General Public License  as published by the Free --
@@ -159,30 +159,19 @@ package body GPR.Osint is
 
    procedure Exit_Program (Exit_Code : Exit_Code_Type) is
    begin
-      --  The program will exit with the following status:
+      --  Some exit codes can't be used.
+      --  Exit code 2 mean that progam terminated by SIGINT signal.
+      --  3 mean that program terminated by abort on Windows or by SIGQUIT
+      --  on Linux.
+      --  6 mean that program terminated by SIGABRT signal
 
-      --    0 if the object file has been generated (with or without warnings)
-      --    1 if recompilation was not needed (smart recompilation)
-      --    2 if gnat1 has been killed by a signal (detected by GCC)
-      --    4 for a fatal error
-      --    5 if there were errors
-      --    6 if no code has been generated (spec)
-
-      --  Note that exit code 3 is not used and must not be used as this is
-      --  the code returned by a program aborted via C abort() routine on
-      --  Windows. GCC checks for that case and thinks that the child process
-      --  has been aborted. This code (exit code 3) used to be the code used
-      --  for E_No_Code, but E_No_Code was changed to 6 for this reason.
-
-      case Exit_Code is
-         when E_Success    => OS_Exit (0);
-         when E_Warnings   => OS_Exit (0);
-         when E_No_Compile => OS_Exit (1);
-         when E_Fatal      => OS_Exit (4);
-         when E_Errors     => OS_Exit (5);
-         when E_No_Code    => OS_Exit (6);
-         when E_Abort      => OS_Abort;
-      end case;
+      OS_Exit
+        (case Exit_Code is
+            when E_Success => 0,
+            when E_General => 1,
+            when E_Subtool => 4,
+            when E_Project => 5,
+            when E_Fatal   => 7);
    end Exit_Program;
 
    ----------

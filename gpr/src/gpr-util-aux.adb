@@ -2,7 +2,7 @@
 --                                                                          --
 --                           GPR PROJECT MANAGER                            --
 --                                                                          --
---          Copyright (C) 2017-2021, Free Software Foundation, Inc.         --
+--          Copyright (C) 2017-2022, Free Software Foundation, Inc.         --
 --                                                                          --
 -- This library is free software;  you can redistribute it and/or modify it --
 -- under terms of the  GNU General Public License  as published by the Free --
@@ -555,7 +555,8 @@ package body GPR.Util.Aux is
             else
                Fail_Program
                  (Project_Tree,
-                  "hosts distributed file " & F_Name & " not found");
+                  "hosts distributed file " & F_Name & " not found",
+                  Exit_Code => E_General);
             end if;
          end;
       end if;

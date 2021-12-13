@@ -2,7 +2,7 @@
 --                                                                          --
 --                             GPR TECHNOLOGY                               --
 --                                                                          --
---                     Copyright (C) 2012-2021, AdaCore                     --
+--                     Copyright (C) 2012-2022, AdaCore                     --
 --                                                                          --
 -- This is  free  software;  you can redistribute it and/or modify it under --
 -- terms of the  GNU  General Public License as published by the Free Soft- --
@@ -137,7 +137,7 @@ package body Gprinstall.Uninstall is
             Fail_Program (Project_Tree, "Manifest " & Name & " not found.");
          end if;
 
-         Finish_Program (Project_Tree, Exit_Code => Osint.E_Errors);
+         Finish_Program (Project_Tree, Exit_Code => Osint.E_General);
       end if;
 
       if not Opt.Quiet_Output then

@@ -1140,8 +1140,7 @@ package body Gprbuild.Compile is
                      begin
                         if Source /= No_Source then
                            Put ("   compilation of ");
-                           Put
-                             (Get_Name_String (Source.Display_File));
+                           Put (Get_Name_String (Source.Display_File));
                            Put (" failed");
                            if Slave /= "" then
                               Put (" on " & Slave);
@@ -1154,9 +1153,13 @@ package body Gprbuild.Compile is
                   New_Line;
                end if;
 
+               if Exit_Code = Osint.E_Success then
+                  Exit_Code := (if Bad_Compilations.Is_Empty then E_Fatal
+                                else E_Subtool);
+               end if;
+
                if Opt.Keep_Going and then Project.Qualifier = Aggregate then
                   Bad_Compilations.Clear;
-                  Exit_Code := E_Fatal;
 
                else
                   if Distributed_Mode and then Slave_Initialized then
@@ -1164,7 +1167,7 @@ package body Gprbuild.Compile is
                   end if;
 
                   Compilation_Phase_Failed
-                    (Tree, No_Message => Opt.No_Exit_Message);
+                    (Tree, Exit_Code, No_Message => Opt.No_Exit_Message);
                end if;
             end if;
          end if;
@@ -1467,27 +1470,23 @@ package body Gprbuild.Compile is
                               --  invalidate the compilation.
 
                               Put ("Unit """);
-                              Put
-                                (Get_Name_String
-                                   (Src_Data.Id.Unit.Name));
+                              Put (Get_Name_String (Src_Data.Id.Unit.Name));
                               Put (""" cannot import unit """);
-                              Put
-                                (Get_Name_String (Source_2.Unit.Name));
+                              Put (Get_Name_String (Source_2.Unit.Name));
                               Put_Line (""":");
 
                               Put ("  """);
                               Put
                                 (Get_Name_String
                                    (Src_Data.Id.Project.Display_Name));
-                              Put
-                                (""" does not directly"
-                                 & " import project """);
+                              Put (""" does not directly import project """);
                               Put
                                 (Get_Name_String
                                    (Source_2.Project.Display_Name));
                               Put_Line ("""");
 
-                              Success := False;
+                              Exit_Code := E_General;
+                              Success   := False;
 
                            elsif not Source_2.In_Interfaces then
                               --  It is not an interface of its project.
@@ -3434,13 +3433,15 @@ package body Gprbuild.Compile is
                   Success : Boolean := True;
                begin
                   Check_Interface_And_Indirect_Imports
-                    (The_ALI      => The_ALI,
-                     Src_Data     => Source,
-                     Success      => Success);
+                    (The_ALI  => The_ALI,
+                     Src_Data => Source,
+                     Success  => Success);
 
                   if not Success then
                      Compilation_Phase_Failed
-                       (Source.Tree, No_Message => Opt.No_Exit_Message);
+                       (Source.Tree,
+                        (if Exit_Code = E_Success then E_Fatal else Exit_Code),
+                        No_Message => Opt.No_Exit_Message);
                   end if;
                end;
             end if;

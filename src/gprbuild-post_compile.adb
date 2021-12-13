@@ -2,7 +2,7 @@
 --                                                                          --
 --                             GPR TECHNOLOGY                               --
 --                                                                          --
---                     Copyright (C) 2011-2021, AdaCore                     --
+--                     Copyright (C) 2011-2022, AdaCore                     --
 --                                                                          --
 -- This is  free  software;  you can redistribute it and/or modify it under --
 -- terms of the  GNU  General Public License as published by the Free Soft- --
@@ -2692,28 +2692,32 @@ package body Gprbuild.Post_Compile is
          Fail_Program
            (Project_Tree,
             "no object directory for library project "
-            & Get_Name_String (For_Project.Display_Name));
+            & Get_Name_String (For_Project.Display_Name),
+            Exit_Code => E_Project);
       end if;
 
       --  Check consistency and build environment
 
       if For_Project.Config.Lib_Support = None then
          Fail_Program
-           (Project_Tree, "library projects not supported on this platform");
+           (Project_Tree, "library projects not supported on this platform",
+            Exit_Code => E_General);
 
       elsif not Is_Static (For_Project)
         and then For_Project.Config.Lib_Support /= Full
       then
          Fail_Program
            (Project_Tree,
-            "shared library projects not supported on this platform");
+            "shared library projects not supported on this platform",
+            Exit_Code => E_General);
 
       elsif not For_Project.Config.Lib_Encapsulated_Supported
         and then For_Project.Standalone_Library = Encapsulated
       then
          Fail_Program
            (Project_Tree,
-            "encapsulated library projects not supported on this platform");
+            "encapsulated library projects not supported on this platform",
+            Exit_Code => E_General);
       end if;
 
       if For_Project.Config.Library_Builder = No_Path then
@@ -3637,7 +3641,8 @@ package body Gprbuild.Post_Compile is
             (if Main.File = No_File -- It was gprlib call
              then "could not build library for project "
                   & Get_Name_String (Main.Project.Name)
-             else "unable to bind " & Get_Name_String (Main.File)));
+             else "unable to bind " & Get_Name_String (Main.File)),
+            Exit_Code => E_Subtool);
 
       elsif not Bad_Processes.Is_Empty then
          for Main of Bad_Processes loop
@@ -3649,8 +3654,10 @@ package body Gprbuild.Post_Compile is
             Put_Line (" failed");
          end loop;
 
-         Fail_Program (Bad_Processes.Last_Element.Tree,
-                       "*** post compilation phase failed");
+         Fail_Program
+           (Bad_Processes.Last_Element.Tree,
+            "*** post compilation phase failed",
+            Exit_Code => E_Subtool);
       end if;
    end Run;
 
@@ -4339,8 +4346,8 @@ package body Gprbuild.Post_Compile is
                when others =>
                   Fail_Program
                     (Project_Tree,
-                     "unable to create binder exchange file " &
-                     Bind_Exchange.all);
+                     "unable to create binder exchange file "
+                     & Bind_Exchange.all);
             end;
 
             --  Optional line: Quiet or Verbose
@@ -4774,8 +4781,8 @@ package body Gprbuild.Post_Compile is
                   when others =>
                      Fail_Program
                        (Project_Tree,
-                        "unable to create binder exchange file " &
-                          Bind_Exchange.all);
+                        "unable to create binder exchange file "
+                        & Bind_Exchange.all);
                end;
 
                Put_Line (Exchange_File, Binding_Label (Nothing_To_Bind));
@@ -4924,6 +4931,8 @@ package body Gprbuild.Post_Compile is
                     (B_Data.Binder_Driver_Path.all, (1 => Bind_Exchange));
 
                   if Pid = Invalid_Pid then
+                     Put ("Can't start binder ");
+                     Put_Line (B_Data.Binder_Driver_Path.all);
                      Record_Failure (Main_File);
 
                   else
@@ -5159,12 +5168,13 @@ package body Gprbuild.Post_Compile is
 
          if Data /= No_Process_Data then
             Libs_Are_Building.Exclude (Data.Main.Project.Name);
-         end if;
 
-         if OK then
-            Data.Main.Project.Was_Built := True;
-         else
-            Record_Failure (Data.Main);
+            if OK then
+               Data.Main.Project.Was_Built := True;
+            else
+               Exit_Code := E_Subtool;
+               Record_Failure (Data.Main);
+            end if;
          end if;
 
          Display_Processes ("bind");

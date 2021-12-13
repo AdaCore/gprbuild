@@ -2,7 +2,7 @@
 --                                                                          --
 --                           GPR PROJECT MANAGER                            --
 --                                                                          --
---          Copyright (C) 2001-2021, Free Software Foundation, Inc.         --
+--          Copyright (C) 2001-2022, Free Software Foundation, Inc.         --
 --                                                                          --
 -- This library is free software;  you can redistribute it and/or modify it --
 -- under terms of the  GNU General Public License  as published by the Free --
@@ -116,9 +116,10 @@ package GPR.Util is
    procedure Fail_Program
      (Project_Tree   : Project_Tree_Ref;
       Message        : String;
-      Flush_Messages : Boolean := True;
-      No_Message     : Boolean := False;
-      Command        : String := "");
+      Exit_Code      : Exit_Code_Type := E_Fatal;
+      Flush_Messages : Boolean        := True;
+      No_Message     : Boolean        := False;
+      Command        : String         := "");
    --  Terminate program with a message and a fatal status code. Do not issue
    --  any message when No_Message is True.
 
@@ -133,9 +134,11 @@ package GPR.Util is
    --  issue any message when No_Message is True.
 
    procedure Compilation_Phase_Failed
-     (Project_Tree : Project_Tree_Ref; No_Message : Boolean := False);
-   --  Terminate program with "*** compilation phase failed" message and a
-   --  fatal status code. Don't issue any message when No_Message is True.
+     (Project_Tree : Project_Tree_Ref;
+      Exit_Code    : Exit_Code_Type := E_Fatal;
+      No_Message   : Boolean        := False);
+   --  Terminate program with "*** compilation phase failed" message and an
+   --  Exit_Code status code. Don't issue any message when No_Message is True.
 
    procedure Duplicate
      (This   : in out Name_List_Index;

@@ -130,10 +130,6 @@ package body GPR.Util is
    --  already there, otherwise get it from OS and put into File_Stamp_HTable
    --  to be able to get it next time.
 
-   ------------------------------
-   -- Locate_Directory support --
-   ------------------------------
-
    ---------------------
    -- C_String_Length --
    ---------------------
@@ -411,10 +407,12 @@ package body GPR.Util is
    ------------------------------
 
    procedure Compilation_Phase_Failed
-     (Project_Tree : Project_Tree_Ref; No_Message : Boolean := False) is
+     (Project_Tree : Project_Tree_Ref;
+      Exit_Code    : Exit_Code_Type := E_Fatal;
+      No_Message   : Boolean        := False) is
    begin
       Fail_Program
-        (Project_Tree, "*** compilation phase failed",
+        (Project_Tree, "*** compilation phase failed", Exit_Code,
          No_Message => No_Message);
    end Compilation_Phase_Failed;
 
@@ -839,9 +837,10 @@ package body GPR.Util is
    procedure Fail_Program
      (Project_Tree   : Project_Tree_Ref;
       Message        : String;
-      Flush_Messages : Boolean := True;
-      No_Message     : Boolean := False;
-      Command        : String := "") is
+      Exit_Code      : Exit_Code_Type := E_Fatal;
+      Flush_Messages : Boolean        := True;
+      No_Message     : Boolean        := False;
+      Command        : String         := "") is
    begin
       if Flush_Messages and not No_Message then
          if Total_Errors_Detected /= 0 or else Warnings_Detected /= 0 then
@@ -849,8 +848,12 @@ package body GPR.Util is
          end if;
       end if;
 
-      Finish_Program (Project_Tree, E_Fatal, Message => Message,
-                      No_Message => No_Message, Command => Command);
+      Finish_Program
+        (Project_Tree,
+         Exit_Code  => Exit_Code,
+         Message    => Message,
+         No_Message => No_Message,
+         Command => Command);
    end Fail_Program;
 
    --------------------
@@ -860,34 +863,26 @@ package body GPR.Util is
    procedure Finish_Program
      (Project_Tree : Project_Tree_Ref;
       Exit_Code    : Exit_Code_Type := E_Success;
-      Message      : String := "";
-      No_Message   : Boolean := False;
-      Command      : String := "")
-   is
+      Message      : String         := "";
+      No_Message   : Boolean        := False;
+      Command      : String         := "") is
    begin
       if not Opt.Keep_Temporary_Files then
-         if Project_Tree = null then
-            Delete_All_Temp_Files (null);
-         else
-            Delete_All_Temp_Files (Project_Tree.Shared);
-         end if;
+         Delete_All_Temp_Files
+           (if Project_Tree = null then null else Project_Tree.Shared);
       end if;
 
-      if Message'Length > 0 then
+      if Message'Length > 0 and then not No_Message then
          if Exit_Code /= E_Success then
-            if not No_Message then
-               Set_Standard_Error;
+            Set_Standard_Error;
+            Write_Program_Name;
+            Write_Line (Message);
+            if Command /= "" then
                Write_Program_Name;
-               Write_Line (Message);
-               if Command /= "" then
-                  Write_Program_Name;
-                  Write_Line (Command);
-               end if;
+               Write_Line (Command);
             end if;
 
-            Exit_Program (E_Fatal);
-
-         elsif not No_Message then
+         else
             Write_Str (Message);
          end if;
       end if;
@@ -3813,7 +3808,8 @@ package body GPR.Util is
                         Fail_Program
                           (Tree,
                            "binding prefix cannot be the same for"
-                           & " two languages");
+                           & " two languages",
+                           Exit_Code => E_General);
                      end if;
                      B_Index := B_Index.Next;
                   end loop;
@@ -3913,8 +3909,11 @@ package body GPR.Util is
          GPR.Conf.Set_Runtime_For
            (Language, Normalize_Pathname (Full_Path.all));
          Free (Full_Path);
+
       elsif not Is_Base_Name (RTS_Name) then
-         Fail_Program (Project_Tree, "cannot find RTS " & RTS_Name);
+         Fail_Program
+           (Project_Tree, "cannot find RTS " & RTS_Name,
+            Exit_Code => E_General);
       end if;
    end Locate_Runtime;
 
@@ -5779,8 +5778,8 @@ package body GPR.Util is
          exception
             when others =>
                Fail_Program
-                 (null,
-                  "could not open argument file """ & Name & '"');
+                 (null, "could not open argument file """ & Name & '"',
+                  Exit_Code => E_General);
          end;
 
          while not End_Of_File (File) loop
@@ -5792,9 +5791,9 @@ package body GPR.Util is
                if Name_Buffer (1) = '@' then
                   Fail_Program
                     (null,
-                     "invalid argument """ &
-                       Name_Buffer (1 .. Name_Len) &
-                       """ in argument file");
+                     "invalid argument """ & Name_Buffer (1 .. Name_Len)
+                     & """ in argument file",
+                     Exit_Code => E_General);
 
                else
                   Command_Line_Arguments.Append (Name_Find);
@@ -5814,8 +5813,8 @@ package body GPR.Util is
                if Arg (Arg'First) = '@' then
                   if Arg'Length = 1 then
                      Fail_Program
-                       (null,
-                        "invalid argument '@' on the command line");
+                       (null, "invalid argument '@' on the command line",
+                        Exit_Code => E_General);
                   else
                      Read_File (Arg (Arg'First + 1 .. Arg'Last));
                   end if;

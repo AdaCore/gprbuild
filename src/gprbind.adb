@@ -2,7 +2,7 @@
 --                                                                          --
 --                             GPR TECHNOLOGY                               --
 --                                                                          --
---                     Copyright (C) 2006-2021, AdaCore                     --
+--                     Copyright (C) 2006-2022, AdaCore                     --
 --                                                                          --
 -- This is  free  software;  you can redistribute it and/or modify it under --
 -- terms of the  GNU  General Public License as published by the Free Soft- --
@@ -678,7 +678,7 @@ begin
          Finish_Program
            (null,
             Osint.E_Fatal,
-           "could not locate " & Path_Of_Gnatbind.all);
+            "could not locate " & Path_Of_Gnatbind.all);
       end;
 
    else

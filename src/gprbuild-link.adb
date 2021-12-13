@@ -2,7 +2,7 @@
 --                                                                          --
 --                             GPR TECHNOLOGY                               --
 --                                                                          --
---                     Copyright (C) 2011-2021, AdaCore                     --
+--                     Copyright (C) 2011-2022, AdaCore                     --
 --                                                                          --
 -- This is  free  software;  you can redistribute it and/or modify it under --
 -- terms of the  GNU  General Public License as published by the Free Soft- --
@@ -1618,8 +1618,8 @@ package body Gprbuild.Link is
       else
          Fail_Program
            (Main_File.Tree,
-            "no linker specified and " &
-              "no default linker in the configuration");
+            "no linker specified and no default linker in the configuration",
+            Exit_Code => E_General);
       end if;
 
       Initialize_Source_Record (Main_Source);
@@ -3496,6 +3496,8 @@ package body Gprbuild.Link is
             Free (Args_List);
 
             if Pid = Invalid_Pid then
+               Put ("Can't start linker ");
+               Put_Line (Linker_Path.all);
                Record_Failure (Main_File);
 
             else
@@ -3535,6 +3537,7 @@ package body Gprbuild.Link is
             if Data /= No_Process_Data then
 
                if not OK then
+                  Exit_Code := E_Subtool;
                   Record_Failure (Data.Main);
                end if;
 
@@ -3596,21 +3599,15 @@ package body Gprbuild.Link is
 
       if Bad_Processes.Length = 1 then
          Main := Bad_Processes.First_Element;
-         if Main.Command.Is_Empty then
-            Fail_Program
-              (Main.Tree,
-               "link of " & Get_Name_String (Main.File) & " failed");
-         else
-            Fail_Program
-              (Main.Tree,
-               "link of " & Get_Name_String (Main.File) & " failed",
-               Command =>
-                 (if Main.Command.Is_Empty or else
-                  Opt.Verbosity_Level /= Opt.None then ""
-                  else "failed command was: " & String_Vector_To_String
-                    (Main.Command))
-              );
-         end if;
+         Fail_Program
+           (Main.Tree,
+            "link of " & Get_Name_String (Main.File) & " failed",
+            Command =>
+              (if Main.Command.Is_Empty
+                 or else Opt.Verbosity_Level /= Opt.None then ""
+               else "failed command was: " & String_Vector_To_String
+                                               (Main.Command)),
+            Exit_Code => E_Subtool);
 
       elsif not Bad_Processes.Is_Empty then
          for Main of Bad_Processes loop
@@ -3626,8 +3623,8 @@ package body Gprbuild.Link is
          end loop;
 
          Fail_Program
-           (Bad_Processes.Last_Element.Tree,
-            "*** link phase failed");
+           (Bad_Processes.Last_Element.Tree, "*** link phase failed",
+            Exit_Code => E_Subtool);
       end if;
    end Run;
 
