@@ -2,7 +2,7 @@
 --                                                                          --
 --                           GPR PROJECT MANAGER                            --
 --                                                                          --
---          Copyright (C) 2000-2021, Free Software Foundation, Inc.         --
+--          Copyright (C) 2000-2022, Free Software Foundation, Inc.         --
 --                                                                          --
 -- This library is free software;  you can redistribute it and/or modify it --
 -- under terms of the  GNU General Public License  as published by the Free --
@@ -2698,19 +2698,21 @@ package body GPR.Nmsc is
                   end if;
 
                elsif Attribute.Name = Name_Warning_Message then
-                  Project.Warning_Message := Attribute.Value.Value;
-
-                  if Project.Extended_By = No_Project
-                    and then Project.Warning_Message
-                             not in No_Name | The_Empty_String
-                  then
-                     Error_Msg
-                       (Data.Flags,
-                        "?" & Get_Name_String (Project.Warning_Message),
-                        Project.Location,
-                        Project);
+                  if Project.Extended_By = No_Project then
+                     declare
+                        Message : constant Name_Id := Attribute.Value.Value;
+                     begin
+                        if Message not in No_Name | The_Empty_String then
+                           Error_Msg
+                             (Data.Flags,
+                              "?"
+                              & Mask_Control_Characters
+                                  (Get_Name_String (Message)),
+                              Project.Location,
+                              Project);
+                        end if;
+                     end;
                   end if;
-
                end if;
             end if;
 

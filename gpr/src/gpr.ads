@@ -2067,9 +2067,6 @@ package GPR is
 
       Config : Project_Configuration;
 
-      Warning_Message : Name_Id := No_Name;
-      --  Message to be displayed when a project is part of the project tree
-
       Path : Path_Information := No_Path_Information;
       --  The path name of the project file. This include base name of the
       --  project file.

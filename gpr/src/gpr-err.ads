@@ -2,7 +2,7 @@
 --                                                                          --
 --                           GPR PROJECT MANAGER                            --
 --                                                                          --
---          Copyright (C) 2001-2021, Free Software Foundation, Inc.         --
+--          Copyright (C) 2001-2022, Free Software Foundation, Inc.         --
 --                                                                          --
 -- This library is free software;  you can redistribute it and/or modify it --
 -- under terms of the  GNU General Public License  as published by the Free --
@@ -64,6 +64,9 @@ package GPR.Err is
    --  for Err_Vars.Error_Msg_Warn.
    --  One_Line flag mean only one error message per line, need to hide some
    --  wrong error message in project parser.
+
+   function Mask_Control_Characters (Message : String) return String;
+   --  Returns the message with all control characters masked by apostrophe
 
    procedure Error_Msg
      (Msg : String; Flag_Location : Source_Ptr; One_Line : Boolean := False);
