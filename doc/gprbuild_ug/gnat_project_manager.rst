@@ -4250,6 +4250,10 @@ Project Level Attributes
     Indicates if the project is externally built.
     Only case-insensitive values allowed are "true" and "false", the default.
 
+  * **Warning_Message**: single
+
+    Causes gprbuild to emit a user-defined warning message.
+
 * **Directories**
 
   * **Object_Dir**: single
