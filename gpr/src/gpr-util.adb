@@ -2,7 +2,7 @@
 --                                                                          --
 --                           GPR PROJECT MANAGER                            --
 --                                                                          --
---          Copyright (C) 2001-2021, Free Software Foundation, Inc.         --
+--          Copyright (C) 2001-2022, Free Software Foundation, Inc.         --
 --                                                                          --
 -- This library is free software;  you can redistribute it and/or modify it --
 -- under terms of the  GNU General Public License  as published by the Free --
@@ -5144,6 +5144,7 @@ package body GPR.Util is
                            end loop;
 
                            if Closure
+                             and then Dep_Src /= Source
                              and then Process_ALI_Deps (Closure => True)
                            then
                               return True;
