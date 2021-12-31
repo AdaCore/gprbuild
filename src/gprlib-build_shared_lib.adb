@@ -110,10 +110,10 @@ procedure Build_Shared_Lib is
       --  Argument_Length := Driver'Length;
 
       --  The minimum arguments
-      Arguments.Append_Vector (Shared_Lib_Minimum_Options);
+      Arguments.Append (Shared_Lib_Minimum_Options);
 
       --  The leading library options, if any
-      Arguments.Append_Vector (Leading_Library_Options_Table);
+      Arguments.Append (Leading_Library_Options_Table);
 
       --  -o <library file name>
 
@@ -255,13 +255,13 @@ procedure Build_Shared_Lib is
       --  Finally the additional switches, the library switches and the library
       --  options.
 
-      Arguments.Append_Vector (Additional_Switches);
+      Arguments.Append (Additional_Switches);
 
-      Arguments.Append_Vector (Library_Switches_Table);
+      Arguments.Append (Library_Switches_Table);
 
-      Arguments.Append_Vector (Ada_Runtime_Switches);
+      Arguments.Append (Ada_Runtime_Switches);
 
-      Arguments.Append_Vector (Library_Options_Table);
+      Arguments.Append (Library_Options_Table);
 
       --  Check if a response file is needed
       if Max_Command_Line_Length > 0
@@ -323,11 +323,11 @@ procedure Build_Shared_Lib is
                        (Response_File_Switches.Last_Index,
                         Response_File_Switches.Last_Element &
                           Get_Name_String (Response_File_Name));
-                     Arguments.Append_Vector (Response_File_Switches);
+                     Arguments.Append (Response_File_Switches);
                   end if;
 
                   --  Put back the options
-                  Arguments.Append_Vector (Options);
+                  Arguments.Append (Options);
                end if;
             end if;
          end;
@@ -369,7 +369,7 @@ procedure Build_Shared_Lib is
                --  We need to add the binder generated object file which
                --  contains the library initilization code to be explicitely
                --  called by the main application.
-               List.Append_Vector (Generated_Objects);
+               List.Append (Generated_Objects);
 
                Aux.Create_Export_Symbols_File
                  (Driver_Path         => Object_Lister.all,

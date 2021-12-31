@@ -617,7 +617,7 @@ begin
       Gnatbind_Options.Append ("-F");
    end if;
 
-   Gnatbind_Options.Append_Vector (ALI_Files_Table);
+   Gnatbind_Options.Append (ALI_Files_Table);
 
    for Option of Binding_Options_Table loop
       Gnatbind_Options.Append (Option);
@@ -984,7 +984,7 @@ begin
       Compiler_Options.Append (Object);
 
       --  Add the trailing options, if any
-      Compiler_Options.Append_Vector (Compiler_Trailing_Options);
+      Compiler_Options.Append (Compiler_Trailing_Options);
 
       if Verbose_Low_Mode then
          Set_Name_Buffer (Ada_Compiler_Path.all);

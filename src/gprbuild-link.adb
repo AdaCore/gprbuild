@@ -762,7 +762,7 @@ package body Gprbuild.Link is
 
       while Proj_List /= null loop
          if not Proj_List.Project.Library then
-            Objects.Append_Vector (Get_Objects (Proj_List.Project));
+            Objects.Append (Get_Objects (Proj_List.Project));
          end if;
 
          Proj_List := Proj_List.Next;
@@ -796,10 +796,10 @@ package body Gprbuild.Link is
 
          if First_Object = Objects.First_Index then
             --  Creation of a new archive
-            Arguments.Append_Vector (Archive_Builder_Opts);
+            Arguments.Append (Archive_Builder_Opts);
          else
             --  Append objects to an existing archive
-            Arguments.Append_Vector (Archive_Builder_Append_Opts);
+            Arguments.Append (Archive_Builder_Append_Opts);
          end if;
 
          --  Followed by the archive name
@@ -885,7 +885,7 @@ package body Gprbuild.Link is
          Arguments.Clear;
          Command.Clear;
 
-         Arguments.Append_Vector (Archive_Indexer_Opts);
+         Arguments.Append (Archive_Indexer_Opts);
          Add_Argument
            (Arguments,
             Archive_Name,
@@ -3428,7 +3428,7 @@ package body Gprbuild.Link is
                            --  argument(s). Update Arguments_Displayed
                            --  too.
 
-                           Arguments.Append_Vector (Other_Arguments);
+                           Arguments.Append (Other_Arguments);
                            Other_Arguments.Clear;
                         end if;
                      end;
@@ -3447,7 +3447,7 @@ package body Gprbuild.Link is
                not Opt.Verbose_Mode);
          end loop;
 
-         Arguments.Append_Vector (Other_Arguments);
+         Arguments.Append (Other_Arguments);
 
          Objects.Clear;
          Other_Arguments.Clear;

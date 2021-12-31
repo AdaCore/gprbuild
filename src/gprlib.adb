@@ -1045,7 +1045,7 @@ procedure Gprlib is
             end if;
          end if;
 
-         Bind_Options.Append_Vector (Binding_Options_Table);
+         Bind_Options.Append (Binding_Options_Table);
 
          --  Get an eventual --RTS from the ALI file
 
@@ -1085,7 +1085,7 @@ procedure Gprlib is
             end loop;
          end if;
 
-         Bind_Options.Append_Vector (ALIs);
+         Bind_Options.Append (ALIs);
 
          if Mapping_File_Name /= null then
             Bind_Options.Append ("-F=" & Mapping_File_Name.all);
@@ -1281,7 +1281,7 @@ procedure Gprlib is
 
          Bind_Options := String_Vectors.Empty_Vector;
 
-         Bind_Options.Append_Vector (Ada_Leading_Switches);
+         Bind_Options.Append (Ada_Leading_Switches);
          Bind_Options.Append (No_Warning);
          Bind_Options.Append (Binder_Generated_File);
          Bind_Options.Append (Output_Switch);
@@ -1330,7 +1330,7 @@ procedure Gprlib is
             end loop;
          end if;
 
-         Bind_Options.Append_Vector (Ada_Trailing_Switches);
+         Bind_Options.Append (Ada_Trailing_Switches);
 
          if not Quiet_Output then
             Name_Len := 0;
@@ -1535,7 +1535,7 @@ procedure Gprlib is
                     or else Size >= Maximum_Size;
                end loop;
 
-               PL_Options.Append_Vector (Trailing_PL_Options);
+               PL_Options.Append (Trailing_PL_Options);
 
                if not Quiet_Output then
                   if Verbose_Mode then
@@ -1576,7 +1576,7 @@ procedure Gprlib is
          --  Not a standalone library, or Partial linker is not specified.
          --  Put all objects in the archive.
 
-         AB_Objects.Append_Vector (Object_Files);
+         AB_Objects.Append (Object_Files);
       end if;
 
       --  Add the .GPR.linker_options section to Linker_Option_Object_File.
@@ -1724,7 +1724,7 @@ procedure Gprlib is
             --  archive in one chunk.
 
             AB_Options := AB_Create_Options;
-            AB_Options.Append_Vector (AB_Objects);
+            AB_Options.Append (AB_Objects);
             First_AB_Object_Pos := AB_Objects.Last_Index + 1;
 
          else
@@ -1753,7 +1753,7 @@ procedure Gprlib is
                Last_AB_Object_Pos := J;
             end loop;
 
-            AB_Options.Append_Vector
+            AB_Options.Append
               (Slice (AB_Objects, First_AB_Object_Pos, Last_AB_Object_Pos));
 
             --  Display the invocation of the archive builder for the creation
