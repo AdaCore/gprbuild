@@ -230,7 +230,7 @@ package GPR.Osint is
 private
 
    function File_Time_Stamp (N : C_File_Name) return Ada.Calendar.Time
-     with Import, Convention => C, External_Name => "__gnat_file_time";
+     with Import, Convention => C, External_Name => "__gnat_file_time_name";
 
    Invalid_Time : constant Ada.Calendar.Time :=
                     File_Time_Stamp (System.Null_Address);
