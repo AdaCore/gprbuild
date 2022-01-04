@@ -4189,16 +4189,13 @@ package body GPR.Util is
       Runtime_Source_Dirs : constant Name_List_Index :=
                              Source.Language.Config.Runtime_Source_Dirs;
 
-      Stamp    : Time_Stamp_Type;
+      Stamp : Time_Stamp_Type;
 
       Source_In_Dependencies : Boolean := False;
       --  Set True if source was found in dependency file of its object file
 
       C_Object_Name : String_Access := null;
       --  The canonical file name for the object file
-
-      Object_Path   : String_Access := null;
-      --  The absolute path name for the object file
 
       Switches_Name : String_Access := null;
       --  The file name of the file that contains the switches that were used
@@ -4219,7 +4216,8 @@ package body GPR.Util is
 
       function Process_Makefile_Deps
         (Dep_Name, Obj_Dir : String) return Boolean;
-      function Process_ALI_Deps (Closure : Boolean) return Boolean;
+      function Process_ALI_Deps
+        (Source : Source_Id; Closure : Boolean) return Boolean;
       --  Process the dependencies for the current source file for the various
       --  dependency modes.
       --  They return True if the file needs to be recompiled.
@@ -4227,8 +4225,64 @@ package body GPR.Util is
       procedure Cleanup;
       --  Cleanup local variables
 
+      function Check_Object_File (Source : Source_Id) return Boolean;
+      --  Check object file exists and consistent with source file
+
       function Check_Time_Stamps
         (Path : String; Stamp : Time_Stamp_Type) return Boolean;
+
+      -----------------------
+      -- Check_Object_File --
+      -----------------------
+
+      function Check_Object_File (Source : Source_Id) return Boolean is
+         function Obj_Path return String is
+           (Get_Name_String (Source.Object_Path));
+      begin
+         --  If object file does not exist, of course source needs to be
+         --  compiled.
+
+         if Source.Object_TS = Empty_Time_Stamp then
+            Source.Object_TS := File_Stamp (Obj_Path);
+         end if;
+
+         if Source.Object_TS = Empty_Time_Stamp then
+            if Opt.Verbosity_Level > Opt.Low then
+               Put ("      -> object file ");
+               Put (Obj_Path);
+               Put_Line (" does not exist");
+            end if;
+
+            return False;
+         end if;
+
+         --  If the object file has been created before the last modification
+         --  of the source, the source needs to be recompiled.
+
+         if not Opt.Minimal_Recompilation
+           and then Source.Object_TS < Source.Source_TS
+         then
+            if Opt.Verbosity_Level > Opt.Low then
+               Put  ("      -> object file ");
+               Put  (Obj_Path);
+               Put_Line (" has time stamp earlier than source");
+            end if;
+
+            return False;
+         end if;
+
+         if Opt.Verbosity_Level > Opt.Low and then Debug.Debug_Flag_T then
+            Put ("   object file ");
+            Put (Obj_Path);
+            Put (": ");
+            Put_Line (String (Source.Object_TS));
+
+            Put ("   source file: ");
+            Put_Line (String (Source.Source_TS));
+         end if;
+
+         return True;
+      end Check_Object_File;
 
       -----------------------
       -- Check_Time_Stamps --
@@ -4411,7 +4465,7 @@ package body GPR.Util is
                      Path : String := Name_Buffer (Start .. Last_Obj);
                   begin
                      Canonical_Case_File_Name (Path);
-                     OK := Path = Object_Path.all;
+                     OK := Path = Get_Name_String (Source.Object_Path);
                   end;
                end if;
             end if;
@@ -4675,11 +4729,13 @@ package body GPR.Util is
       -- Process_ALI_Deps --
       ----------------------
 
-      function Process_ALI_Deps (Closure : Boolean) return Boolean is
-         Text  : Text_Buffer_Ptr :=
-                   Read_Library_Info_From_Full
-                     (File_Name_Type (Source.Dep_Path),
-                      Source.Dep_TS'Access);
+      function Process_ALI_Deps
+        (Source : Source_Id; Closure : Boolean) return Boolean
+      is
+         Text : Text_Buffer_Ptr :=
+                  Read_Library_Info_From_Full
+                    (File_Name_Type (Source.Dep_Path), Source.Dep_TS'Access);
+
          Proj  : Project_Id;
          Found : Boolean := False;
          Preps : String_Sets.Set;
@@ -4691,6 +4747,8 @@ package body GPR.Util is
          --  have any additional references.
 
          Conf_Paths_Found : Config_Paths_Found := (Conf_Paths'Range => False);
+
+         The_ALI : ALI_Id;
 
       begin
          if Text = null then
@@ -4708,10 +4766,37 @@ package body GPR.Util is
            ALI.Scan_ALI
              (File_Name_Type (Source.Dep_Path),
               Text,
-              Ignore_ED     => False,
-              Err           => True,
-              Read_Lines    => "APDW");
+              Ignore_ED  => False,
+              Err        => True,
+              Read_Lines => "APDW");
          Free (Text);
+
+         if Source = Need_To_Compile.Source then
+            Need_To_Compile.The_ALI := The_ALI;
+
+         elsif Need_To_Compile.Stamp
+           < File_Time_Stamp (Source.Dep_Path, Source.Dep_TS'Access)
+         then
+            --  We can be here only in Closure mode because
+            --  Source /= Need_To_Compile.Source
+            --  see if condition.
+
+            if Opt.Verbosity_Level > Opt.Low then
+               Put ("    -> ALI file from dependencies ");
+               Put (Get_Name_String (Source.Dep_Name));
+               Put (" later than ");
+               Put_Line (Get_Name_String (Need_To_Compile.Source.Dep_Name));
+            end if;
+
+            return True;
+
+         elsif Object_Check then
+            Initialize_Source_Record (Source);
+
+            if not Check_Object_File (Source) then
+               return True;
+            end if;
+         end if;
 
          if The_ALI = ALI.No_ALI_Id then
             if Opt.Verbosity_Level > Opt.Low then
@@ -4812,7 +4897,8 @@ package body GPR.Util is
             Sfile    : File_Name_Type;
             Dep_Src  : GPR.Source_Id;
             Position : Name_Id_Set.Cursor;
-            Inserted : Boolean := True;
+            Inserted : Boolean;
+            ALI_Rec  : ALIs_Record renames ALI.ALIs.Table (The_ALI);
          begin
             Proj := ALI_Project;
             for J in Projects'Range loop
@@ -4820,20 +4906,20 @@ package body GPR.Util is
                Projects (J) := Proj;
             end loop;
 
-            for D in ALI.ALIs.Table (The_ALI).First_Sdep ..
-              ALI.ALIs.Table (The_ALI).Last_Sdep
-            loop
+            for D in ALI_Rec.First_Sdep .. ALI_Rec.Last_Sdep loop
                Sfile := ALI.Sdep.Table (D).Sfile;
+               Dep_Src := Source_Files_Htable.Get
+                            (Tree.Source_Files_HT, Sfile);
 
-               if Closure then
+               if Closure and then Dep_Src /= No_Source then
                   Processed.Insert (Name_Id (Sfile), Position, Inserted);
+               else
+                  Inserted := True;
                end if;
 
                if Inserted
                  and then ALI.Sdep.Table (D).Stamp /= Empty_Time_Stamp
                then
-                  Dep_Src := Source_Files_Htable.Get
-                    (Tree.Source_Files_HT, Sfile);
                   Found := False;
 
                   if Dep_Src = No_Source
@@ -5145,7 +5231,9 @@ package body GPR.Util is
 
                            if Closure
                              and then Dep_Src /= Source
-                             and then Process_ALI_Deps (Closure => True)
+                             and then Dep_Src.Kind /= Sep
+                             and then not Dep_Src.Project.Externally_Built
+                             and then Process_ALI_Deps (Dep_Src, True)
                            then
                               return True;
                            end if;
@@ -5229,7 +5317,6 @@ package body GPR.Util is
       procedure Cleanup is
       begin
          Free (C_Object_Name);
-         Free (Object_Path);
          Free (Switches_Name);
       end Cleanup;
 
@@ -5268,7 +5355,6 @@ package body GPR.Util is
       if Source.Language.Config.Object_Generated and then Object_Check then
          C_Object_Name := new String'(Get_Name_String (Source.Object));
          Canonical_Case_File_Name (C_Object_Name.all);
-         Object_Path := new String'(Get_Name_String (Source.Object_Path));
 
          if Source.Switches_Path /= No_Path then
             Switches_Name :=
@@ -5314,48 +5400,10 @@ package body GPR.Util is
             return;
          end if;
 
-      elsif Object_Check then
-         --  If object file does not exist, of course source need to be
-         --  compiled.
-
-         if Source.Object_TS = Empty_Time_Stamp then
-            if Opt.Verbosity_Level > Opt.Low then
-               Put  ("      -> object file ");
-               Put  (Object_Path.all);
-               Put_Line (" does not exist");
-            end if;
-
-            Must_Compile := True;
-            Cleanup;
-            return;
-         end if;
-
-         --  If the object file has been created before the last modification
-         --  of the source, the source need to be recompiled.
-
-         if (not Opt.Minimal_Recompilation)
-           and then Source.Object_TS < Source.Source_TS
-         then
-            if Opt.Verbosity_Level > Opt.Low then
-               Put  ("      -> object file ");
-               Put  (Object_Path.all);
-               Put_Line (" has time stamp earlier than source");
-            end if;
-
-            Must_Compile := True;
-            Cleanup;
-            return;
-         end if;
-
-         if Opt.Verbosity_Level > Opt.Low and then Debug.Debug_Flag_T then
-            Put ("   object file ");
-            Put (Object_Path.all);
-            Put (": ");
-            Put_Line (String (Source.Object_TS));
-
-            Put ("   source file: ");
-            Put_Line (String (Source.Source_TS));
-         end if;
+      elsif Object_Check and then not Check_Object_File (Source) then
+         Must_Compile := True;
+         Cleanup;
+         return;
       end if;
 
       if Source.Language.Config.Dependency_Kind /= None then
@@ -5419,7 +5467,7 @@ package body GPR.Util is
             if Opt.Verbosity_Level > Opt.Low then
                Put ("      -> ALI file ");
                Put (Get_Name_String (Source.Dep_Path));
-               Put_Line (" has timestamp earlier than object file");
+               Put_Line (" has timestamp later than object file");
             end if;
 
             Must_Compile := True;
@@ -5496,14 +5544,14 @@ package body GPR.Util is
             end if;
 
          when ALI_File =>
-            if Process_ALI_Deps (Closure => False) then
+            if Process_ALI_Deps (Source, Closure => False) then
                Must_Compile := True;
                Cleanup;
                return;
             end if;
 
          when ALI_Closure =>
-            if Process_ALI_Deps (Closure => True) then
+            if Process_ALI_Deps (Source, Closure => True) then
                Must_Compile := True;
                Cleanup;
                return;

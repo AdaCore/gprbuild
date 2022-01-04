@@ -2,7 +2,7 @@
 --                                                                          --
 --                           GPR PROJECT MANAGER                            --
 --                                                                          --
---          Copyright (C) 1992-2021, Free Software Foundation, Inc.         --
+--          Copyright (C) 1992-2022, Free Software Foundation, Inc.         --
 --                                                                          --
 -- This library is free software;  you can redistribute it and/or modify it --
 -- under terms of the  GNU General Public License  as published by the Free --
@@ -26,6 +26,7 @@ with Ada.Strings.Fixed; use Ada.Strings.Fixed;
 
 with GPR.Names;  use GPR.Names;
 with GPR.Output; use GPR.Output;
+with GPR.Opt;
 
 package body GPR.ALI is
 
@@ -56,6 +57,8 @@ package body GPR.ALI is
       'C'    => True,   -- SCO information
       'F'    => True,   -- SPARK cross-reference information
       others => False);
+
+   Spark_End_Marker : constant Text_Buffer := "GG EK_END_MARKER";
 
    --------------------
    -- Initialize_ALI --
@@ -123,6 +126,8 @@ package body GPR.ALI is
       Id        : ALI_Id;
       C         : Character;
       First_Arg : Arg_Id;
+      First_P   : Text_Ptr    := T'First;
+      Last_P    : Text_Ptr    := T'First;
 
       Ignore : array (Character range 'A' .. 'Z') of Boolean;
       --  Ignore (X) is set to True if lines starting with X are to
@@ -628,9 +633,13 @@ package body GPR.ALI is
 
       procedure Skip_Next_Line is
       begin
+         First_P := P;
+
          while not At_Eol loop
             P := P + 1;
          end loop;
+
+         Last_P := P - 1;
 
          Skip_Eol;
       end Skip_Next_Line;
@@ -1317,7 +1326,7 @@ package body GPR.ALI is
             --  The file/path name may be quoted
 
             Sdep.Table (Sdep.Last).Sfile :=
-              Get_File_Name (May_Be_Quoted =>  True);
+              Get_File_Name (May_Be_Quoted => True);
 
             Sdep.Table (Sdep.Last).Stamp := Get_Stamp;
             Sdep.Table (Sdep.Last).Dummy_Entry :=
@@ -1423,6 +1432,14 @@ package body GPR.ALI is
       --  We must at this stage be at an Xref line or the end of file
 
       if C = EOF then
+         --  Check that gnatprove generated .ali files ended with right marker
+
+         if Opt.GnatProve_Mode
+           and then T (First_P .. Last_P) /= Spark_End_Marker
+         then
+            return No_ALI_Id;
+         end if;
+
          return Id;
       end if;
 
@@ -1430,6 +1447,18 @@ package body GPR.ALI is
 
       if C /= 'X' then
          return No_ALI_Id;
+      end if;
+
+      if Opt.GnatProve_Mode then
+         --  Check that gnatprove generated .ali files ended with right marker
+
+         while P < T'Last loop
+            Skip_Next_Line;
+         end loop;
+
+         if T (First_P .. Last_P) /= Spark_End_Marker then
+            return No_ALI_Id;
+         end if;
       end if;
 
       return Id;
