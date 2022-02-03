@@ -1,0 +1,7 @@
+Code-Review+2: Vasiliy Fofanov <fofanov@adacore.com>
+Code-Review+1: CI Builder <ci-builder@adacore.com>
+Submitted-by: Dmitriy Anisimkov <anisimko@adacore.com>
+Submitted-at: Thu, 03 Feb 2022 16:00:04 +0000
+Reviewed-on: https://git.adacore-it.com/c/gprbuild/+/110394
+Project: gprbuild
+Branch: refs/heads/master
