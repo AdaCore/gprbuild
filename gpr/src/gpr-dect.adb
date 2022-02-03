@@ -2,7 +2,7 @@
 --                                                                          --
 --                           GPR PROJECT MANAGER                            --
 --                                                                          --
---          Copyright (C) 2001-2021, Free Software Foundation, Inc.         --
+--          Copyright (C) 2001-2022, Free Software Foundation, Inc.         --
 --                                                                          --
 -- This library is free software;  you can redistribute it and/or modify it --
 -- under terms of the  GNU General Public License  as published by the Free --
@@ -933,13 +933,14 @@ package body GPR.Dect is
          --  Scan past "is"
 
          Scan (In_Tree);
+
+      else
+         return;
       end if;
 
       Start_New_Case_Construction (In_Tree, String_Type);
 
-      When_Loop :
-
-      while Token = Tok_When loop
+      When_Loop : while Token = Tok_When loop
 
          if First_Case_Item then
             Current_Item :=
