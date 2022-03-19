@@ -3631,7 +3631,7 @@ package body GPR.Util is
             end if;
          end loop;
 
-         return Ret;
+         return Ret(1 .. Length - Separator'Length);
       end;
    end Concat_Paths;
 
