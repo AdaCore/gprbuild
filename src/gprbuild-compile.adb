@@ -1073,15 +1073,25 @@ package body Gprbuild.Compile is
          File : Ada.Text_IO.File_Type;
          Line : String (1 .. 1_024);
          Last : Natural;
+         Length : Natural;
+         Print_New_Line : Boolean := False;
       begin
          if OS_Lib.Is_Regular_File (File_Path) then
             Open (File, In_File, File_Path);
 
             while not End_Of_File (File) loop
                Get_Line (File, Line, Last);
-               Put_Line (Stream, Line (1 .. Last));
+               if Last = Line'Last then
+                  Put (Stream, Line (1 .. Last));
+                  Print_New_Line := True;
+               else
+                  Put_Line (Stream, Line (1 .. Last));
+               end if;
             end loop;
 
+            if Print_New_Line then
+               Put_Line (Stream, "");
+            end if;
             Close (File);
          end if;
       end Display_Content;
