@@ -1724,6 +1724,20 @@ package body GPR.Util is
       end if;
    end Get_Line;
 
+   --------------
+   -- Get_Line --
+   --------------
+
+   function Get_Line
+     (File : Text_File; Max_Length : Positive := 4096) return String
+   is
+      Result : String (1 .. Max_Length);
+      Last   : Natural;
+   begin
+      Get_Line (File, Result, Last);
+      return Result (1 .. Last);
+   end Get_Line;
+
    ------------------
    -- Get_Switches --
    ------------------
@@ -4816,14 +4830,102 @@ package body GPR.Util is
             A : String_Access;
 
             Gnatep : constant String := "-gnatep=";
+            File   : Text_File;
+
+            procedure Prep_Append (Filename : String);
+
+            -----------------
+            -- Prep_Append --
+            -----------------
+
+            procedure Prep_Append (Filename : String) is
+            begin
+               Preps.Include
+                 (Normalize_Pathname (Filename, Case_Sensitive => False));
+            end Prep_Append;
+
          begin
             for J in U.First_Arg .. U.Last_Arg loop
                A := Args.Table (J);
                if Starts_With (A.all, Gnatep) then
-                  Preps.Include
-                    (Normalize_Pathname
-                       (A (A'First + Gnatep'Length .. A'Last),
-                        Case_Sensitive => False));
+                  Prep_Append (A (A'First + Gnatep'Length .. A'Last));
+
+                  --  Extract all definition filenames from preprocessor data
+                  --  file. Put it into the Preps too.
+
+                  Open (File, A (A'First + Gnatep'Length .. A'Last));
+
+                  while Is_Valid (File) and then not End_Of_File (File) loop
+                     declare
+                        Line   : constant String := Get_Line (File);
+                        Str    : String (Line'Range);
+                        Last   : Natural;
+                        Scan   : Positive := Line'First;
+
+                        procedure Scan_String_Literal;
+                        --  Scan string literal from Line starting from Scan
+                        --  index.
+
+                        -------------------------
+                        -- Scan_String_Literal --
+                        -------------------------
+
+                        procedure Scan_String_Literal is
+                           Was_DQ : Boolean := False;
+                           Inside : Boolean := False;
+                        begin
+                           Last := Str'First - 1;
+
+                           for Idx in Scan .. Line'Last loop
+                              if Line (Idx) = '"' then
+                                 if Inside then
+                                    if Was_DQ then
+                                       Last := Last + 1;
+                                       Str (Last) := '"';
+                                    end if;
+
+                                    Was_DQ := not Was_DQ;
+
+                                 else
+                                    Inside := True;
+                                 end if;
+
+                              else
+                                 if Was_DQ then
+                                    Scan := Idx;
+                                    exit;
+                                 end if;
+
+                                 if Inside then
+                                    Last := Last + 1;
+                                    Str (Last) := Line (Idx);
+                                 end if;
+                              end if;
+                           end loop;
+
+                           Inside := False;
+                        end Scan_String_Literal;
+
+                     begin
+                        if Line /= "" then
+                           case Line (Line'First) is
+                              when '*' =>
+                                 Scan_String_Literal;
+                                 Prep_Append (Str (Str'First .. Last));
+                              when '"' =>
+                                 Scan_String_Literal;
+                                 Scan_String_Literal;
+                                 Prep_Append (Str (Str'First .. Last));
+                              when others =>
+                                 null;
+                           end case;
+                        end if;
+                     end;
+                  end loop;
+
+                  if Is_Valid (File) then
+                     Close (File);
+                  end if;
                end if;
             end loop;
          end;

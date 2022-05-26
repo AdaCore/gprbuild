@@ -307,6 +307,9 @@ package GPR.Util is
    --  Reads a line from an open text file (fails if File is invalid or in an
    --  out file).
 
+   function Get_Line
+     (File : Text_File; Max_Length : Positive := 4096) return String;
+
    procedure Put (File : Text_File; S : String);
    procedure Put_Line (File : Text_File; Line : String);
    --  Output a string or a line to an out text file (fails if File is invalid
