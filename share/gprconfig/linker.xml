@@ -717,20 +717,6 @@
     </config>
   </configuration>
 
-  <!-- GNAAMP -->
-  <configuration>
-    <targets>
-       <target name="aamp" />
-    </targets>
-    <config>
-   for Library_Support use "none";
-
-   package Linker is
-      for Driver use "aa_link";
-   end Linker;
-    </config>
-  </configuration>
-
   <!-- DOTNET -->
   <configuration>
     <targets>
@@ -1227,7 +1213,7 @@
         for Map_File_Option use "-Wl,-Map,";
      end Linker;
     </config>
-  </configuration>>
+  </configuration>
 
   <configuration>
     <targets>

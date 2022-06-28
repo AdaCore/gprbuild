@@ -1,0 +1,5 @@
+[gerrit]
+host = git.adacore.com
+project = gprbuild
+defaultbranch = lts-7.4
+defaultremote = origin

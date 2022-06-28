@@ -355,18 +355,6 @@
     </target>
   </compiler_description>
 
-  <!--    GNAAMP -->
-  <compiler_description>
-    <name>GNAAMP</name>
-    <executable>gnaampmake</executable>
-    <version>
-     <external>gnaampls -v</external>
-     <grep  regexp="^GNATLS.+?(\d+(\.\d+)?)" group="1"></grep>
-    </version>
-    <languages>Ada</languages>
-    <target>aamp</target>
-  </compiler_description>
-
   <!--  G++ compilers (not for GNAT Pro)  -->
   <compiler_description>
     <name>G++</name>

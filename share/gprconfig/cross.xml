@@ -2,18 +2,6 @@
 <gprconfig>
    <!--  This package provides adjustments for cross compilers -->
 
-   <!-- AAMP executable have extension .axe -->
-   <configuration>
-     <targets>
-       <target name="aamp" />
-     </targets>
-     <config>
-   package Builder is
-      for Executable_Suffix use ".axe";
-   end Builder;
-     </config>
-   </configuration>
-
    <configuration>
      <targets>
        <target name="dotnet" />

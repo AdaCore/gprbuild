@@ -1,0 +1,32 @@
+<?xml version="1.0" ?>
+
+<gprconfig>
+
+  <!--  GNAAMP -->
+  <compiler_description>
+    <name>GNAAMP</name>
+    <executable>gnaampmake</executable>
+    <version>
+      <external>gnaampls -v</external>
+      <grep  regexp="^GNATLS.+?(\d+(\.\d+)?)" group="1"></grep>
+    </version>
+    <languages>Ada</languages>
+    <runtimes>
+      <directory group="1" contents="">\.\./lib/(.*)/adalib/</directory>
+    </runtimes>
+    <target>aamp</target>
+  </compiler_description>
+
+  <!--  AAMP_MAC -->
+  <compiler_description>
+    <name>AAMP_MAC</name>
+    <executable>macasm</executable>
+    <version>1.0</version>
+    <languages>aamp_macro_assembly</languages>
+    <runtimes>
+      <directory group="1" contents="">\.\./lib/(.*)/adainclude</directory>
+    </runtimes>
+    <target>aamp</target>
+  </compiler_description>
+
+</gprconfig>

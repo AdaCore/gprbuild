@@ -1,0 +1,114 @@
+<?xml version="1.0" ?>
+
+<gprconfig>
+
+  <!--  AAMP Platform -->
+
+  <configuration>
+    <targets>
+      <target name="aamp" />
+    </targets>
+    <config>
+   package Builder is
+      for Executable_Suffix use ".axe";
+   end Builder;
+
+   for Library_Support use "none";
+
+   package Linker is
+      for Driver use "aa_link";
+   end Linker;
+    </config>
+  </configuration>
+
+  <configuration>
+    <compilers>
+      <compiler name="GNAAMP" />
+     </compilers>
+    <config>
+   package Naming is
+      for Spec_Suffix ("Ada") use ".ads";
+      for Body_Suffix ("Ada") use ".adb";
+      for Casing use "lowercase";
+      for Dot_Replacement use "-";
+   end Naming;
+
+   package Compiler is
+      for Driver                   ("Ada") use "gnaamp";
+      for Language_Kind            ("Ada") use "unit_based";
+      for Dependency_Kind          ("Ada") use "ALI_File";
+      for Required_Switches        ("Ada") use
+          Compiler'Required_Switches ("Ada")
+             &amp; ("-gnatA");
+      for Leading_Required_Switches ("Ada") use
+          Compiler'Leading_Required_Switches ("Ada") &amp; ("-aamp_target=${RUNTIME(ada)}");
+      for Object_File_Suffix       ("Ada") use ".obj";
+      for Mapping_File_Switches    ("Ada") use ("-gnatem=");
+      for Mapping_Spec_Suffix      ("Ada") use "%s";
+      for Mapping_Body_Suffix      ("Ada") use "%b";
+      for Config_File_Switches     ("Ada") use ("-gnatec=");
+      for Include_Path_File     ("Ada") use "ADA_PRJ_INCLUDE_FILE";
+      for Config_Body_File_Name    ("Ada") use
+           "pragma Source_File_Name_Project (%u, Body_File_Name => ""%f"");";
+      for Config_Spec_File_Name    ("Ada") use
+           "pragma Source_File_Name_Project (%u, Spec_File_Name => ""%f"");";
+      for Config_Body_File_Name_Pattern ("Ada") use
+           "pragma Source_File_Name_Project " &amp;
+           "  (Body_File_Name  => ""*%b""," &amp;
+           "   Casing          => %c," &amp;
+           "   Dot_Replacement => ""%d"");";
+      for Config_Spec_File_Name_Pattern ("Ada") use
+           "pragma Source_File_Name_Project " &amp;
+           "  (Spec_File_Name  => ""*%s""," &amp;
+           "   Casing          => %c," &amp;
+           "   Dot_Replacement => ""%d"");";
+      for Config_File_Unique    ("Ada") use "False";
+   end Compiler;
+
+   package Binder is
+      for Objects_Path_File     ("Ada") use "ADA_PRJ_OBJECTS_FILE";
+      for Required_Switches     ("Ada") use
+          Binder'Required_Switches ("Ada")  &amp;
+          ("ada_binder=gnaampbind");
+      for Required_Switches ("Ada") use
+          Binder'Required_Switches ("Ada") &amp; ("--RTS=${RUNTIME_DIR(ada)}");
+      for Driver         ("Ada") use
+          "${GPRCONFIG_PREFIX}/libexec/gprbuild/gprbind";
+   end Binder;
+
+   package Linker is
+      for Default_Switches ("Ada") use ("-aamp_target=${RUNTIME(ada)}");
+      for Driver use "aa_link";
+   end Linker;
+
+   for Toolchain_Version     ("Ada") use "GNAT ${VERSION(ada)}";
+   for Runtime_Library_Dir   ("Ada") use "${RUNTIME_DIR(ada)}/adalib/";
+   for Runtime_Source_Dir    ("Ada") use "${RUNTIME_DIR(ada)}/adainclude/";
+    </config>
+  </configuration>
+
+  <configuration>
+    <compilers>
+      <compiler name="AAMP_MAC"/>
+    </compilers>
+    <config>
+   for Objects_Linked ("aamp_macro_assembly") use "False";
+   for Runtime_Library_Dir   ("aamp_macro_assembly") use "${RUNTIME_DIR(aamp_macro_assembly)}";
+   package Naming is
+      -- How to recognize MAC files
+      for Body_Suffix ("aamp_macro_assembly") use ".mac";
+   end Naming;
+   package Compiler is
+      -- describes our code generation
+      for Driver ("aamp_macro_assembly") use "macasm";
+      for Object_File_Suffix ("aamp_macro_assembly") use ".obj";
+      for Default_Switches ("aamp_macro_assembly") use 
+          ("-list",
+           "-cross",
+           "-instr",
+           "-in_mac=${RUNTIME_DIR(aamp_macro_assembly)}..\${RUNTIME(aamp_macro_assembly)}.mlb");
+   end Compiler;
+    </config>
+  </configuration>
+
+</gprconfig>
