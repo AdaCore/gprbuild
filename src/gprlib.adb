@@ -2488,7 +2488,9 @@ begin
       Library_Dependency_Directory := Library_Directory;
    end if;
 
-   if Standalone /= No then
+   if Standalone /= No
+     and then not ALIs.Is_Empty
+   then
       Process_Standalone;
    end if;
 
