@@ -314,6 +314,9 @@ procedure Gprlib is
    --  Copy to the Copy_Source_Directory the sources of the interfaces of
    --  a Stand-Alone Library.
 
+   function Is_Gnarl_Dependent return Boolean;
+   --  Detects from the .ali files if there is a dependency on libgnarl
+
    procedure Process_Shared;
    --  Process a shared library
 
@@ -802,11 +805,6 @@ procedure Gprlib is
 
       GPR.Initialize (GPR.No_Project_Tree);
 
-      if S_Osinte_Ads = No_File then
-         Set_Name_Buffer ("s-osinte.ads");
-         S_Osinte_Ads := Name_Find;
-      end if;
-
       for Dir of Imported_Library_Directories loop
          Library_Switches_Table.Append ("-L" & Dir);
          if not Path_Option.Is_Empty then
@@ -817,66 +815,6 @@ procedure Gprlib is
       for Libname of Imported_Library_Names loop
          Library_Switches_Table.Append ("-l" & Libname);
       end loop;
-
-      --  If Ada is used and we don't already know yet that libgnarl is needed,
-      --  look for s-osinte.ads in all the ALI files. If found in at least one,
-      --  then libgnarl is needed.
-
-      if Use_GNAT_Lib
-        and then not Runtime_Library_Dirs.Is_Empty
-        and then not Libgnarl_Needed
-      then
-         declare
-            Lib_File : File_Name_Type;
-            Text     : Text_Buffer_Ptr;
-            Id       : ALI.ALI_Id;
-            use ALI;
-
-         begin
-            if Verbosity_Level > Opt.Low then
-               Put_Line ("Reading ALI files to decide for -lgnarl");
-            end if;
-
-            ALI_Loop :
-            for ALI_File of ALIs loop
-               if Verbosity_Level > Opt.Low then
-                  Put_Line ("Reading " & ALI_File);
-               end if;
-
-               Set_Name_Buffer (ALI_File);
-               Lib_File := Name_Find;
-               Text := Osint.Read_Library_Info (Lib_File, True);
-
-               Id := ALI.Scan_ALI
-                 (F          => Lib_File,
-                  T          => Text,
-                  Ignore_ED  => False,
-                  Err        => True,
-                  Read_Lines => "D");
-               Free (Text);
-
-               if Id = No_ALI_Id and then Verbose_Mode then
-                  Put_Line ("warning: reading of " & ALI_File & " failed");
-
-               else
-                  --  Look for s-osinte.ads in the dependencies
-
-                  for Index in ALI.ALIs.Table (Id).First_Sdep ..
-                    ALI.ALIs.Table (Id).Last_Sdep
-                  loop
-                     if ALI.Sdep.Table (Index).Sfile = S_Osinte_Ads then
-                        Libgnarl_Needed := True;
-                        exit ALI_Loop;
-                     end if;
-                  end loop;
-               end if;
-            end loop ALI_Loop;
-
-            if Verbosity_Level > Opt.Low then
-               Put_Line ("End of ALI file reading");
-            end if;
-         end;
-      end if;
 
       if Use_GNAT_Lib and then not Runtime_Library_Dirs.Is_Empty then
          if Standalone = Encapsulated then
@@ -1912,6 +1850,77 @@ procedure Gprlib is
    end Process_Static;
 
    ------------------------
+   -- Is_Gnarl_Dependent --
+   ------------------------
+
+   function Is_Gnarl_Dependent return Boolean
+   is
+      Gnarl_Dependent : Boolean := False;
+   begin
+      --  If Ada is used and we don't already know that libgnarl is needed,
+      --  look for s-osinte.ads in all the ALI files. If found in at least one,
+      --  then libgnarl is needed.
+
+      if Use_GNAT_Lib
+        and then not Runtime_Library_Dirs.Is_Empty
+        and then not Libgnarl_Needed
+      then
+         declare
+            Lib_File : File_Name_Type;
+            Text     : Text_Buffer_Ptr;
+            Id       : ALI.ALI_Id;
+            use ALI;
+
+         begin
+            if Verbosity_Level > Opt.Low then
+               Put_Line ("Reading ALI files to decide for -lgnarl");
+            end if;
+
+            ALI_Loop :
+            for ALI_File of ALIs loop
+               if Verbosity_Level > Opt.Low then
+                  Put_Line ("Reading " & ALI_File);
+               end if;
+
+               Set_Name_Buffer (ALI_File);
+               Lib_File := Name_Find;
+               Text := Osint.Read_Library_Info (Lib_File, True);
+
+               Id := ALI.Scan_ALI
+                 (F          => Lib_File,
+                  T          => Text,
+                  Ignore_ED  => False,
+                  Err        => True,
+                  Read_Lines => "D");
+               Free (Text);
+
+               if Id = No_ALI_Id and then Verbose_Mode then
+                  Put_Line ("warning: reading of " & ALI_File & " failed");
+
+               else
+                  --  Look for s-osinte.ads in the dependencies
+
+                  for Index in ALI.ALIs.Table (Id).First_Sdep ..
+                    ALI.ALIs.Table (Id).Last_Sdep
+                  loop
+                     if ALI.Sdep.Table (Index).Sfile = S_Osinte_Ads then
+                        Gnarl_Dependent := True;
+                        exit ALI_Loop;
+                     end if;
+                  end loop;
+               end if;
+            end loop ALI_Loop;
+
+            if Verbosity_Level > Opt.Low then
+               Put_Line ("End of ALI file reading");
+            end if;
+         end;
+      end if;
+
+      return Gnarl_Dependent;
+   end Is_Gnarl_Dependent;
+
+   ------------------------
    -- Read_Exchange_File --
    ------------------------
 
@@ -2497,6 +2506,13 @@ begin
    --  Archives
 
    if not No_Create then
+      if S_Osinte_Ads = No_File then
+         Set_Name_Buffer ("s-osinte.ads");
+         S_Osinte_Ads := Name_Find;
+      end if;
+
+      Libgnarl_Needed := Is_Gnarl_Dependent;
+
       if Relocatable then
          Process_Shared;
       else
