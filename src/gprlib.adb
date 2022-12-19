@@ -1855,7 +1855,7 @@ procedure Gprlib is
 
    function Is_Gnarl_Dependent return Boolean
    is
-      Gnarl_Dependent : Boolean := False;
+      Gnarl_Dependent : Boolean := Libgnarl_Needed;
    begin
       --  If Ada is used and we don't already know that libgnarl is needed,
       --  look for s-osinte.ads in all the ALI files. If found in at least one,
