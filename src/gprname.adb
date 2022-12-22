@@ -1229,16 +1229,13 @@ package body GPRName is
 
                Kind_Of_Node := Kind_Of (Current_Node, Tree);
 
-               if Kind_Of_Node = N_Attribute_Declaration or else
-                 Kind_Of_Node = N_Package_Declaration
+               if Kind_Of_Node in N_Attribute_Declaration |
+                     N_Package_Declaration
                then
                   Name := GPR.Tree.Name_Of (Current_Node, Tree);
 
-                  if Name in Name_Source_Files
-                           | Name_Source_List_File
-                           | Name_Source_Dirs
-                           | Name_Languages
-                           | Name_Naming
+                  if Name in Name_Source_Files | Name_Source_List_File |
+                        Name_Source_Dirs | Name_Languages | Name_Naming
                   then
                      Comments :=
                        Tree.Project_Nodes.Table (Current_Node).Comments;
@@ -1261,8 +1258,7 @@ package body GPRName is
 
                      if No (Previous) then
                         Set_First_Declarative_Item_Of
-                          (Project_Declaration_Of (Project_Node, Tree),
-                           Tree,
+                          (Project_Declaration_Of (Project_Node, Tree), Tree,
                            To => Next_Declarative_Item (Declaration, Tree));
 
                      else

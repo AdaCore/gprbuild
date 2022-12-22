@@ -277,7 +277,7 @@ package body GPR.ALI is
          while C not in 'A' .. 'Z'
            or else not Known_ALI_Lines (C)
          loop
-            if C = CR or else C = LF then
+            if C in CR | LF then
                Skip_Next_Line;
                C := Nextc;
 
@@ -997,15 +997,15 @@ package body GPR.ALI is
 
             --  Version field
 
-            if C in '0' .. '9' or else C in 'a' .. 'f' then
+            if C in '0' .. '9' | 'a' .. 'f' then
                Units.Table (Units.Last).Version (1) := C;
 
                for J in 2 .. 8 loop
-                  C := Getc;
+                  C                                    := Getc;
                   Units.Table (Units.Last).Version (J) := C;
                end loop;
 
-            --  BD/BN parameters
+               --  BD/BN parameters
 
             elsif C = 'B' then
                C := Getc;
@@ -1019,7 +1019,7 @@ package body GPR.ALI is
                   Units.Table (Units.Last).Body_Needed_For_SAL := True;
                end if;
 
-            --  DE parameter (Dynamic elaboration checks)
+               --  DE parameter (Dynamic elaboration checks)
 
             elsif C = 'D' then
                C := Getc;
@@ -1029,7 +1029,7 @@ package body GPR.ALI is
                   Units.Table (Units.Last).Dynamic_Elab := True;
                end if;
 
-            --  EB/EE parameters
+               --  EB/EE parameters
 
             elsif C = 'E' then
                C := Getc;
@@ -1042,7 +1042,7 @@ package body GPR.ALI is
 
                Check_At_End_Of_Field;
 
-            --  GE parameter (generic)
+               --  GE parameter (generic)
 
             elsif C = 'G' then
                C := Getc;
@@ -1052,7 +1052,7 @@ package body GPR.ALI is
                   Units.Table (Units.Last).Is_Generic := True;
                end if;
 
-            --  IL/IS/IU parameters
+               --  IL/IS/IU parameters
 
             elsif C = 'I' then
                C := Getc;
@@ -1067,7 +1067,7 @@ package body GPR.ALI is
 
                Check_At_End_Of_Field;
 
-            --  KM/KU parameters
+               --  KM/KU parameters
 
             elsif C = 'K' then
                C := Getc;
@@ -1080,7 +1080,7 @@ package body GPR.ALI is
 
                Check_At_End_Of_Field;
 
-            --  NE parameter
+               --  NE parameter
 
             elsif C = 'N' then
                C := Getc;
@@ -1090,7 +1090,7 @@ package body GPR.ALI is
                   Check_At_End_Of_Field;
                end if;
 
-            --  PF/PR/PU/PK parameters
+               --  PF/PR/PU/PK parameters
 
             elsif C = 'P' then
                C := Getc;
@@ -1107,18 +1107,18 @@ package body GPR.ALI is
 
                Check_At_End_Of_Field;
 
-            --  OL/OO/OS/OT parameters
+               --  OL/OO/OS/OT parameters
 
             elsif C = 'O' then
                C := Getc;
 
-               if C = 'L' or else C = 'O' or else C = 'S' or else C = 'T' then
+               if C in 'L' | 'O' | 'S' | 'T' then
                   Units.Table (Units.Last).Optimize_Alignment := C;
                end if;
 
                Check_At_End_Of_Field;
 
-            --  RC/RT parameters
+               --  RC/RT parameters
 
             elsif C = 'R' then
                C := Getc;
@@ -1133,7 +1133,7 @@ package body GPR.ALI is
 
                Check_At_End_Of_Field;
 
-            --  SE/SP/SU parameters
+               --  SE/SP/SU parameters
 
             elsif C = 'S' then
                C := Getc;
@@ -1161,7 +1161,7 @@ package body GPR.ALI is
 
          With_Loop : loop
             Check_Unknown_Line;
-            exit With_Loop when C /= 'W' and then C /= 'Y' and then C /= 'Z';
+            exit With_Loop when C not in 'W' | 'Y' | 'Z';
 
             if Ignore ('W') then
                Skip_Next_Line;

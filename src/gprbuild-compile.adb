@@ -3115,8 +3115,7 @@ package body Gprbuild.Compile is
             Get_Name_String (Directories.Table (Index));
 
             while Name_Len > 1
-              and then (Name_Buffer (Name_Len) = Directory_Separator
-                        or else Name_Buffer (Name_Len) = '/')
+              and then (Name_Buffer (Name_Len) in Directory_Separator | '/')
             loop
                Name_Len := Name_Len - 1;
             end loop;

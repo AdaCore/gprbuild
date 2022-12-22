@@ -694,9 +694,7 @@ procedure Gprbuild.Main is
       elsif Arg = "-kargs" then
          Current_Processor := Gprconfig;
 
-      elsif Arg = "-gargs"
-        or else Arg = "-margs"
-      then
+      elsif Arg in "-gargs" | "-margs" then
          Current_Processor := None;
 
          --  A special test is needed for the -o switch within a -largs since
@@ -740,10 +738,10 @@ procedure Gprbuild.Main is
             Complete_Output    := True;
             No_Complete_Output := False;
 
-         elsif Arg = No_Complete_Output_Option or else Arg = "-n" then
+         elsif Arg in No_Complete_Output_Option | "-n" then
             Forbidden_In_Package_Builder;
             No_Complete_Output := True;
-            Complete_Output := False;
+            Complete_Output    := False;
 
          elsif Arg = No_Project_Option then
             Forbidden_In_Package_Builder;
@@ -1453,7 +1451,7 @@ procedure Gprbuild.Main is
                Output_File_Name_Expected := True;
             end if;
 
-         elsif Arg = "-p" or else Arg = "--create-missing-dirs" then
+         elsif Arg in "-p" | "--create-missing-dirs" then
             Forbidden_In_Package_Builder;
             Opt.Create_Dirs := Create_All_Dirs;
 
@@ -1515,7 +1513,7 @@ procedure Gprbuild.Main is
             Unique_Compile_All_Projects := True;
             Unique_Compile := True;
 
-         elsif Arg = "-v" or else Arg = "-vl" then
+         elsif Arg in "-v" | "-vl" then
             Opt.Verbose_Mode    := True;
             Opt.Verbosity_Level := Opt.Low;
             Opt.Quiet_Output    := False;
@@ -1604,8 +1602,7 @@ procedure Gprbuild.Main is
 
             null;
 
-         elsif (Language = No_Name or else Language = Name_Ada)
-           and then (not Command_Line)
+         elsif (Language in No_Name | Name_Ada) and then (not Command_Line)
            and then Arg = "-x"
          then
             --  For compatibility with gnatmake, ignore -x if found in the
@@ -1613,14 +1610,11 @@ procedure Gprbuild.Main is
 
             null;
 
-         elsif (Language = No_Name or else Language = Name_Ada)
-            and then not Subst_Switch_Present
-            and then
-             (Arg = "-fstack-check"
-              or else Arg = "-fno-inline"
-              or else
-                (Arg'Length >= 2
-                 and then (Arg (2) = 'O' or else Arg (2) = 'g')))
+         elsif (Language in No_Name | Name_Ada)
+           and then not Subst_Switch_Present
+           and then
+           (Arg in "-fstack-check" | "-fno-inline"
+            or else (Arg'Length >= 2 and then (Arg (2) in 'O' | 'g')))
          then
             --  For compatibility with gnatmake, use switch to compile Ada
             --  code. We don't do this if the --compiler-pkg-subst switch was
@@ -1632,8 +1626,8 @@ procedure Gprbuild.Main is
                  Compiling_Options_HTable.Get (Name_Ada);
 
                if Current_Comp_Option_Table = No_Comp_Option_Table then
-                  Current_Comp_Option_Table := new String_Vectors.Vector'
-                    (String_Vectors.Empty_Vector);
+                  Current_Comp_Option_Table :=
+                    new String_Vectors.Vector'(String_Vectors.Empty_Vector);
                   Compiling_Options_HTable.Set
                     (Name_Ada, Current_Comp_Option_Table);
                end if;
@@ -1643,7 +1637,7 @@ procedure Gprbuild.Main is
                  Builder_Compiling_Options_HTable.Get (Name_Ada);
 
                if Current_Builder_Comp_Option_Table =
-                  No_Builder_Comp_Option_Table
+                 No_Builder_Comp_Option_Table
                then
                   Current_Builder_Comp_Option_Table :=
                     new String_Vectors.Vector'(String_Vectors.Empty_Vector);
@@ -1656,21 +1650,18 @@ procedure Gprbuild.Main is
             Add_Option (Arg, Command_Line);
             Current_Processor := None;
 
-         elsif (Language = No_Name or else Language = Name_Ada)
-            and then
-             (Arg = "-nostdlib" or else Arg = "-nostdinc")
+         elsif (Language in No_Name | Name_Ada)
+           and then (Arg in "-nostdlib" | "-nostdinc")
          then
             --  For compatibility with gnatmake, use switch to bind Ada code
             --  code and for -nostdlib to link.
 
-            Current_Bind_Option_Table :=
-              Binder_Options_HTable.Get (Name_Ada);
+            Current_Bind_Option_Table := Binder_Options_HTable.Get (Name_Ada);
 
             if Current_Bind_Option_Table = No_Bind_Option_Table then
                Current_Bind_Option_Table :=
                  new String_Vectors.Vector'(String_Vectors.Empty_Vector);
-               Binder_Options_HTable.Set
-                 (Name_Ada, Current_Bind_Option_Table);
+               Binder_Options_HTable.Set (Name_Ada, Current_Bind_Option_Table);
             end if;
 
             Current_Processor := Binder;

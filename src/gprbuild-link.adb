@@ -3288,13 +3288,8 @@ package body Gprbuild.Link is
                               Path   => Response_2);
                         end if;
 
-                        if Main_Proj.Config.Resp_File_Format = GCC
-                          or else
-                            Main_Proj.Config.Resp_File_Format = GCC_GNU
-                          or else
-                            Main_Proj.Config.Resp_File_Format = GCC_Object_List
-                          or else
-                            Main_Proj.Config.Resp_File_Format = GCC_Option_List
+                        if Main_Proj.Config.Resp_File_Format in GCC | GCC_GNU |
+                              GCC_Object_List | GCC_Option_List
                         then
                            Add_Argument
                              (Arguments,
@@ -3321,10 +3316,9 @@ package body Gprbuild.Link is
                               Resp_File_Options.Replace_Element
                                 (Resp_File_Options.Last_Index,
                                  Resp_File_Options.Last_Element &
-                                   Get_Name_String (Response_File_Name));
+                                 Get_Name_String (Response_File_Name));
                               Add_Arguments
-                                (Arguments,
-                                 Resp_File_Options,
+                                (Arguments, Resp_File_Options,
                                  Opt.Verbose_Mode);
                               Objects.Clear;
                            end if;

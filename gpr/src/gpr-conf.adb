@@ -534,12 +534,12 @@ package body GPR.Conf is
       end if;
 
       OK :=
-        Target = ""
-          or else Target = "native"
-          or else
-            (Tgt_Name /= No_Name
-              and then (Tgt_Name = Empty_String
-                         or else Target = Get_Name_String (Tgt_Name)));
+        Target in "" | "native"
+        or else
+        (Tgt_Name /= No_Name
+         and then
+         (Tgt_Name = Empty_String
+          or else Target = Get_Name_String (Tgt_Name)));
 
       if not OK then
          if Autoconf_Specified then
@@ -1423,7 +1423,7 @@ package body GPR.Conf is
       function Is_Base_Name (Path : String) return Boolean is
       begin
          for I in Path'Range loop
-            if Path (I) = Directory_Separator or else Path (I) = '/' then
+            if Path (I) in Directory_Separator | '/' then
                return False;
             end if;
          end loop;

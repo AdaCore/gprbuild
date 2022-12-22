@@ -226,25 +226,18 @@ package body GPR.Dect is
       --  is not allowed in aggregate projects, but is allowed in aggregate
       --  library projects.
 
-      if ((Qualif = Aggregate
-           or else
-           Qualif = Aggregate_Library)
-           and then
-          (Name = Name_Naming or else
-           Name = Name_Compiler or else
-           Name = Name_Linker))
+      if
+        ((Qualif in Aggregate | Aggregate_Library)
+         and then (Name in Name_Naming | Name_Compiler | Name_Linker))
         or else
-          (Qualif = Aggregate
-           and then
-           (Name = Name_Install or else
-            Name = Name_Binder))
+        (Qualif = Aggregate and then (Name in Name_Install | Name_Binder))
       then
          Error_Msg_Name_1 := Name;
 
          Error_Msg
            (Flags,
-            "package %% cannot be used in aggregate"
-            & (if Qualif = Aggregate then "" else " library") & " projects",
+            "package %% cannot be used in aggregate" &
+            (if Qualif = Aggregate then "" else " library") & " projects",
             Location_Of (Current_Package, In_Tree));
       end if;
    end Check_Package_Allowed;
@@ -266,49 +259,40 @@ package body GPR.Dect is
    begin
       case Qualif is
          when Aggregate | Aggregate_Library =>
-            if        Name = Snames.Name_Languages
-              or else Name = Snames.Name_Source_Files
-              or else Name = Snames.Name_Source_List_File
-              or else Name = Snames.Name_Locally_Removed_Files
-              or else Name = Snames.Name_Excluded_Source_Files
-              or else Name = Snames.Name_Excluded_Source_List_File
-              or else Name = Snames.Name_Exec_Dir
-              or else Name = Snames.Name_Source_Dirs
-              or else Name = Snames.Name_Inherit_Source_Path
+            if Name in Snames.Name_Languages | Snames.Name_Source_Files |
+                  Snames.Name_Source_List_File          |
+                  Snames.Name_Locally_Removed_Files     |
+                  Snames.Name_Excluded_Source_Files     |
+                  Snames.Name_Excluded_Source_List_File |
+                  Snames.Name_Exec_Dir | Snames.Name_Source_Dirs |
+                  Snames.Name_Inherit_Source_Path
               or else
-                (Qualif = Aggregate and then Name = Snames.Name_Interfaces)
+              (Qualif = Aggregate and then Name = Snames.Name_Interfaces)
               or else
-                (Qualif = Aggregate and then Name = Snames.Name_Library_Dir)
+              (Qualif = Aggregate and then Name = Snames.Name_Library_Dir)
               or else
-                (Qualif = Aggregate and then Name = Snames.Name_Library_Name)
-              or else Name = Snames.Name_Main
-              or else Name = Snames.Name_Roots
+              (Qualif = Aggregate and then Name = Snames.Name_Library_Name)
+              or else Name = Snames.Name_Main or else Name = Snames.Name_Roots
               or else Name = Snames.Name_Externally_Built
               or else Name = Snames.Name_Executable
               or else Name = Snames.Name_Executable_Suffix
               or else
-                (Qualif = Aggregate and then
-                 Name = Snames.Name_Default_Switches)
+              (Qualif = Aggregate and then Name = Snames.Name_Default_Switches)
             then
                Error_Msg_Name_1 := Name;
                Error_Msg
-                 (Flags,
-                  "%% is not valid in aggregate projects",
-                  Location_Of (Attribute, In_Tree),
-                  Always => True);
+                 (Flags, "%% is not valid in aggregate projects",
+                  Location_Of (Attribute, In_Tree), Always => True);
             end if;
 
          when others =>
-            if Name = Snames.Name_Project_Files
-              or else Name = Snames.Name_Project_Path
-              or else Name = Snames.Name_External
+            if Name in Snames.Name_Project_Files | Snames.Name_Project_Path |
+                  Snames.Name_External
             then
                Error_Msg_Name_1 := Name;
                Error_Msg
-                 (Flags,
-                  "%% is only valid in aggregate projects",
-                  Location_Of (Attribute, In_Tree),
-                  Always => True);
+                 (Flags, "%% is only valid in aggregate projects",
+                  Location_Of (Attribute, In_Tree), Always => True);
             end if;
       end case;
    end Check_Attribute_Allowed;

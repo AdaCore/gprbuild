@@ -710,9 +710,8 @@ package body GPR.Sinput is
       --  PRIVATE. The reason for ignoring PRIVATE is that it handles some
       --  error situations, and also to handle PRIVATE WITH in Ada 2005 mode.
 
-      while Token = Tok_With
-        or else Token = Tok_Private
-        or else (Token not in Token_Class_Cunit and then Token /= Tok_EOF)
+      while Token in Tok_With | Tok_Private
+        or else (Token not in Token_Class_Cunit | Tok_EOF)
       loop
          Err.Scanner.Scan;
       end loop;

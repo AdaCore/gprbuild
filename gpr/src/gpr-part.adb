@@ -796,7 +796,7 @@ package body GPR.Part is
       --  If Token is not WITH or LIMITED, there is no context clause, or we
       --  have exhausted the with clauses.
 
-      while Token = Tok_With or else Token = Tok_Limited loop
+      while Token in Tok_With | Tok_Limited loop
          Current_With_Node :=
            Default_Project_Node (Of_Kind => N_With_Clause, In_Tree => In_Tree);
          Limited_With := Token = Tok_Limited;
@@ -828,10 +828,8 @@ package body GPR.Part is
             --  Store path and location in table Withs
 
             Current_With :=
-              (Path         => Path_Name_Type (Token_Name),
-               Location     => Token_Ptr,
-               Limited_With => Limited_With,
-               Node         => Current_With_Node,
+              (Path => Path_Name_Type (Token_Name), Location => Token_Ptr,
+               Limited_With => Limited_With, Node => Current_With_Node,
                Next         => No_With);
 
             Append_Current_With;
@@ -1732,8 +1730,7 @@ package body GPR.Part is
             begin
                --  Check if we already have a project with this name
 
-               while Project_Name /= No_Name
-                 and then Project_Name /= Name_Of_Project
+               while Project_Name not in No_Name | Name_Of_Project
                loop
                   Name_And_Node :=
                     Tree_Private_Part.Projects_Htable.Get_Next

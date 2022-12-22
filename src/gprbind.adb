@@ -775,7 +775,7 @@ begin
                for J in Option'Range loop
                   Ch := Option (J);
 
-                  if Ch = ' ' or else Ch = ASCII.HT or else Ch = '"' then
+                  if Ch in ' ' | ASCII.HT | '"' then
                      Quotes_Needed := True;
                      exit;
                   end if;
@@ -1141,20 +1141,20 @@ begin
                      begin
                         Set_Name_Buffer (Line (3 .. Last));
 
-                        while Name_Buffer (Name_Len) = Directory_Separator
-                          or else Name_Buffer (Name_Len) = '/'
+                        while Name_Buffer (Name_Len) in Directory_Separator |
+                              '/'
                         loop
                            Name_Len := Name_Len - 1;
                         end loop;
 
-                        while Name_Buffer (Name_Len) /= Directory_Separator
-                          and then Name_Buffer (Name_Len) /= '/'
+                        while Name_Buffer (Name_Len) not in
+                            Directory_Separator | '/'
                         loop
                            Name_Len := Name_Len - 1;
                         end loop;
 
-                        while Name_Buffer (Name_Len) = Directory_Separator
-                          or else Name_Buffer (Name_Len) = '/'
+                        while Name_Buffer (Name_Len) in Directory_Separator |
+                              '/'
                         loop
                            Name_Len := Name_Len - 1;
                         end loop;
@@ -1179,8 +1179,8 @@ begin
                            exit Dir_Loop when First <= 3;
 
                            Dir_Last := First - 1;
-                           while Name_Buffer (Dir_Last) = Directory_Separator
-                             or else Name_Buffer (Dir_Last) = '/'
+                           while Name_Buffer (Dir_Last) in
+                               Directory_Separator | '/'
                            loop
                               Dir_Last := Dir_Last - 1;
                            end loop;

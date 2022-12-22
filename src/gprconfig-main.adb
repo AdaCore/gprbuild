@@ -601,9 +601,7 @@ begin
                           Get_Name_String (Runtime_Dir_Of (Comp));
                   Last : Natural := RTS'Last;
                begin
-                  if RTS (Last) = '/' or else
-                     RTS (Last) = Directory_Separator
-                  then
+                  if RTS (Last) in '/' | Directory_Separator then
                      Last := Last - 1;
                   end if;
 

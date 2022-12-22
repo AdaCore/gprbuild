@@ -206,23 +206,20 @@ package body Gprbuild is
       Proj : constant Project_Id := Object_Project (Project, Must_Be_Writable);
    begin
       if Proj = No_Project then
-         if Project.Qualifier = Aggregate
-           or else Project.Qualifier = Aggregate_Library
-         then
+         if Project.Qualifier in Aggregate | Aggregate_Library then
             Fail_Program
               (Project_Tree,
-               "no project with writable object directory for project "
-               & Get_Name_String (Project.Name),
+               "no project with writable object directory for project " &
+               Get_Name_String (Project.Name),
                Exit_Code => E_General);
 
          else
             Fail_Program
               (Project_Tree,
-               "object directory """
-               & Get_Name_String (Project.Object_Directory.Display_Name)
-               & """ for project """
-               & Get_Name_String (Project.Name)
-               & """ is not writable",
+               "object directory """ &
+               Get_Name_String (Project.Object_Directory.Display_Name) &
+               """ for project """ & Get_Name_String (Project.Name) &
+               """ is not writable",
                Exit_Code => E_General);
          end if;
       end if;
@@ -445,8 +442,7 @@ package body Gprbuild is
          Get_Name_String (Directories.Table (Index));
 
          while Name_Len > 1
-           and then (Name_Buffer (Name_Len) = Directory_Separator
-                     or else Name_Buffer (Name_Len) = '/')
+           and then (Name_Buffer (Name_Len) in Directory_Separator | '/')
          loop
             Name_Len := Name_Len - 1;
          end loop;

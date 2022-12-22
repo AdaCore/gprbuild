@@ -1632,15 +1632,15 @@ package body GPR.Nmsc is
                            --  Attributes Required_Switches (<language>) and
                            --  Leading_Required_Switches (<language>.
 
-                        elsif Current_Array.Name = Name_Required_Switches
-                          or else
-                            Current_Array.Name = Name_Leading_Required_Switches
+                        elsif Current_Array.Name in Name_Required_Switches |
+                              Name_Leading_Required_Switches
                         then
-                           Put (Into_List =>
-                                  Lang_Index.Config.
-                                    Compiler_Leading_Required_Switches,
-                                From_List => Element.Value.Values,
-                                In_Tree   => Data.Tree);
+                           Put
+                             (Into_List =>
+                                Lang_Index.Config
+                                  .Compiler_Leading_Required_Switches,
+                              From_List => Element.Value.Values,
+                              In_Tree   => Data.Tree);
 
                            --  Attribute Trailing_Required_Switches (<language>
 
@@ -2022,30 +2022,26 @@ package body GPR.Nmsc is
                     and then Element.Value.Kind = Single
                     and then Element.Value.Value /= No_Name
                   then
-                     if Current_Array.Name = Name_Spec_Suffix
-                       or else Current_Array.Name = Name_Specification_Suffix
+                     if Current_Array.Name in Name_Spec_Suffix |
+                           Name_Specification_Suffix
                      then
 
                         --  Attribute Spec_Suffix (<language>)
 
                         Get_Name_String (Element.Value.Value);
-                        Canonical_Case_File_Name
-                          (Name_Buffer (1 .. Name_Len));
-                        Lang_Index.Config.Naming_Data.Spec_Suffix :=
-                          Name_Find;
+                        Canonical_Case_File_Name (Name_Buffer (1 .. Name_Len));
+                        Lang_Index.Config.Naming_Data.Spec_Suffix := Name_Find;
 
-                     elsif Current_Array.Name = Name_Implementation_Suffix
-                       or else Current_Array.Name = Name_Body_Suffix
+                     elsif Current_Array.Name in Name_Implementation_Suffix |
+                           Name_Body_Suffix
                      then
 
                         Get_Name_String (Element.Value.Value);
-                        Canonical_Case_File_Name
-                          (Name_Buffer (1 .. Name_Len));
+                        Canonical_Case_File_Name (Name_Buffer (1 .. Name_Len));
 
                         --  Attribute Body_Suffix (<language>)
 
-                        Lang_Index.Config.Naming_Data.Body_Suffix :=
-                          Name_Find;
+                        Lang_Index.Config.Naming_Data.Body_Suffix := Name_Find;
                         Lang_Index.Config.Naming_Data.Separate_Suffix :=
                           Lang_Index.Config.Naming_Data.Body_Suffix;
                      end if;
@@ -5893,9 +5889,7 @@ package body GPR.Nmsc is
                exit;
             end if;
 
-         elsif Last_Underscore
-           and then (The_Name (Index) = '_' or else The_Name (Index) = '.')
-         then
+         elsif Last_Underscore and then (The_Name (Index) in '_' | '.') then
             --  Two underscores are illegal, and a dot cannot follow
             --  an underscore.
 
@@ -6802,7 +6796,7 @@ package body GPR.Nmsc is
             S3 : constant Character := Name_Buffer (3);
 
          begin
-            if S1 = 'a' or else S1 = 'g' or else S1 = 'i' or else S1 = 's' then
+            if S1 in 'a' | 'g' | 'i' | 's' then
 
                --  Children or separates of packages A, G, I or S. These names
                --  are x__ ... or x~... (where x is a, g, i, or s). Both
@@ -6811,7 +6805,7 @@ package body GPR.Nmsc is
                --  processing of the project files.
 
                if S2 = '_' and then S3 = '_' then
-                  Name_Buffer (2) := '.';
+                  Name_Buffer (2)                 := '.';
                   Name_Buffer (3 .. Name_Len - 1) :=
                     Name_Buffer (4 .. Name_Len);
                   Name_Len := Name_Len - 1;
@@ -6847,13 +6841,9 @@ package body GPR.Nmsc is
            Unit_Exceptions_Htable.Get (Project.Unit_Exceptions, Unit);
 
          if Kind = Spec then
-            Masked := Unit_Except.Spec /= No_File
-                        and then
-                      Unit_Except.Spec /= File_Name;
+            Masked := Unit_Except.Spec not in No_File | File_Name;
          else
-            Masked := Unit_Except.Impl /= No_File
-                        and then
-                      Unit_Except.Impl /= File_Name;
+            Masked := Unit_Except.Impl not in No_File | File_Name;
          end if;
 
          if Masked then
@@ -8227,14 +8217,13 @@ package body GPR.Nmsc is
             Read (Dir, Name, Last);
             exit when Last = 0;
 
-            if Name (1 .. Last) /= "." and then Name (1 .. Last) /= ".." then
+            if Name (1 .. Last) not in "." | ".." then
                declare
                   Path_Name : constant String :=
-                                Normalize_Pathname
-                                  (Name           => Name (1 .. Last),
-                                   Directory      => Path_Str,
-                                   Resolve_Links  => Resolve_Links)
-                                & Directory_Separator;
+                    Normalize_Pathname
+                      (Name => Name (1 .. Last), Directory => Path_Str,
+                       Resolve_Links => Resolve_Links) &
+                    Directory_Separator;
 
                   Path2 : Path_Information;
                   OK    : Boolean := True;
@@ -8243,7 +8232,7 @@ package body GPR.Nmsc is
                   if Is_Directory (Path_Name) then
                      if Ignore /= Nil_String then
                         declare
-                           Dir_Name : String := Name (1 .. Last);
+                           Dir_Name : String         := Name (1 .. Last);
                            List     : String_List_Id := Ignore;
 
                         begin
@@ -8256,11 +8245,12 @@ package body GPR.Nmsc is
                                  Canonical_Case_File_Name
                                    (Name_Buffer (1 .. Name_Len));
 
-                                 File_Pattern := Compile
-                                   (Name_Buffer (1 .. Name_Len),
-                                    Glob           => True,
-                                    Case_Sensitive => File_Names_Case_Sensitive
-                                   );
+                                 File_Pattern :=
+                                   Compile
+                                     (Name_Buffer (1 .. Name_Len),
+                                      Glob           => True,
+                                      Case_Sensitive =>
+                                        File_Names_Case_Sensitive);
 
                                  OK := not Match (Dir_Name, File_Pattern);
                                  exit when not OK;
