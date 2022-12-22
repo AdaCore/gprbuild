@@ -196,12 +196,7 @@ package body GPR.Compilation.Sync is
                function Match
                  (Name : String; R_Set : Regexp_Set) return Boolean is
                begin
-                  for Regexp of R_Set loop
-                     if Match (Name, Regexp) then
-                        return True;
-                     end if;
-                  end loop;
-                  return False;
+                  return (for some Regexp of R_Set => Match (Name, Regexp));
                end Match;
 
                S_Name     : constant String := Simple_Name (File);

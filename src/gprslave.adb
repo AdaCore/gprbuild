@@ -579,12 +579,7 @@ procedure Gprslave is
 
       function Working_Dir_Exists (Directory : String) return Boolean is
       begin
-         for B of Builders loop
-            if Work_Directory (B) = Directory then
-               return True;
-            end if;
-         end loop;
-         return False;
+         return (for some B of Builders => Work_Directory (B) = Directory);
       end Working_Dir_Exists;
 
    end Builders;

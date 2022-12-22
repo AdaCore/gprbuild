@@ -2217,22 +2217,16 @@ package body GPR.Util is
 
       --  Definitely predefined if prefix is a- i- or s- followed by letter
 
-      if Name_Len >=  3
-        and then Name_Buffer (2) = '-'
-        and then (Name_Buffer (1) = 'a'
-                    or else
-                  Name_Buffer (1) = 'g'
-                    or else
-                  Name_Buffer (1) = 'i'
-                    or else
-                  Name_Buffer (1) = 's')
-        and then (Name_Buffer (3) in 'a' .. 'z'
-                    or else
-                  Name_Buffer (3) in 'A' .. 'Z')
+      if Name_Len >= 3 and then Name_Buffer (2) = '-'
+        and then
+        (Name_Buffer (1) = 'a' or else Name_Buffer (1) = 'g'
+         or else Name_Buffer (1) = 'i' or else Name_Buffer (1) = 's')
+        and then
+        (Name_Buffer (3) in 'a' .. 'z' or else Name_Buffer (3) in 'A' .. 'Z')
       then
          return True;
 
-      --  Definitely false if longer than 12 characters (8.3)
+         --  Definitely false if longer than 12 characters (8.3)
 
       elsif Name_Len > 8 then
          return False;
@@ -2241,17 +2235,13 @@ package body GPR.Util is
       --  Otherwise check against special list, first padding to 8 characters
 
       while Name_Len < 8 loop
-         Name_Len := Name_Len + 1;
+         Name_Len               := Name_Len + 1;
          Name_Buffer (Name_Len) := ' ';
       end loop;
 
-      for J in Predef_Names'Range loop
-         if Name_Buffer (1 .. 8) = Predef_Names (J) then
-            return True;
-         end if;
-      end loop;
-
-      return False;
+      return
+        (for some J in Predef_Names'Range =>
+           Name_Buffer (1 .. 8) = Predef_Names (J));
    end Is_Ada_Predefined_File_Name;
 
    ----------------------------
@@ -3969,12 +3959,9 @@ package body GPR.Util is
 
       function Is_Base_Name (Path : String) return Boolean is
       begin
-         for I in Path'Range loop
-            if Is_Directory_Separator (Path (I)) then
-               return False;
-            end if;
-         end loop;
-         return True;
+         return
+           (for all I in Path'Range =>
+              not (Is_Directory_Separator (Path (I))));
       end Is_Base_Name;
 
       RTS_Name : constant String := GPR.Conf.Runtime_Name_For (Language);
