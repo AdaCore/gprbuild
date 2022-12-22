@@ -112,7 +112,7 @@ package body GPR.Err is
 
       --  Kill continuation if parent message killed
 
-      if Continuation and Last_Killed then
+      if Continuation and then Last_Killed then
          return;
       end if;
 
@@ -281,7 +281,7 @@ package body GPR.Err is
 
       --  Brief Error mode
 
-      if Brief_Output or not Verbose_Mode then
+      if Brief_Output or else not Verbose_Mode then
          E := First_Error_Msg;
          Set_Standard_Error;
 

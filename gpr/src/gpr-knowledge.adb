@@ -3962,44 +3962,42 @@ package body GPR.Knowledge is
 
             if (not From_Extra_Dir or else El.Path = Comp.Path)
               and then Filter_Match (Base, Comp => Comp, Filter => El.all)
-              and then (not Runtime_Specified or El.Runtime_Dir /= No_Name)
+              and then
+              (not Runtime_Specified or else El.Runtime_Dir /= No_Name)
             then
                Ncomp := new Compiler'(Comp);
                if El.Runtime_Dir /= No_Name then
                   Ncomp.Runtime_Dir := El.Runtime_Dir;
-                  Ncomp.Runtime := El.Runtime;
+                  Ncomp.Runtime     := El.Runtime;
                end if;
 
-               if not Ncomp.Any_Runtime
-                 and then Ncomp.Runtime = No_Name
+               if not Ncomp.Any_Runtime and then Ncomp.Runtime = No_Name
                  and then El.Runtime /= No_Name
                then
-                     Ncomp.Runtime := El.Runtime;
+                  Ncomp.Runtime := El.Runtime;
                end if;
 
                Append (Iterator.Compilers, Ncomp);
 
                if Current_Verbosity /= Default then
                   Put_Verbose
-                    ("Saving compiler for possible backtracking: "
-                     & To_String (Base, Ncomp.all, As_Config_Arg => True)
-                     & " (matches --config "
-                     & To_String (Base, El.all, As_Config_Arg => True)
-                     & ")");
+                    ("Saving compiler for possible backtracking: " &
+                     To_String (Base, Ncomp.all, As_Config_Arg => True) &
+                     " (matches --config " &
+                     To_String (Base, El.all, As_Config_Arg => True) & ")");
                end if;
 
                if Iterator.Matched (Index) = Compiler_Lists.No_Element then
                   Iterator.Found := Iterator.Found + 1;
 
                   Put_Verbose
-                    ("Selecting it since this filter was not matched yet "
-                     & Iterator.Found'Img & "/" & Iterator.Count'Img);
+                    ("Selecting it since this filter was not matched yet " &
+                     Iterator.Found'Img & "/" & Iterator.Count'Img);
 
-                  Iterator.Matched (Index) := Last (Iterator.Compilers);
+                  Iterator.Matched (Index)   := Last (Iterator.Compilers);
                   Iterator.Found_One (Index) := True;
                   Set_Selection
-                    (Iterator.Compilers, Iterator.Matched (Index),
-                     True);
+                    (Iterator.Compilers, Iterator.Matched (Index), True);
 
                   --  Only keep those compilers that are not incompatible
                   --  (according to the knowledge base). It might happen that
@@ -4013,10 +4011,10 @@ package body GPR.Knowledge is
                      Set_Selection
                        (Iterator.Compilers, Iterator.Matched (Index), False);
                      Put_Verbose
-                       ("Compilers are not compatible, cancelling last"
-                        & " compiler found");
+                       ("Compilers are not compatible, cancelling last" &
+                        " compiler found");
                      Iterator.Matched (Index) := Compiler_Lists.No_Element;
-                     Iterator.Found := Iterator.Found - 1;
+                     Iterator.Found           := Iterator.Found - 1;
                   end if;
                end if;
             end if;

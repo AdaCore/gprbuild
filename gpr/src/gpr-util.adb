@@ -888,7 +888,7 @@ package body GPR.Util is
       No_Message     : Boolean        := False;
       Command        : String         := "") is
    begin
-      if Flush_Messages and not No_Message then
+      if Flush_Messages and then not No_Message then
          if Total_Errors_Detected /= 0 or else Warnings_Detected /= 0 then
             Err.Finalize;
          end if;
@@ -2015,7 +2015,7 @@ package body GPR.Util is
    begin
       --  Nothing to do if source record has already been fully initialized
 
-      if Source.Initialized and not Always then
+      if Source.Initialized and then not Always then
          return;
       end if;
 

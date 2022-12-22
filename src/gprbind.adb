@@ -860,7 +860,7 @@ begin
    end if;
 
    if Return_Code /= 0 then
-      if Delete_Temp_Files and not Dash_O_File_Specified then
+      if Delete_Temp_Files and then not Dash_O_File_Specified then
          Delete_File (Get_Name_String (Objects_Path), Success);
       end if;
 

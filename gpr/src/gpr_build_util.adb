@@ -509,7 +509,7 @@ package body Gpr_Build_Util is
 
          Close (Mapping_FD, Status);
 
-         OK := OK and Status;
+         OK := OK and then Status;
       end if;
 
       --  If the creation of the mapping file was successful, we add the switch
@@ -2369,10 +2369,10 @@ package body Gpr_Build_Util is
               Has_Mains
                 or else (Root_Project.Library
                           and then Root_Project.Standalone_Library /= No);
-            Data.Need_Compilation := All_Phases or Option_Compile_Only;
-            Data.Need_Binding     := All_Phases or Option_Bind_Only;
-            Data.Need_Linking     := (All_Phases or Option_Link_Only)
-                                       and Has_Mains;
+            Data.Need_Compilation := All_Phases or else Option_Compile_Only;
+            Data.Need_Binding := All_Phases or else Option_Bind_Only;
+            Data.Need_Linking :=
+              (All_Phases or else Option_Link_Only) and then Has_Mains;
          end if;
 
          if Current_Verbosity = High then

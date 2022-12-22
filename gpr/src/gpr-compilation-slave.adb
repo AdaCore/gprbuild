@@ -883,7 +883,7 @@ package body GPR.Compilation.Slave is
             --  We are past the random slave and we have found one slave ready,
             --  stop search here.
 
-            exit Search_Slaves when K > Index and Result /= No_Slave;
+            exit Search_Slaves when K > Index and then Result /= No_Slave;
          end loop Search_Slaves;
 
          return Result;

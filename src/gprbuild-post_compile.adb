@@ -3746,9 +3746,8 @@ package body Gprbuild.Post_Compile is
               and then Is_Included_In_Global_Archive
                          (Source.Object, Source.Project)
             then
-               if Source.Project = For_Project
-                 or not Source.Project.Library
-                 or Config.Kind = File_Based
+               if Source.Project = For_Project or not Source.Project.Library or
+                 Config.Kind = File_Based
                then
                   Add_Dep (Get_Name_String (Source.Dep_Path));
                   Dep_Files := True;
@@ -3974,15 +3973,14 @@ package body Gprbuild.Post_Compile is
                --  no object file per se.
 
                if Bind_Object_TS = Osint.Invalid_Time
-                 and not Opt.CodePeer_Mode
+                 and then not Opt.CodePeer_Mode
                then
                   Binder_Driver_Needs_To_Be_Called := True;
 
                   if Opt.Verbosity_Level > Opt.Low then
                      Put_Line
                        ("      -> binder generated object " &
-                        Line (1 .. Last) &
-                        " does not exist");
+                        Line (1 .. Last) & " does not exist");
                   end if;
                end if;
             end if;

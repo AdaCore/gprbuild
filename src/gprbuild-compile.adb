@@ -1933,7 +1933,7 @@ package body Gprbuild.Compile is
             end if;
          end if;
 
-         if Compilation_OK and Dep_File_OK then
+         if Compilation_OK and then Dep_File_OK then
             Create (Dep_File, Dep_Path);
             Put (Dep_File, Object_Path.all);
             Put (Dep_File, ": ");
@@ -2143,7 +2143,7 @@ package body Gprbuild.Compile is
                Add_Option_Internal_Codepeer
                  (Value   => Get_Name_String (Nam_Nod.Name),
                   To      => Compilation_Options,
-                  Display => First or Opt.Verbose_Mode);
+                  Display => First or else Opt.Verbose_Mode);
                First := False;
             end if;
 

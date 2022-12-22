@@ -319,7 +319,7 @@ package body GPR.ALI is
          --  sensitive. This ensures that we handle names in the canonical
          --  lower case format, regardless of the actual case.
 
-         if Lower and not File_Names_Case_Sensitive then
+         if Lower and then not File_Names_Case_Sensitive then
             Canonical_Case_File_Name (Name_Buffer (1 .. Name_Len));
             return Name_Find;
          else

@@ -1426,7 +1426,7 @@ package body Gprinstall.Install is
                Pattern   => Get_Pattern,
                Process   => Copy_Entry'Access);
 
-            if Required and not Something_Copied then
+            if Required and then not Something_Copied then
                Rollback_Manifests;
                Fail_Program
                  (Project_Tree,
@@ -1474,7 +1474,7 @@ package body Gprinstall.Install is
 
          --  Copy library
 
-         if Copy (Library) and not Sources_Only then
+         if Copy (Library) and then not Sources_Only then
             if not Is_Static (Project)
               and then Project.Lib_Internal_Name /= No_Name
               and then Project.Library_Name /= Project.Lib_Internal_Name
@@ -1483,42 +1483,42 @@ package body Gprinstall.Install is
                   --  No support for version, do a simple copy
 
                   Copy_File
-                    (From          => Cat
-                       (Project.Library_Dir.Display_Name,
-                        Get_Library_Filename),
-                     To            => Lib_Dir,
-                     File          => Get_Name_String (Get_Library_Filename),
-                     Executable    => True,
-                     Extract_Debug => Side_Debug);
+                    (From =>
+                       Cat
+                         (Project.Library_Dir.Display_Name,
+                          Get_Library_Filename),
+                     To         => Lib_Dir,
+                     File       => Get_Name_String (Get_Library_Filename),
+                     Executable => True, Extract_Debug => Side_Debug);
 
                else
                   Copy_File
-                    (From          => Cat
-                       (Project.Library_Dir.Display_Name,
-                        File_Name_Type (Project.Lib_Internal_Name)),
-                     To            => Lib_Dir,
-                     File          =>
-                       Get_Name_String (Project.Lib_Internal_Name),
-                     Executable    => True,
-                     Extract_Debug => Side_Debug);
+                    (From =>
+                       Cat
+                         (Project.Library_Dir.Display_Name,
+                          File_Name_Type (Project.Lib_Internal_Name)),
+                     To         => Lib_Dir,
+                     File       => Get_Name_String (Project.Lib_Internal_Name),
+                     Executable => True, Extract_Debug => Side_Debug);
 
                   Copy_File
-                    (From     => Lib_Dir
-                                   & Get_Name_String (Get_Library_Filename),
+                    (From => Lib_Dir & Get_Name_String (Get_Library_Filename),
                      To       => Lib_Dir,
                      File     => Get_Name_String (Project.Lib_Internal_Name),
-                     From_Ver => Cat (Lib_Dir,
-                        Major_Id_Name
-                           (Get_Name_String (Get_Library_Filename),
-                            Get_Name_String (Project.Lib_Internal_Name))),
+                     From_Ver =>
+                       Cat
+                         (Lib_Dir,
+                          Major_Id_Name
+                            (Get_Name_String (Get_Library_Filename),
+                             Get_Name_String (Project.Lib_Internal_Name))),
                      Sym_Link => True);
                end if;
 
             else
                Copy_File
-                 (From          => Cat
-                    (Project.Library_Dir.Display_Name,
-                     Get_Library_Filename),
+                 (From =>
+                    Cat
+                      (Project.Library_Dir.Display_Name, Get_Library_Filename),
                   To            => Lib_Dir,
                   File          => Get_Name_String (Get_Library_Filename),
                   Executable    => not Is_Static (Project),
@@ -1534,30 +1534,29 @@ package body Gprinstall.Install is
                if Windows_Target then
                   if Lib_Dir /= Exec_Dir then
                      Copy_File
-                       (From          => Lib_Dir
-                        & Get_Name_String (Get_Library_Filename),
-                        To            => Exec_Dir,
-                        File          =>
-                          Get_Name_String (Get_Library_Filename),
-                        Executable    => True,
-                        Extract_Debug => False);
+                       (From =>
+                          Lib_Dir & Get_Name_String (Get_Library_Filename),
+                        To         => Exec_Dir,
+                        File       => Get_Name_String (Get_Library_Filename),
+                        Executable => True, Extract_Debug => False);
                   end if;
 
                elsif Link_Lib_Dir /= Lib_Dir then
                   if On_Windows then
                      Copy_File
-                       (From       => Lib_Dir
-                          & Get_Name_String (Get_Library_Filename),
-                        To         => Link_Lib_Dir,
-                        File       => Get_Name_String (Get_Library_Filename),
-                        Sym_Link   => False);
+                       (From =>
+                          Lib_Dir & Get_Name_String (Get_Library_Filename),
+                        To       => Link_Lib_Dir,
+                        File     => Get_Name_String (Get_Library_Filename),
+                        Sym_Link => False);
                   else
                      Copy_File
-                       (From       => Link_Lib_Dir
-                          & Get_Name_String (Get_Library_Filename),
-                        To         => Lib_Dir,
-                        File       => Get_Name_String (Get_Library_Filename),
-                        Sym_Link   => True);
+                       (From =>
+                          Link_Lib_Dir &
+                          Get_Name_String (Get_Library_Filename),
+                        To       => Lib_Dir,
+                        File     => Get_Name_String (Get_Library_Filename),
+                        Sym_Link => True);
                   end if;
                   --  Copy also the versioned library if any
 
@@ -1566,30 +1565,34 @@ package body Gprinstall.Install is
                   then
                      if On_Windows then
                         Copy_File
-                          (From       =>
-                             Lib_Dir
-                               & Get_Name_String (Project.Lib_Internal_Name),
-                           To         => Link_Lib_Dir,
-                           File       =>
+                          (From =>
+                             Lib_Dir &
                              Get_Name_String (Project.Lib_Internal_Name),
-                           From_Ver   => Cat (Link_Lib_Dir,
-                             Major_Id_Name
-                               (Get_Name_String (Get_Library_Filename),
-                                Get_Name_String (Project.Lib_Internal_Name))),
-                           Sym_Link   => False);
+                           To       => Link_Lib_Dir,
+                           File => Get_Name_String (Project.Lib_Internal_Name),
+                           From_Ver =>
+                             Cat
+                               (Link_Lib_Dir,
+                                Major_Id_Name
+                                  (Get_Name_String (Get_Library_Filename),
+                                   Get_Name_String
+                                     (Project.Lib_Internal_Name))),
+                           Sym_Link => False);
                      else
                         Copy_File
-                          (From       =>
-                             Link_Lib_Dir
-                               & Get_Name_String (Project.Lib_Internal_Name),
-                           To         => Lib_Dir,
-                           File       =>
+                          (From =>
+                             Link_Lib_Dir &
                              Get_Name_String (Project.Lib_Internal_Name),
-                           From_Ver   => Cat (Link_Lib_Dir,
-                             Major_Id_Name
-                               (Get_Name_String (Get_Library_Filename),
-                                Get_Name_String (Project.Lib_Internal_Name))),
-                           Sym_Link   => True);
+                           To       => Lib_Dir,
+                           File => Get_Name_String (Project.Lib_Internal_Name),
+                           From_Ver =>
+                             Cat
+                               (Link_Lib_Dir,
+                                Major_Id_Name
+                                  (Get_Name_String (Get_Library_Filename),
+                                   Get_Name_String
+                                     (Project.Lib_Internal_Name))),
+                           Sym_Link => True);
                      end if;
                   end if;
                end if;
@@ -1598,7 +1601,7 @@ package body Gprinstall.Install is
 
          --  Copy executable(s)
 
-         if Copy (Executable) and not Sources_Only then
+         if Copy (Executable) and then not Sources_Only then
             Mains.Reset;
 
             declare
@@ -1608,15 +1611,14 @@ package body Gprinstall.Install is
                   if M.Project in Project | Project.Extends then
                      declare
                         Bin : constant String :=
-                                Main_Binary (Name_Id (M.File));
+                          Main_Binary (Name_Id (M.File));
                      begin
                         Copy_File
-                          (From          =>
+                          (From =>
                              Get_Name_String
-                               (Project.Exec_Directory.Display_Name) & Bin,
-                           To            => Exec_Dir,
-                           File          => Bin,
-                           Executable    => True,
+                               (Project.Exec_Directory.Display_Name) &
+                             Bin,
+                           To => Exec_Dir, File => Bin, Executable => True,
                            Extract_Debug => Side_Debug);
                      end;
                   end if;
@@ -2852,16 +2854,16 @@ package body Gprinstall.Install is
             Line := Line & " is";
             Content.Append (-Line);
 
-            if Has_Sources (Project) or Project.Library then
+            if Has_Sources (Project) or else Project.Library then
                --  BUILD variable
 
                Content.Append
                  ("   type BUILD_KIND is (""" & Build_Name.all & """);");
 
-               Line := +Get_Build_Line
-                 (Vars    =>
-                    (if Build_Vars = null then "" else Build_Vars.all),
-                  Default => Build_Name.all);
+               Line :=
+                 +Get_Build_Line
+                   (Vars => (if Build_Vars = null then "" else Build_Vars.all),
+                    Default => Build_Name.all);
 
                Content.Append (-Line);
 
@@ -2889,9 +2891,8 @@ package body Gprinstall.Install is
 
                if Project.Library then
                   Content.Append
-                    ("   for Library_Name use """
-                     & Get_Name_String (Project.Library_Name)
-                     & """;");
+                    ("   for Library_Name use """ &
+                     Get_Name_String (Project.Library_Name) & """;");
 
                   --  Issue the Library_Version only if needed
 
@@ -2900,9 +2901,8 @@ package body Gprinstall.Install is
                     and then Project.Library_Name /= Project.Lib_Internal_Name
                   then
                      Content.Append
-                       ("   for Library_Version use """
-                        & Get_Name_String (Project.Lib_Internal_Name)
-                        & """;");
+                       ("   for Library_Version use """ &
+                        Get_Name_String (Project.Lib_Internal_Name) & """;");
                   end if;
                end if;
 
@@ -3144,9 +3144,8 @@ package body Gprinstall.Install is
 
       --  Skip non active project and externally built ones
 
-      Is_Project_To_Install := Active
-        and (Bring_Sources (Project)
-             or Project.Externally_Built);
+      Is_Project_To_Install :=
+        Active and (Bring_Sources (Project) or else Project.Externally_Built);
 
       --  If we have an aggregate project we just install separately all
       --  aggregated projects.
@@ -3186,7 +3185,7 @@ package body Gprinstall.Install is
                Put ("Skip");
             end if;
 
-            if Is_Project_To_Install or Opt.Verbose_Mode then
+            if Is_Project_To_Install or else Opt.Verbose_Mode then
                Put (" project ");
                Put (Get_Name_String (Project.Display_Name));
                if Build_Name.all /= "default" then
@@ -3194,11 +3193,11 @@ package body Gprinstall.Install is
                end if;
             end if;
 
-            if not Is_Project_To_Install and Opt.Verbose_Mode then
+            if not Is_Project_To_Install and then Opt.Verbose_Mode then
                Put (" (not active)");
             end if;
 
-            if Is_Project_To_Install or Opt.Verbose_Mode then
+            if Is_Project_To_Install or else Opt.Verbose_Mode then
                New_Line;
             end if;
          end if;

@@ -1021,10 +1021,9 @@ package body GPR.Dect is
       end loop When_Loop;
 
       End_Case_Construction
-        (Check_All_Labels => not When_Others and not Quiet_Output,
+        (Check_All_Labels => not When_Others and then not Quiet_Output,
          Case_Location    => Location_Of (Case_Construction, In_Tree),
-         Flags            => Flags,
-         String_Type      => Present (String_Type));
+         Flags            => Flags, String_Type => Present (String_Type));
 
       Expect (Tok_End, "`END CASE`");
       Remove_Next_End_Node;

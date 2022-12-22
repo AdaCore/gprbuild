@@ -132,9 +132,8 @@ package body Gprbuild is
          if Element.Value /= Empty_String then
 
             Add_Option
-              (Value       => Element.Value,
-               To          => To,
-               Display     => Display_All or First_Display,
+              (Value       => Element.Value, To => To,
+               Display     => Display_All or else First_Display,
                Simple_Name => Simple_Name);
             First_Display := False;
          end if;
