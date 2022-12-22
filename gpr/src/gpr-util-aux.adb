@@ -370,14 +370,10 @@ package body GPR.Util.Aux is
          Status :=
            Write (Resp_File, Object (1)'Address, Object'Length);
 
-         if Format = GNU or else Format = GCC_GNU then
-            Status :=
-              Write (Resp_File, GNU_Closing'Address, GNU_Closing'Length);
-
-         else
-            Status :=
-              Write (Resp_File, ASCII.LF'Address, 1);
-         end if;
+         Status :=
+           (if Format = GNU or else Format = GCC_GNU then
+              Write (Resp_File, GNU_Closing'Address, GNU_Closing'Length)
+            else Write (Resp_File, ASCII.LF'Address, 1));
       end loop;
 
       if Format = GNU or else Format = GCC_GNU then

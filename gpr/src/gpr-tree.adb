@@ -470,11 +470,9 @@ package body GPR.Tree is
       pragma Assert (Present (Node));
       Zone := In_Tree.Project_Nodes.Table (Node).Comments;
 
-      if No (Zone) then
-         return No_Name;
-      else
-         return In_Tree.Project_Nodes.Table (Zone).Value;
-      end if;
+      return
+        (if No (Zone) then No_Name
+         else In_Tree.Project_Nodes.Table (Zone).Value);
    end End_Of_Line_Comment;
 
    ------------------------
@@ -684,12 +682,9 @@ package body GPR.Tree is
       pragma Assert (Present (Node));
       Zone := In_Tree.Project_Nodes.Table (Node).Comments;
 
-      if No (Zone) then
-         return Empty_Project_Node;
-
-      else
-         return In_Tree.Project_Nodes.Table (Zone).Field2;
-      end if;
+      return
+        (if No (Zone) then Empty_Project_Node
+         else In_Tree.Project_Nodes.Table (Zone).Field2);
    end First_Comment_After;
 
    -----------------------------
@@ -707,12 +702,9 @@ package body GPR.Tree is
       pragma Assert (Present (Node));
       Zone := In_Tree.Project_Nodes.Table (Node).Comments;
 
-      if No (Zone) then
-         return Empty_Project_Node;
-
-      else
-         return In_Tree.Project_Nodes.Table (Zone).Comments;
-      end if;
+      return
+        (if No (Zone) then Empty_Project_Node
+         else In_Tree.Project_Nodes.Table (Zone).Comments);
    end First_Comment_After_End;
 
    --------------------------
@@ -729,12 +721,9 @@ package body GPR.Tree is
       pragma Assert (Present (Node));
       Zone := In_Tree.Project_Nodes.Table (Node).Comments;
 
-      if No (Zone) then
-         return Empty_Project_Node;
-
-      else
-         return In_Tree.Project_Nodes.Table (Zone).Field1;
-      end if;
+      return
+        (if No (Zone) then Empty_Project_Node
+         else In_Tree.Project_Nodes.Table (Zone).Field1);
    end First_Comment_Before;
 
    ------------------------------
@@ -751,12 +740,9 @@ package body GPR.Tree is
       pragma Assert (Present (Node));
       Zone := In_Tree.Project_Nodes.Table (Node).Comments;
 
-      if No (Zone) then
-         return Empty_Project_Node;
-
-      else
-         return In_Tree.Project_Nodes.Table (Zone).Field3;
-      end if;
+      return
+        (if No (Zone) then Empty_Project_Node
+         else In_Tree.Project_Nodes.Table (Zone).Field3);
    end First_Comment_Before_End;
 
    -------------------------------
@@ -775,11 +761,10 @@ package body GPR.Tree is
              | N_Case_Item
              | N_Package_Declaration);
 
-      if In_Tree.Project_Nodes.Table (Node).Kind = N_Project_Declaration then
-         return In_Tree.Project_Nodes.Table (Node).Field1;
-      else
-         return In_Tree.Project_Nodes.Table (Node).Field2;
-      end if;
+      return
+        (if In_Tree.Project_Nodes.Table (Node).Kind = N_Project_Declaration
+         then In_Tree.Project_Nodes.Table (Node).Field1
+         else In_Tree.Project_Nodes.Table (Node).Field2);
    end First_Declarative_Item_Of;
 
    ------------------------------
@@ -2886,11 +2871,10 @@ package body GPR.Tree is
          and then In_Tree.Project_Nodes.Table (Node).Kind in
              N_Variable_Reference | N_Typed_Variable_Declaration);
 
-      if In_Tree.Project_Nodes.Table (Node).Kind = N_Variable_Reference then
-         return In_Tree.Project_Nodes.Table (Node).Field3;
-      else
-         return In_Tree.Project_Nodes.Table (Node).Field2;
-      end if;
+      return
+        (if In_Tree.Project_Nodes.Table (Node).Kind = N_Variable_Reference then
+           In_Tree.Project_Nodes.Table (Node).Field3
+         else In_Tree.Project_Nodes.Table (Node).Field2);
    end String_Type_Of;
 
    ---------------------
@@ -3023,11 +3007,10 @@ package body GPR.Tree is
          New_Decl := Expr;
       end if;
 
-      if Kind_Of (Parent, Tree) = N_Project then
-         Real_Parent := Project_Declaration_Of (Parent, Tree);
-      else
-         Real_Parent := Parent;
-      end if;
+      Real_Parent :=
+        (if Kind_Of (Parent, Tree) = N_Project then
+           Project_Declaration_Of (Parent, Tree)
+         else Parent);
 
       Decl := First_Declarative_Item_Of (Real_Parent, Tree);
 

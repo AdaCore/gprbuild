@@ -94,11 +94,10 @@ package body Gprinstall.Uninstall is
             return Containing_Directory (Containing_Directory (Install_Name));
 
          else
-            if Is_Absolute_Path (Global_Project_Subdir.V.all) then
-               return Global_Project_Subdir.V.all;
-            else
-               return Global_Prefix_Dir.V.all & Global_Project_Subdir.V.all;
-            end if;
+            return
+              (if Is_Absolute_Path (Global_Project_Subdir.V.all) then
+                 Global_Project_Subdir.V.all
+               else Global_Prefix_Dir.V.all & Global_Project_Subdir.V.all);
          end if;
       end Project_Dir;
 
@@ -175,13 +174,11 @@ package body Gprinstall.Uninstall is
                end if;
 
                if Global_Prefix_Dir.Default then
-                  if Prefix = Null_Unbounded_String then
-                     Prefix := To_Unbounded_String
-                       (Normalize_Pathname (Pathname));
-                  else
-                     Prefix := To_Unbounded_String
-                       (Common_Prefix (To_String (Prefix), Pathname));
-                  end if;
+                  Prefix :=
+                    (if Prefix = Null_Unbounded_String then
+                       To_Unbounded_String (Normalize_Pathname (Pathname))
+                     else To_Unbounded_String
+                         (Common_Prefix (To_String (Prefix), Pathname)));
                end if;
 
                --  Unconditionally add a file to the remove list if digest is

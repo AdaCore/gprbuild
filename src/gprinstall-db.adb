@@ -95,11 +95,10 @@ package body Gprinstall.DB is
 
       function Project_Dir return String is
       begin
-         if Is_Absolute_Path (Global_Project_Subdir.V.all) then
-            return Global_Project_Subdir.V.all;
-         else
-            return Global_Prefix_Dir.V.all & Global_Project_Subdir.V.all;
-         end if;
+         return
+           (if Is_Absolute_Path (Global_Project_Subdir.V.all) then
+              Global_Project_Subdir.V.all
+            else Global_Prefix_Dir.V.all & Global_Project_Subdir.V.all);
       end Project_Dir;
 
       package File_Size_IO is new Text_IO.Integer_IO (Directories.File_Size);
@@ -125,11 +124,7 @@ package body Gprinstall.DB is
             --  Number of files
 
             Put (S.N_Files, Width => 5);
-            if S.N_Files > 1 then
-               Put (" files, ");
-            else
-               Put (" file, ");
-            end if;
+            Put ((if S.N_Files > 1 then " files, " else " file, "));
 
             --  Sizes
 

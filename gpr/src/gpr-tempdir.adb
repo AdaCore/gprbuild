@@ -71,11 +71,7 @@ package body GPR.Tempdir is
 
       function Directory return String is
       begin
-         if Temp_Dir'Length /= 0 then
-            return Temp_Dir.all;
-         else
-            return Current_Dir;
-         end if;
+         return (if Temp_Dir'Length /= 0 then Temp_Dir.all else Current_Dir);
       end Directory;
 
    --  Start of processing for Create_Temp_File
@@ -200,11 +196,7 @@ package body GPR.Tempdir is
 
    function Temporary_Directory_Path return String is
    begin
-      if Temp_Dir /= null then
-         return Temp_Dir.all;
-      else
-         return "";
-      end if;
+      return (if Temp_Dir /= null then Temp_Dir.all else "");
    end Temporary_Directory_Path;
 
 --  Start of elaboration for package Tempdir

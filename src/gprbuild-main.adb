@@ -268,11 +268,8 @@ procedure Gprbuild.Main is
       Success : Boolean;
    begin
       if For_Builder then
-         if Has_Global_Compilation_Switches then
-            Builder_Switches_Lang := No_Name;
-         else
-            Builder_Switches_Lang := For_Lang;
-         end if;
+         Builder_Switches_Lang :=
+           (if Has_Global_Compilation_Switches then No_Name else For_Lang);
 
          Scan_Arg
            (Switch,
@@ -916,13 +913,10 @@ procedure Gprbuild.Main is
                Script_Name : constant String :=
                  Arg (Build_Script_Option'Length + 1 .. Arg'Last);
             begin
-               if Is_Absolute_Path (Script_Name) then
-                  Build_Script_Name := new String'(Script_Name);
-
-               else
-                  Build_Script_Name :=
-                    new String'(Get_Current_Dir & Script_Name);
-               end if;
+               Build_Script_Name :=
+                 (if Is_Absolute_Path (Script_Name) then
+                    new String'(Script_Name)
+                  else new String'(Get_Current_Dir & Script_Name));
             end;
 
          elsif Arg = "--db-" then
@@ -1145,18 +1139,15 @@ procedure Gprbuild.Main is
          then
             Forbidden_In_Package_Builder;
 
-            if Arg'Length = Relocate_Build_Tree_Option'Length then
-               Build_Tree_Dir := new String'(Current_Working_Dir);
-
-            else
-               Build_Tree_Dir :=
-                 new String'
+            Build_Tree_Dir :=
+              (if Arg'Length = Relocate_Build_Tree_Option'Length then
+                 new String'(Current_Working_Dir)
+               else new String'
                    (Normalize_Pathname
                       (Arg (Relocate_Build_Tree_Option'Length + 2 .. Arg'Last),
                        Current_Working_Dir,
                        Resolve_Links => Opt.Follow_Links_For_Dirs) &
-                    Dir_Separator);
-            end if;
+                    Dir_Separator));
 
             --  Out-of-tree compilation also imply -p (create missing dirs)
 

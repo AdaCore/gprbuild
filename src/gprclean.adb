@@ -434,11 +434,10 @@ package body Gprclean is
                            Proj     : Project_Id := Project;
                         begin
                            Project_Loop : loop
-                              if Proj.Qualifier = Aggregate_Library then
-                                 Iter := For_Each_Source (Project_Tree);
-                              else
-                                 Iter := For_Each_Source (Project_Tree, Proj);
-                              end if;
+                              Iter :=
+                                (if Proj.Qualifier = Aggregate_Library then
+                                   For_Each_Source (Project_Tree)
+                                 else For_Each_Source (Project_Tree, Proj));
 
                               loop
                                  Source := GPR.Element (Iter);

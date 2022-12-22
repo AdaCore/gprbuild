@@ -446,12 +446,12 @@ package body GPR.Sinput is
       Source_File.Increment_Last;
       X := Source_File.Last;
 
-      if X = Source_File.First then
-         Lo := First_Source_Ptr;
-      else
-         Lo := ((Source_File.Table (X - 1).Source_Last + Source_Align) /
-                  Source_Align) * Source_Align;
-      end if;
+      Lo :=
+        (if X = Source_File.First then First_Source_Ptr
+         else
+           ((Source_File.Table (X - 1).Source_Last + Source_Align) /
+            Source_Align) *
+           Source_Align);
 
       Name_Buffer (Name_Len + 1) := ASCII.NUL;
 

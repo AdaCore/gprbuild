@@ -184,18 +184,14 @@ procedure Gprls.Main is
             New_Line;
 
             if Status = Incomplete_Closure then
-               if The_Sources.Last_Index = 1 then
-                  Put_Line ("Incomplete closure:");
-               else
-                  Put_Line ("Incomplete closures:");
-               end if;
+               Put_Line
+                 ((if The_Sources.Last_Index = 1 then "Incomplete closure:"
+                   else "Incomplete closures:"));
 
             elsif Status = GPR.Util.Success then
-               if The_Sources.Last_Index = 1 then
-                  Put_Line ("Closure:");
-               else
-                  Put_Line ("Closures:");
-               end if;
+               Put_Line
+                 ((if The_Sources.Last_Index = 1 then "Closure:"
+                   else "Closures:"));
 
             else
                Fail_Program
@@ -260,22 +256,18 @@ procedure Gprls.Main is
                        (Units.Table (ALIs.Table (Id).First_Unit).Uname);
 
                      if Print_Object then
-                        if ALIs.Table (Id).No_Object then
-                           Output_Object (No_File);
-                        else
-                           Output_Object (ALIs.Table (Id).Ofile_Full_Name);
-                        end if;
+                        Output_Object
+                          ((if ALIs.Table (Id).No_Object then No_File
+                            else ALIs.Table (Id).Ofile_Full_Name));
                      end if;
 
                      --  In verbose mode print all main units in the ALI file,
                      --  otherwise just print the first one to ease columnwise
                      --  printout.
 
-                     if Verbose_Mode then
-                        Last_U := ALIs.Table (Id).Last_Unit;
-                     else
-                        Last_U := ALIs.Table (Id).First_Unit;
-                     end if;
+                     Last_U :=
+                       (if Verbose_Mode then ALIs.Table (Id).Last_Unit
+                        else ALIs.Table (Id).First_Unit);
 
                      for U in ALIs.Table (Id).First_Unit .. Last_U loop
                         if Print_Unit then
@@ -506,11 +498,9 @@ procedure Gprls.Main is
    function Get_Tree_Name (Index : Positive) return String is
       Tree : constant Project_Tree_Ref := File_Names (Index).Tree;
    begin
-      if Tree = null then
-         return "";
-      else
-         return Get_Name_String (Tree.Projects.Project.Name);
-      end if;
+      return
+        (if Tree = null then ""
+         else Get_Name_String (Tree.Projects.Project.Name));
    end Get_Tree_Name;
 
    ----------------------
@@ -1332,11 +1322,9 @@ begin
      String (1 .. Project_File_Name'Length + Project_File_Extension'Length);
    Path_Last := Project_File_Name'Length;
 
-   if File_Names_Case_Sensitive then
-      Path_Name (1 .. Path_Last) := Project_File_Name.all;
-   else
-      Path_Name (1 .. Path_Last) := To_Lower (Project_File_Name.all);
-   end if;
+   Path_Name (1 .. Path_Last) :=
+     (if File_Names_Case_Sensitive then Project_File_Name.all
+      else To_Lower (Project_File_Name.all));
 
    Path_Name (Path_Last + 1 .. Path_Name'Last) :=
      Project_File_Extension;

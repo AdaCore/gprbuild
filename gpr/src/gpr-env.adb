@@ -634,11 +634,9 @@ package body GPR.Env is
          Put ("pragma Source_File_Name_Project (");
          Put (Get_Name_String (Source.Unit.Name));
 
-         if Source.Kind = Spec then
-            Put (", Spec_File_Name => """);
-         else
-            Put (", Body_File_Name => """);
-         end if;
+         Put
+           ((if Source.Kind = Spec then ", Spec_File_Name => """
+             else ", Body_File_Name => """));
 
          Put (Get_Name_String (Source.File));
          Put ("""");
@@ -864,11 +862,8 @@ package body GPR.Env is
 
                Add_Char_To_Name_Buffer ('%');
 
-               if Source.Kind = Spec then
-                  Add_Char_To_Name_Buffer ('s');
-               else
-                  Add_Char_To_Name_Buffer ('b');
-               end if;
+               Add_Char_To_Name_Buffer
+                 ((if Source.Kind = Spec then 's' else 'b'));
 
                Unit := Name_Find;
 
@@ -1162,13 +1157,10 @@ package body GPR.Env is
                            Write_Line ("   OK");
                         end if;
 
-                        if Full_Path then
-                           return Get_Name_String
-                             (Unit.File_Names (Impl).Path.Name);
-
-                        else
-                           return Get_Name_String (Current_Name);
-                        end if;
+                        return
+                          (if Full_Path then
+                             Get_Name_String (Unit.File_Names (Impl).Path.Name)
+                           else Get_Name_String (Current_Name));
 
                         --  If it has the name of the extended body name,
                         --  return the extended body name
@@ -1178,13 +1170,10 @@ package body GPR.Env is
                            Write_Line ("   OK");
                         end if;
 
-                        if Full_Path then
-                           return Get_Name_String
-                             (Unit.File_Names (Impl).Path.Name);
-
-                        else
-                           return Get_Name_String (The_Body_Name);
-                        end if;
+                        return
+                          (if Full_Path then
+                             Get_Name_String (Unit.File_Names (Impl).Path.Name)
+                           else Get_Name_String (The_Body_Name));
 
                      else
                         if Current_Verbosity = High then
@@ -1226,12 +1215,10 @@ package body GPR.Env is
                            Write_Line ("   OK");
                         end if;
 
-                        if Full_Path then
-                           return Get_Name_String
-                             (Unit.File_Names (Spec).Path.Name);
-                        else
-                           return Get_Name_String (Current_Name);
-                        end if;
+                        return
+                          (if Full_Path then
+                             Get_Name_String (Unit.File_Names (Spec).Path.Name)
+                           else Get_Name_String (Current_Name));
 
                         --  If it has the same name as the extended spec name,
                         --  return the extended spec name.
@@ -1241,12 +1228,10 @@ package body GPR.Env is
                            Write_Line ("   OK");
                         end if;
 
-                        if Full_Path then
-                           return Get_Name_String
-                             (Unit.File_Names (Spec).Path.Name);
-                        else
-                           return Get_Name_String (The_Spec_Name);
-                        end if;
+                        return
+                          (if Full_Path then
+                             Get_Name_String (Unit.File_Names (Spec).Path.Name)
+                           else Get_Name_String (The_Spec_Name));
 
                      else
                         if Current_Verbosity = High then
@@ -2155,11 +2140,7 @@ package body GPR.Env is
       end if;
 
       if Is_Absolute_Path (Path) then
-         if Check_Filename (Path) then
-            return new String'(Path);
-         else
-            return null;
-         end if;
+         return (if Check_Filename (Path) then new String'(Path) else null);
       end if;
 
       CF := Self.Found.Find (Path);

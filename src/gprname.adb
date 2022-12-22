@@ -704,13 +704,10 @@ package body GPRName is
          --  If there was no comments for attribute Source_List_File, put those
          --  for Source_Files, if they exist.
 
-         if Present (Source_List_File_Comments) then
-            Tree.Project_Nodes.Table (Attribute).Comments :=
-              Source_List_File_Comments;
-         else
-            Tree.Project_Nodes.Table (Attribute).Comments :=
-              Source_Files_Comments;
-         end if;
+         Tree.Project_Nodes.Table (Attribute).Comments :=
+           (if Present (Source_List_File_Comments) then
+              Source_List_File_Comments
+            else Source_Files_Comments);
 
          --  Put the foreign source file names in the source list file
 
@@ -1667,12 +1664,10 @@ package body GPRName is
                                  Current_Source := Sources (Index);
 
                                  if Opt.Verbose_Mode then
-                                    if Current_Source.Spec then
-                                       Put ("      spec of ");
-
-                                    else
-                                       Put ("      body of ");
-                                    end if;
+                                    Put
+                                      ((if Current_Source.Spec then
+                                          "      spec of "
+                                        else "      body of "));
 
                                     Put_Line
                                       (Get_Name_String

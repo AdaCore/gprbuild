@@ -692,11 +692,7 @@ package body GPR.Nmsc is
 
       Add_Src := True;
 
-      if Kind = Sep then
-         S_Or_B := Impl;
-      else
-         S_Or_B := Kind;
-      end if;
+      S_Or_B := (if Kind = Sep then Impl else Kind);
 
       if Unit /= No_Name then
          Prev_Unit := Units_Htable.Get (Data.Tree.Units_HT, Unit);
@@ -3036,14 +3032,9 @@ package body GPR.Nmsc is
                                     Lib_Dirs := Library_Dir.Next;
                                  end loop;
 
-                                 if Version /= No_Name then
-                                    Lang_Index.Config.
-                                      Runtime_Library_Version := Version;
-                                 else
-                                    Lang_Index.Config.
-                                      Runtime_Library_Version :=
-                                      Lang_Index.Config.Toolchain_Version;
-                                 end if;
+                                 Lang_Index.Config.Runtime_Library_Version :=
+                                   (if Version /= No_Name then Version
+                                    else Lang_Index.Config.Toolchain_Version);
 
                                  Shared.Ada_Runtime_Dir := Element.Value.Value;
                                  Shared.Ada_Runtime_Library_Dirs :=
@@ -3183,14 +3174,14 @@ package body GPR.Nmsc is
                function No_GNAT_Prefix (Id : Name_Id) return String is
                   Result : constant String := Get_Name_String_Or_Null (Id);
                begin
-                  if Lang_Index.Name = Name_Ada
-                    and then Starts_With (Result, GNAT_And_Space)
-                  then
-                     return Result
-                       (Result'First + GNAT_And_Space'Length .. Result'Last);
-                  else
-                     return Result;
-                  end if;
+                  return
+                    (if
+                       Lang_Index.Name = Name_Ada
+                       and then Starts_With (Result, GNAT_And_Space)
+                     then
+                       Result
+                         (Result'First + GNAT_And_Space'Length .. Result'Last)
+                     else Result);
                end No_GNAT_Prefix;
 
                TVC : constant String :=
@@ -3347,11 +3338,9 @@ package body GPR.Nmsc is
          Project.Externally_Built := Project.Extends.Externally_Built;
       end if;
 
-      if Project.Externally_Built then
-         Debug_Output ("project is externally built");
-      else
-         Debug_Output ("project is not externally built");
-      end if;
+      Debug_Output
+        ((if Project.Externally_Built then "project is externally built"
+          else "project is not externally built"));
    end Check_If_Externally_Built;
 
    ----------------------
@@ -3474,16 +3463,10 @@ package body GPR.Nmsc is
 
             Project_2 := Project;
             Big_Loop : while Project_2 /= No_Project loop
-               if Project.Qualifier = Aggregate_Library then
-
-                  --  For an aggregate library we want to consider sources of
-                  --  all aggregated projects.
-
-                  Iter := For_Each_Source (Data.Tree);
-
-               else
-                  Iter := For_Each_Source (Data.Tree, Project_2);
-               end if;
+               Iter :=
+                 (if Project.Qualifier = Aggregate_Library then
+                    For_Each_Source (Data.Tree)
+                  else For_Each_Source (Data.Tree, Project_2));
 
                loop
                   Source := GPR.Element (Iter);
@@ -3557,16 +3540,10 @@ package body GPR.Nmsc is
 
             Project_2 := Project;
             Big_Loop_2 : while Project_2 /= No_Project loop
-               if Project.Qualifier = Aggregate_Library then
-
-                  --  For an aggregate library we want to consider sources of
-                  --  all aggregated projects.
-
-                  Iter := For_Each_Source (Data.Tree);
-
-               else
-                  Iter := For_Each_Source (Data.Tree, Project_2);
-               end if;
+               Iter :=
+                 (if Project.Qualifier = Aggregate_Library then
+                    For_Each_Source (Data.Tree)
+                  else For_Each_Source (Data.Tree, Project_2));
 
                loop
                   Source := GPR.Element (Iter);
@@ -4866,11 +4843,8 @@ package body GPR.Nmsc is
          while Exceptions /= No_Array_Element loop
             Element   := Shared.Array_Elements.Table (Exceptions);
 
-            if Element.Restricted then
-               Naming_Exception := Inherited;
-            else
-               Naming_Exception := Yes;
-            end if;
+            Naming_Exception :=
+              (if Element.Restricted then Inherited else Yes);
 
             File_Name := Canonical_Case_File_Name (Element.Value.Value);
 
@@ -5974,13 +5948,10 @@ package body GPR.Nmsc is
 
    function Compute_Directory_Last (Dir : String) return Natural is
    begin
-      if Dir'Length > 1
-        and then Is_Directory_Separator (Dir (Dir'Last - 1))
-      then
-         return Dir'Last - 1;
-      else
-         return Dir'Last;
-      end if;
+      return
+        (if Dir'Length > 1 and then Is_Directory_Separator (Dir (Dir'Last - 1))
+         then Dir'Last - 1
+         else Dir'Last);
    end Compute_Directory_Last;
 
    --------------------------
@@ -6004,11 +5975,8 @@ package body GPR.Nmsc is
       --  Set the object directory to its default which may be nil, if there
       --  is no sources in the project.
 
-      if No_Sources then
-         Project.Object_Directory := No_Path_Information;
-      else
-         Project.Object_Directory := Project.Directory;
-      end if;
+      Project.Object_Directory :=
+        (if No_Sources then No_Path_Information else Project.Directory);
 
       --  Check the object directory
 
@@ -6846,15 +6814,12 @@ package body GPR.Nmsc is
          Unit_Except :=
            Unit_Exceptions_Htable.Get (Project.Unit_Exceptions, Unit);
 
-         if Kind = Spec then
-            Masked := Unit_Except.Spec /= No_File
-                        and then
-                      Unit_Except.Spec /= File_Name;
-         else
-            Masked := Unit_Except.Impl /= No_File
-                        and then
-                      Unit_Except.Impl /= File_Name;
-         end if;
+         Masked :=
+           (if Kind = Spec then
+              Unit_Except.Spec /= No_File
+              and then Unit_Except.Spec /= File_Name
+            else Unit_Except.Impl /= No_File
+              and then Unit_Except.Impl /= File_Name);
 
          if Masked then
             if Current_Verbosity = High then
@@ -7253,11 +7218,10 @@ package body GPR.Nmsc is
                   --  If the element has no location, then use the location of
                   --  Excluded_Sources to report possible errors.
 
-                  if Element.Location = No_Location then
-                     Location := Excluded_Sources.Location;
-                  else
-                     Location := Element.Location;
-                  end if;
+                  Location :=
+                    (if Element.Location = No_Location then
+                       Excluded_Sources.Location
+                     else Element.Location);
 
                   Excluded_Sources_Htable.Set
                     (Project.Excluded, Name,
@@ -7423,11 +7387,9 @@ package body GPR.Nmsc is
                --  If the element has no location, then use the location of
                --  Sources to report possible errors.
 
-               if Element.Location = No_Location then
-                  Location := Sources.Location;
-               else
-                  Location := Element.Location;
-               end if;
+               Location :=
+                 (if Element.Location = No_Location then Sources.Location
+                  else Element.Location);
 
                --  Check that there is no directory information
 
@@ -8397,11 +8359,9 @@ package body GPR.Nmsc is
             --  Links have been resolved if necessary, and Path_Name
             --  always ends with a directory separator.
 
-            if Recursive then
-               Success := Recursive_Find_Dirs (Path_Name, Rank);
-            else
-               Success := Subdirectory_Matches (Path_Name, Rank);
-            end if;
+            Success :=
+              (if Recursive then Recursive_Find_Dirs (Path_Name, Rank)
+               else Subdirectory_Matches (Path_Name, Rank));
 
             if not Success then
                case Search_For is

@@ -75,11 +75,9 @@ package body GPR.Attr is
      (Attribute : Attribute_Node_Id) return Attribute_Default_Value
    is
    begin
-      if Attribute = Empty_Attribute then
-         return Empty_Value;
-      else
-         return Attrs.Table (Attribute.Value).Default;
-      end if;
+      return
+        (if Attribute = Empty_Attribute then Empty_Value
+         else Attrs.Table (Attribute.Value).Default);
    end Attribute_Default_Of;
 
    -----------------------
@@ -90,11 +88,9 @@ package body GPR.Attr is
      (Attribute : Attribute_Node_Id) return Attribute_Kind
    is
    begin
-      if Attribute = Empty_Attribute then
-         return Unknown;
-      else
-         return Attrs.Table (Attribute.Value).Attr_Kind;
-      end if;
+      return
+        (if Attribute = Empty_Attribute then Unknown
+         else Attrs.Table (Attribute.Value).Attr_Kind);
    end Attribute_Kind_Of;
 
    -----------------------
@@ -103,11 +99,9 @@ package body GPR.Attr is
 
    function Attribute_Name_Of (Attribute : Attribute_Node_Id) return Name_Id is
    begin
-      if Attribute = Empty_Attribute then
-         return No_Name;
-      else
-         return Attrs.Table (Attribute.Value).Name;
-      end if;
+      return
+        (if Attribute = Empty_Attribute then No_Name
+         else Attrs.Table (Attribute.Value).Name);
    end Attribute_Name_Of;
 
    --------------------------
@@ -213,14 +207,12 @@ package body GPR.Attr is
 
       function Attribute_Location return String is
       begin
-         if Current_Package = Empty_Pkg then
-            return "project level attributes";
-
-         else
-            return "attribute of package """
-              & Get_Name_String
-                  (Package_Attributes.Table (Current_Package).Name) & '"';
-         end if;
+         return
+           (if Current_Package = Empty_Pkg then "project level attributes"
+            else "attribute of package """ &
+              Get_Name_String
+                (Package_Attributes.Table (Current_Package).Name) &
+              '"');
       end Attribute_Location;
 
       -----------------
@@ -1427,11 +1419,9 @@ package body GPR.Attr is
       return Boolean
    is
    begin
-      if Attribute = Empty_Attribute then
-         return False;
-      else
-         return Attrs.Table (Attribute.Value).Config_Concat;
-      end if;
+      return
+        (Attribute /= Empty_Attribute)
+        and then Attrs.Table (Attribute.Value).Config_Concat;
    end Is_Config_Concatenable;
 
    ------------------
@@ -1451,11 +1441,9 @@ package body GPR.Attr is
      (After : Attribute_Node_Id) return Attribute_Node_Id
    is
    begin
-      if After = Empty_Attribute then
-         return Empty_Attribute;
-      else
-         return (Value => Attrs.Table (After.Value).Next);
-      end if;
+      return
+        (if After = Empty_Attribute then Empty_Attribute
+         else (Value => Attrs.Table (After.Value).Next));
    end Next_Attribute;
 
    -----------------------
@@ -1464,22 +1452,18 @@ package body GPR.Attr is
 
    function Optional_Index_Of (Attribute : Attribute_Node_Id) return Boolean is
    begin
-      if Attribute = Empty_Attribute then
-         return False;
-      else
-         return Attrs.Table (Attribute.Value).Optional_Index;
-      end if;
+      return
+        (Attribute /= Empty_Attribute)
+        and then Attrs.Table (Attribute.Value).Optional_Index;
    end Optional_Index_Of;
 
    function Others_Allowed_For
      (Attribute : Attribute_Node_Id) return Boolean
    is
    begin
-      if Attribute = Empty_Attribute then
-         return False;
-      else
-         return Attrs.Table (Attribute.Value).Others_Allowed;
-      end if;
+      return
+        (Attribute /= Empty_Attribute)
+        and then Attrs.Table (Attribute.Value).Others_Allowed;
    end Others_Allowed_For;
 
    -----------------------
@@ -1499,11 +1483,9 @@ package body GPR.Attr is
    begin
       for Index in Package_Attributes.First .. Package_Attributes.Last loop
          if Package_Attributes.Table (Index).Name = Name then
-            if Package_Attributes.Table (Index).Known then
-               return (Value => Index);
-            else
-               return Unknown_Package;
-            end if;
+            return
+              (if Package_Attributes.Table (Index).Known then (Value => Index)
+               else Unknown_Package);
          end if;
       end loop;
 
@@ -1810,11 +1792,9 @@ package body GPR.Attr is
      (Attribute : Attribute_Node_Id) return Variable_Kind
    is
    begin
-      if Attribute = Empty_Attribute then
-         return Undefined;
-      else
-         return Attrs.Table (Attribute.Value).Var_Kind;
-      end if;
+      return
+        (if Attribute = Empty_Attribute then Undefined
+         else Attrs.Table (Attribute.Value).Var_Kind);
    end Variable_Kind_Of;
 
    ------------------------
@@ -1825,12 +1805,10 @@ package body GPR.Attr is
      (Pkg : Package_Node_Id) return Attribute_Node_Id
    is
    begin
-      if Pkg = Empty_Package or else Pkg = Unknown_Package then
-         return Empty_Attribute;
-      else
-         return
-           (Value => Package_Attributes.Table (Pkg.Value).First_Attribute);
-      end if;
+      return
+        (if Pkg = Empty_Package or else Pkg = Unknown_Package then
+           Empty_Attribute
+         else (Value => Package_Attributes.Table (Pkg.Value).First_Attribute));
    end First_Attribute_Of;
 
    ----------------------
@@ -1839,11 +1817,9 @@ package body GPR.Attr is
 
    function Is_Package_Known (Pkg : Package_Node_Id) return Boolean is
    begin
-      if Pkg = Empty_Package or else Pkg = Unknown_Package then
-         return False;
-      else
-         return Package_Attributes.Table (Pkg.Value).Known;
-      end if;
+      return
+        not (Pkg = Empty_Package or else Pkg = Unknown_Package)
+        and then Package_Attributes.Table (Pkg.Value).Known;
    end Is_Package_Known;
 
 end GPR.Attr;

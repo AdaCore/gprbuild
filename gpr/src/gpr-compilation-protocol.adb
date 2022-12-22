@@ -467,18 +467,15 @@ package body GPR.Compilation.Protocol is
          Timestamp    := Time_Stamp_Type (Line.Args (5).all);
          Version      := To_Unbounded_String (Line.Args (6).all);
 
-         if Line.Args'Length > 6 then
-            Hash := To_Unbounded_String (Line.Args (7).all);
-         else
-            Hash := Null_Unbounded_String;
-         end if;
+         Hash :=
+           (if Line.Args'Length > 6 then
+              To_Unbounded_String (Line.Args (7).all)
+            else Null_Unbounded_String);
 
-         if Line.Args'Length > 7 then
-            Included_Artifact_Patterns :=
-              To_Unbounded_String (Line.Args (8).all);
-         else
-            Included_Artifact_Patterns := Null_Unbounded_String;
-         end if;
+         Included_Artifact_Patterns :=
+           (if Line.Args'Length > 7 then
+              To_Unbounded_String (Line.Args (8).all)
+            else Null_Unbounded_String);
 
       elsif Line.Cmd = PG then
          Is_Ping := True;
@@ -1244,15 +1241,11 @@ package body GPR.Compilation.Protocol is
    is
       P : constant Natural := Index (Str, To_String (Channel.WD_To));
    begin
-      if P = 0 then
-         return Str;
-
-      else
-         --  Make sure we translate the filename to native directory seprator
-         return To_Native_Directory_Separator
-           (To_String (Channel.WD_From)
-            & Str (P + Length (Channel.WD_To) .. Str'Last));
-      end if;
+      return
+        (if P = 0 then Str
+         else To_Native_Directory_Separator
+             (To_String (Channel.WD_From) &
+              Str (P + Length (Channel.WD_To) .. Str'Last)));
    end Translate_Receive;
 
    --------------------
@@ -1264,12 +1257,10 @@ package body GPR.Compilation.Protocol is
    is
       P : constant Natural := Index (Str, To_String (Channel.WD_From));
    begin
-      if P = 0 then
-         return Str;
-      else
-         return To_String (Channel.WD_To)
-           & Str (P + Length (Channel.WD_From) .. Str'Last);
-      end if;
+      return
+        (if P = 0 then Str
+         else To_String (Channel.WD_To) &
+           Str (P + Length (Channel.WD_From) .. Str'Last));
    end Translate_Send;
 
 end GPR.Compilation.Protocol;

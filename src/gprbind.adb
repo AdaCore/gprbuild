@@ -603,16 +603,11 @@ begin
 
    Gnatbind_Options.Append (Dash_x);
 
-   if Is_Absolute_Path (GNATBIND.all) then
-      FULL_GNATBIND := GNATBIND;
-
-   else
-      FULL_GNATBIND :=
-        new String'
-              (Dir_Name (Ada_Compiler_Path.all) &
-               Directory_Separator &
-               GNATBIND.all);
-   end if;
+   FULL_GNATBIND :=
+     (if Is_Absolute_Path (GNATBIND.all) then GNATBIND
+      else new String'
+          (Dir_Name (Ada_Compiler_Path.all) & Directory_Separator &
+           GNATBIND.all));
 
    if Gnatbind_Path_Specified then
       FULL_GNATBIND := Gnatbind_Path;

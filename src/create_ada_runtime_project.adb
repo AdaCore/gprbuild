@@ -129,12 +129,8 @@ procedure Create_Ada_Runtime_Project is
 
    function Equal (K1, K2 : String_Access) return Boolean is
    begin
-      if K1 = null or else K2 = null then
-         return K1 = K2;
-
-      else
-         return K1.all = K2.all;
-      end if;
+      return
+        (if K1 = null or else K2 = null then K1 = K2 else K1.all = K2.all);
    end Equal;
 
    ----------
@@ -194,12 +190,7 @@ procedure Create_Ada_Runtime_Project is
 
    function Hash (Key : String_Access) return Header_Num is
    begin
-      if Key = null then
-         return 0;
-
-      else
-         return Hash (Key.all);
-      end if;
+      return (if Key = null then 0 else Hash (Key.all));
    end Hash;
 
    ----------

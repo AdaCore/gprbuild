@@ -371,14 +371,12 @@ procedure Gprinstall.Main is
                Set_Param (Global_Project_Subdir, Project_Subdir_Option);
 
             elsif Has_Prefix (Build_Var_Option) then
-               if Build_Vars = null then
-                  Build_Vars := new String'
-                    (Arg (Build_Var_Option'Length + 2 .. Arg'Last));
-               else
-                  Build_Vars := new String'
-                    ((Arg (Build_Var_Option'Length + 2 .. Arg'Last))
-                     & ',' & Build_Vars.all);
-               end if;
+               Build_Vars :=
+                 (if Build_Vars = null then
+                    new String'(Arg (Build_Var_Option'Length + 2 .. Arg'Last))
+                  else new String'
+                      ((Arg (Build_Var_Option'Length + 2 .. Arg'Last)) & ',' &
+                       Build_Vars.all));
 
             elsif Has_Prefix (No_Build_Var_Option) then
                No_Build_Var := True;
@@ -451,11 +449,9 @@ procedure Gprinstall.Main is
                                (Arg (Relocate_Build_Tree_Option'Length + 2
                                      .. Arg'Last));
                   begin
-                     if Is_Absolute_Path (Dir) then
-                        Build_Tree_Dir := new String'(Dir);
-                     else
-                        Build_Tree_Dir := new String'(Get_Current_Dir & Dir);
-                     end if;
+                     Build_Tree_Dir :=
+                       (if Is_Absolute_Path (Dir) then new String'(Dir)
+                        else new String'(Get_Current_Dir & Dir));
                   end;
                end if;
 
@@ -1009,14 +1005,12 @@ begin
       DB.List;
 
    else
-      if Global_Install_Name.Default then
-         Uninstall.Process
-           (Ada.Directories.Compose
+      Uninstall.Process
+        ((if Global_Install_Name.Default then
+            Ada.Directories.Compose
               (Ada.Directories.Containing_Directory (Project_File_Name.all),
-               Ada.Directories.Base_Name (Project_File_Name.all)));
-      else
-         Uninstall.Process (Global_Install_Name.V.all);
-      end if;
+               Ada.Directories.Base_Name (Project_File_Name.all))
+          else Global_Install_Name.V.all));
    end if;
 
    if Usage_Mode = Install_Mode then

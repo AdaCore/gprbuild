@@ -284,11 +284,9 @@ procedure GprConfig.Main is
          Put_Line (" with the following command line:");
          Put ("gprconfig --batch");
          Put (" --target=");
-         if Selected_Target = Null_Unbounded_String then
-            Put ("all");
-         else
-            Put (To_String (Selected_Target));
-         end if;
+         Put
+           ((if Selected_Target = Null_Unbounded_String then "all"
+             else To_String (Selected_Target)));
 
          C := First (Compilers);
          while Has_Element (C) loop
@@ -607,16 +605,15 @@ begin
                      Last := Last - 1;
                   end if;
 
-                  if Last - RTS'First > 6 and then
-                    RTS (Last - 5 .. Last) = "adalib" and then
-                    (RTS (Last - 6) = Directory_Separator or else
-                     (RTS (Last - 6) = '/'))
-
-                  then
-                     Last := Last - 6;
-                  else
-                     Last := RTS'Last;
-                  end if;
+                  Last :=
+                    (if
+                       Last - RTS'First > 6
+                       and then RTS (Last - 5 .. Last) = "adalib"
+                       and then
+                       (RTS (Last - 6) = Directory_Separator
+                        or else (RTS (Last - 6) = '/'))
+                     then Last - 6
+                     else RTS'Last);
 
                   Parse_Knowledge_Base (Base, RTS (RTS'First .. Last));
                end;

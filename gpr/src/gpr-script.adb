@@ -64,11 +64,7 @@ package body GPR.Script is
          end if;
       end loop;
 
-      if Need_Quoting then
-         return "'" & Arg (1 .. Last) & "'";
-      else
-         return S;
-      end if;
+      return (if Need_Quoting then "'" & Arg (1 .. Last) & "'" else S);
    end Potentially_Quoted;
 
    -----------------------

@@ -193,11 +193,9 @@ package body GPR.PP is
          end if;
 
          for J in 1 .. Name_Len loop
-            if Capital then
-               Write_Char (To_Upper (Name_Buffer (J)));
-            else
-               Write_Char (Name_Buffer (J));
-            end if;
+            Write_Char
+              ((if Capital then To_Upper (Name_Buffer (J))
+                else Name_Buffer (J)));
 
             if Capitalize then
                Capital :=
@@ -994,23 +992,12 @@ package body GPR.PP is
    --  Start of processing for Pretty_Print
 
    begin
-      if W_Char = null then
-         Write_Char := Write_Char_Default'Access;
-      else
-         Write_Char := W_Char;
-      end if;
+      Write_Char :=
+        (if W_Char = null then Write_Char_Default'Access else W_Char);
 
-      if W_Eol = null then
-         Write_Eol := Write_Eol_Default'Access;
-      else
-         Write_Eol := W_Eol;
-      end if;
+      Write_Eol := (if W_Eol = null then Write_Eol_Default'Access else W_Eol);
 
-      if W_Str = null then
-         Write_Str := Write_Str_Default'Access;
-      else
-         Write_Str := W_Str;
-      end if;
+      Write_Str := (if W_Str = null then Write_Str_Default'Access else W_Str);
 
       Print (Project, Initial_Indent);
    end Pretty_Print;

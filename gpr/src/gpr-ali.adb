@@ -1288,11 +1288,9 @@ package body GPR.ALI is
 
          Get_Name_String (Units.Table (Units.Last).Uname);
 
-         if Name_Buffer (Name_Len) = 'b' then
-            Units.Table (Units.Last).Utype := Is_Body_Only;
-         else
-            Units.Table (Units.Last).Utype := Is_Spec_Only;
-         end if;
+         Units.Table (Units.Last).Utype :=
+           (if Name_Buffer (Name_Len) = 'b' then Is_Body_Only
+            else Is_Spec_Only);
       end if;
 
       --  Ignore external version lines
@@ -1434,13 +1432,12 @@ package body GPR.ALI is
       if C = EOF then
          --  Check that gnatprove generated .ali files ended with right marker
 
-         if Opt.GnatProve_Mode
-           and then T (First_P .. Last_P) /= Spark_End_Marker
-         then
-            return No_ALI_Id;
-         end if;
-
-         return Id;
+         return
+           (if
+              Opt.GnatProve_Mode
+              and then T (First_P .. Last_P) /= Spark_End_Marker
+            then No_ALI_Id
+            else Id);
       end if;
 
       Check_Unknown_Line;

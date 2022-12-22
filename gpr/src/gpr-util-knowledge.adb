@@ -71,11 +71,9 @@ package body Knowledge is
 
       function Dir return String is
       begin
-         if Directory'Length = 0 then
-            return Default_Knowledge_Base_Directory;
-         else
-            return Directory;
-         end if;
+         return
+           (if Directory'Length = 0 then Default_Knowledge_Base_Directory
+            else Directory);
       end Dir;
 
    begin

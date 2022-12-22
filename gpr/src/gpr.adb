@@ -150,12 +150,7 @@ package body GPR is
 
    begin
       if Directory'Length /= 0 then
-         if not Exists (Variable) then
-            Update ("");
-
-         else
-            Update (Value (Variable));
-         end if;
+         Update ((if Exists (Variable) then Value (Variable) else ""));
       end if;
    end Add_To_Path;
 
@@ -283,11 +278,9 @@ package body GPR is
 
    begin
       if not Opt.Keep_Temporary_Files then
-         if Shared = null then
-            Instance := Temp_Files;
-         else
-            Instance := Shared.Private_Part.Temp_Files;
-         end if;
+         Instance :=
+           (if Shared = null then Temp_Files
+            else Shared.Private_Part.Temp_Files);
 
          for Index in
            1 .. Temp_Files_Table.Last (Instance)
@@ -318,11 +311,9 @@ package body GPR is
             end if;
          end loop;
 
-         if Shared = null then
-            Temp_Files_Table.Init (Temp_Files);
-         else
-            Temp_Files_Table.Init (Shared.Private_Part.Temp_Files);
-         end if;
+         Temp_Files_Table.Init
+           ((if Shared = null then Temp_Files
+             else Shared.Private_Part.Temp_Files));
       end if;
 
       if Shared /= null then
@@ -1154,11 +1145,9 @@ package body GPR is
 
    function Hash (Project : Project_Id) return Header_Num is
    begin
-      if Project = No_Project then
-         return Header_Num'First;
-      else
-         return Hash (Project.Name);
-      end if;
+      return
+        (if Project = No_Project then Header_Num'First
+         else Hash (Project.Name));
    end Hash;
 
    ---------------
@@ -1296,13 +1285,11 @@ package body GPR is
       Object_File_Suffix : Name_Id := No_Name) return File_Name_Type
    is
    begin
-      if Object_File_Suffix = No_Name then
-         return Extend_Name
-           (Source_File_Name, Object_Suffix);
-      else
-         return Extend_Name
-           (Source_File_Name, Get_Name_String (Object_File_Suffix));
-      end if;
+      return
+        (if Object_File_Suffix = No_Name then
+           Extend_Name (Source_File_Name, Object_Suffix)
+         else Extend_Name
+             (Source_File_Name, Get_Name_String (Object_File_Suffix)));
    end Object_Name;
 
    function Object_Name
@@ -1836,16 +1823,15 @@ package body GPR is
          --  files; otherwise add the object directory.
 
          if Project.Library then
-            if Project.Object_Directory = No_Path_Information
-              or else
-                (Including_Libraries
-                  and then
-                    Contains_ALI_Files (Project.Library_ALI_Dir.Display_Name))
-            then
-               return Project.Library_ALI_Dir.Display_Name;
-            else
-               return Project.Object_Directory.Display_Name;
-            end if;
+            return
+              (if
+                 Project.Object_Directory = No_Path_Information
+                 or else
+                 (Including_Libraries
+                  and then Contains_ALI_Files
+                    (Project.Library_ALI_Dir.Display_Name))
+               then Project.Library_ALI_Dir.Display_Name
+               else Project.Object_Directory.Display_Name);
 
             --  For a non-library project, add object directory if it is not a
             --  virtual project, and if there are Ada sources in the project or
@@ -2200,11 +2186,9 @@ package body GPR is
          Set_Standard_Error;
          Write_Str (Str);
 
-         if Str2 = No_Name then
-            Write_Line (" <no_name>");
-         else
-            Write_Line (" """ & Get_Name_String (Str2) & '"');
-         end if;
+         Write_Line
+           ((if Str2 = No_Name then " <no_name>"
+             else " """ & Get_Name_String (Str2) & '"'));
 
          Set_Standard_Output;
       end if;

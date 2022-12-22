@@ -138,11 +138,7 @@ package body GPR.Util is
       function strlen (A : Address) return size_t;
       pragma Import (Intrinsic, strlen, "strlen");
    begin
-      if S = Null_Address then
-         return 0;
-      else
-         return Integer (strlen (S));
-      end if;
+      return (if S = Null_Address then 0 else Integer (strlen (S)));
    end C_String_Length;
 
    ------------------------
@@ -402,11 +398,10 @@ package body GPR.Util is
 
    function "<" (Left, Right : Main_Project_Tree) return Boolean is
    begin
-      if Left.Project.Name /= Right.Project.Name then
-         return Left.Project.Name < Right.Project.Name;
-      else
-         return Left.Main.File < Right.Main.File;
-      end if;
+      return
+        (if Left.Project.Name /= Right.Project.Name then
+           Left.Project.Name < Right.Project.Name
+         else Left.Main.File < Right.Main.File);
    end "<";
 
    -----------
@@ -498,17 +493,11 @@ package body GPR.Util is
    begin
       loop
          if At_A > A'Last then
-            if At_B > B'Last or else B (At_B) = '/' then
-               return A'Length;
-            else
-               return Slash - A'First;
-            end if;
+            return
+              (if At_B > B'Last or else B (At_B) = '/' then A'Length
+               else Slash - A'First);
          elsif At_B > B'Last then
-            if A (At_A) = '/' then  --  A cannot be shorter than B here
-               return B'Length;
-            else
-               return Slash - A'First;
-            end if;
+            return (if A (At_A) = '/' then B'Length else Slash - A'First);
          elsif A (At_A) /= B (At_B) then
             return Slash - A'First;
          elsif A (At_A) = '/' then
@@ -818,15 +807,15 @@ package body GPR.Util is
             To_Lower (Exec (Path_Last - 2 .. Path_Last));
          end if;
 
-         if Path_Last < Exec'First + 2
-           or else Exec (Path_Last - 2 .. Path_Last) /= "bin"
-           or else (Path_Last - 3 >= Exec'First
-                    and then not Is_Directory_Separator (Exec (Path_Last - 3)))
-         then
-            return "";
-         end if;
-
-         return (Exec (Exec'First .. Path_Last - 4)) & Directory_Separator;
+         return
+           (if
+              Path_Last < Exec'First + 2
+              or else Exec (Path_Last - 2 .. Path_Last) /= "bin"
+              or else
+              (Path_Last - 3 >= Exec'First
+               and then not Is_Directory_Separator (Exec (Path_Last - 3)))
+            then ""
+            else (Exec (Exec'First .. Path_Last - 4)) & Directory_Separator);
       end Get_Install_Dir;
 
    --  Beginning of Executable_Prefix_Path
@@ -997,11 +986,9 @@ package body GPR.Util is
    --  Start of processing for For_Interface_Sources
 
    begin
-      if Project.Qualifier = Aggregate_Library then
-         Iter := For_Each_Source (Tree);
-      else
-         Iter := For_Each_Source (Tree, Project);
-      end if;
+      Iter :=
+        (if Project.Qualifier = Aggregate_Library then For_Each_Source (Tree)
+         else For_Each_Source (Tree, Project));
 
       --  First look at each spec, check if the body is needed
 
@@ -1077,11 +1064,10 @@ package body GPR.Util is
       --  Now handle the bodies and separates if needed
 
       if Deps.Length /= 0 then
-         if Project.Qualifier = Aggregate_Library then
-            Iter := For_Each_Source (Tree);
-         else
-            Iter := For_Each_Source (Tree, Project);
-         end if;
+         Iter :=
+           (if Project.Qualifier = Aggregate_Library then
+              For_Each_Source (Tree)
+            else For_Each_Source (Tree, Project));
 
          loop
             Sid := Element (Iter);
@@ -1401,11 +1387,7 @@ package body GPR.Util is
 
             Proj : Project_Id;
          begin
-            if All_Projects then
-               Proj := No_Project;
-            else
-               Proj := Project;
-            end if;
+            Proj := (if All_Projects then No_Project else Project);
 
             Iter := For_Each_Source
               (In_Tree           => Tree,
@@ -1934,11 +1916,9 @@ package body GPR.Util is
    is
       Ind : constant Natural := Source_Info_Project_HTable.Get (For_Project);
    begin
-      if Ind = 0 then
-         Iter := (No_Source_Info, 0);
-      else
-         Iter := Source_Info_Table.Table (Ind);
-      end if;
+      Iter :=
+        (if Ind = 0 then (No_Source_Info, 0)
+         else Source_Info_Table.Table (Ind));
    end Initialize;
 
    ------------------------------
@@ -2293,11 +2273,9 @@ package body GPR.Util is
                   Filename'Last - Pragma_Config_File_Suffix'Length + 1;
       E_Last  : constant Integer := Filename'Last;
    begin
-      if Filename'Length > Pragma_Config_File_Suffix'Length then
-         return (Filename (E_First .. E_Last) = Pragma_Config_File_Suffix);
-      else
-         return False;
-      end if;
+      return
+        Filename'Length > Pragma_Config_File_Suffix'Length
+        and then (Filename (E_First .. E_Last) = Pragma_Config_File_Suffix);
    end Is_Pragmas_Config_File;
 
    ----------------
@@ -2880,14 +2858,12 @@ package body GPR.Util is
      (Variable : Variable_Value;
       Default  : String) return String is
    begin
-      if Variable.Kind /= Single
-        or else Variable.Default
-        or else Variable.Value = No_Name
-      then
-         return Default;
-      else
-         return Get_Name_String (Variable.Value);
-      end if;
+      return
+        (if
+           Variable.Kind /= Single or else Variable.Default
+           or else Variable.Value = No_Name
+         then Default
+         else Get_Name_String (Variable.Value));
    end Value_Of;
 
    function Value_Of
@@ -3501,13 +3477,10 @@ package body GPR.Util is
 
    function Ensure_Directory (Path : String) return String is
    begin
-      if Path'Length = 0
-        or else Is_Directory_Separator (Path (Path'Last))
-      then
-         return Path;
-      else
-         return Path & Directory_Separator;
-      end if;
+      return
+        (if Path'Length = 0 or else Is_Directory_Separator (Path (Path'Last))
+         then Path
+         else Path & Directory_Separator);
    end Ensure_Directory;
 
    ----------------------
@@ -3533,13 +3506,12 @@ package body GPR.Util is
 
    function Ensure_Suffix (Item : String; Suffix : String) return String is
    begin
-      if Item'Length >= Suffix'Length
-        and then Item (Item'Last - Suffix'Length + 1 .. Item'Last) = Suffix
-      then
-         return Item;
-      else
-         return Item & Suffix;
-      end if;
+      return
+        (if
+           Item'Length >= Suffix'Length
+           and then Item (Item'Last - Suffix'Length + 1 .. Item'Last) = Suffix
+         then Item
+         else Item & Suffix);
    end Ensure_Suffix;
 
 --     ---------------
@@ -3874,11 +3846,9 @@ package body GPR.Util is
                         & " for Lang", Language_Name);
                   end if;
 
-                  if Config.Binder_Prefix = No_Name then
-                     Binder_Prefix := Empty_String;
-                  else
-                     Binder_Prefix := Config.Binder_Prefix;
-                  end if;
+                  Binder_Prefix :=
+                    (if Config.Binder_Prefix = No_Name then Empty_String
+                     else Config.Binder_Prefix);
 
                   B_Index := Data.Binding;
                   while B_Index /= null loop
@@ -3926,11 +3896,10 @@ package body GPR.Util is
 
    function Get_Target return String is
    begin
-      if Target_Name = null or else Target_Name.all = "" then
-         return Sdefault.Hostname;
-      else
-         return Target_Name.all;
-      end if;
+      return
+        (if Target_Name = null or else Target_Name.all = "" then
+           Sdefault.Hostname
+         else Target_Name.all);
    end Get_Target;
 
    --------------------
@@ -4130,11 +4099,8 @@ package body GPR.Util is
          end loop;
       end if;
 
-      if Ok_Maj then
-         return Maj_Version (Maj_Version'First .. Last_Maj);
-      else
-         return "";
-      end if;
+      return
+        (if Ok_Maj then Maj_Version (Maj_Version'First .. Last_Maj) else "");
    end Major_Id_Name;
 
    ------------------
@@ -5012,13 +4978,12 @@ package body GPR.Util is
                   Put (Get_Name_String (GNAT_Version));
                   Put ("; expected version = ");
 
-                  if Tree.Shared.Ada_Runtime_Library_Version /= No_Name then
-                     Put_Line
-                       (Get_Name_String
-                         (Tree.Shared.Ada_Runtime_Library_Version));
-                  else
-                     Put_Line ("unknown");
-                  end if;
+                  Put_Line
+                    ((if Tree.Shared.Ada_Runtime_Library_Version /= No_Name
+                      then
+                        Get_Name_String
+                          (Tree.Shared.Ada_Runtime_Library_Version)
+                      else "unknown"));
                end if;
 
                return True;
@@ -6089,12 +6054,9 @@ package body GPR.Util is
 
    function Command_Line_Argument (Rank : Positive) return String is
    begin
-      if Rank > Command_Line_Arguments.Last then
-         return "";
-
-      else
-         return Get_Name_String (Command_Line_Arguments.Table (Rank));
-      end if;
+      return
+        (if Rank > Command_Line_Arguments.Last then ""
+         else Get_Name_String (Command_Line_Arguments.Table (Rank)));
    end Command_Line_Argument;
 
 begin

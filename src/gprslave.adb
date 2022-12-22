@@ -711,14 +711,11 @@ procedure Gprslave is
    function Get_Arg (Builder : Build_Master; Value : String) return String is
       P : constant Natural := Fixed.Index (Value, WD_Path_Tag);
    begin
-      if P = 0 then
-         return Value;
-      else
-         return Value (Value'First .. P - 1)
-           & Work_Directory (Builder)
-           & Directory_Separator
-           & Get_Arg (Builder, Value (P + WD_Path_Tag'Length .. Value'Last));
-      end if;
+      return
+        (if P = 0 then Value
+         else Value (Value'First .. P - 1) & Work_Directory (Builder) &
+           Directory_Separator &
+           Get_Arg (Builder, Value (P + WD_Path_Tag'Length .. Value'Last)));
    end Get_Arg;
 
    --------------
@@ -2024,16 +2021,11 @@ procedure Gprslave is
                if Item'Length > 0 then
                   --  No start to replace, this is a plain file-name
 
-                  if Star = 0 then
-                     Name := To_Unbounded_String (Item);
-
-                  else
-                     --  We have a star, replace it with the base name
-
-                     Name := To_Unbounded_String
-                       (Item (Item'First .. Star - 1)
-                        & Base_Name & Item (Star + 1 .. Item'Last));
-                  end if;
+                  Name :=
+                    (if Star = 0 then To_Unbounded_String (Item)
+                     else To_Unbounded_String
+                         (Item (Item'First .. Star - 1) & Base_Name &
+                          Item (Star + 1 .. Item'Last)));
 
                   if Exists (Root & To_String (Name)) then
                      Result.Append (Root & To_String (Name));

@@ -238,11 +238,9 @@ package body GPR.Osint is
 
    function File_Stamp (Name : File_Name_Type) return Time_Stamp_Type is
    begin
-      if Name = No_File then
-         return Empty_Time_Stamp;
-      end if;
-
-      return File_Stamp (Get_Name_String (Name));
+      return
+        (if Name = No_File then Empty_Time_Stamp
+         else File_Stamp (Get_Name_String (Name)));
    end File_Stamp;
 
    function File_Stamp (Name : Path_Name_Type) return Time_Stamp_Type is

@@ -173,11 +173,9 @@ package body Gprls is
       if ALI = No_ALI_Id then
          Status := Not_Found;
       else
-         if Source.Kind = Spec then
-            U := ALIs.Table (ALI).Last_Unit;
-         else
-            U := ALIs.Table (ALI).First_Unit;
-         end if;
+         U :=
+           (if Source.Kind = Spec then ALIs.Table (ALI).Last_Unit
+            else ALIs.Table (ALI).First_Unit);
 
          Find_Status (Source, ALI, U, Status);
       end if;
@@ -267,11 +265,7 @@ package body Gprls is
    procedure Output_Object (O : File_Name_Type) is
    begin
       if Print_Object then
-         if O /= No_File then
-            Put_Line (Get_Name_String (O));
-         else
-            Put_Line (No_Obj);
-         end if;
+         Put_Line ((if O /= No_File then Get_Name_String (O) else No_Obj));
       end if;
    end Output_Object;
 
@@ -455,17 +449,11 @@ package body Gprls is
          New_Line;
          Put ("     Kind   => ");
 
-         if Units.Table (U_Id).Unit_Kind = 'p' then
-            Put ("package ");
-         else
-            Put ("subprogram ");
-         end if;
+         Put
+           ((if Units.Table (U_Id).Unit_Kind = 'p' then "package "
+             else "subprogram "));
 
-         if Kind = 's' then
-            Put_Line ("spec");
-         else
-            Put_Line ("body");
-         end if;
+         Put_Line ((if Kind = 's' then "spec" else "body"));
       end if;
 
       if Verbose_Mode then
@@ -697,11 +685,9 @@ package body Gprls is
          if ALIs.Table (A).Main_Program /= None then
             Output_Token (T_Main);
 
-            if ALIs.Table (A).Main_Program = Proc then
-               Output_Token (T_Procedure);
-            else
-               Output_Token (T_Function);
-            end if;
+            Output_Token
+              ((if ALIs.Table (A).Main_Program = Proc then T_Procedure
+                else T_Function));
 
             Write_Eol;
          end if;
@@ -863,11 +849,9 @@ package body Gprls is
 
          Output_Token (T_Kind);
 
-         if Units.Table (U).Unit_Kind = 'p' then
-            Output_Token (T_Package);
-         else
-            Output_Token (T_Subprogram);
-         end if;
+         Output_Token
+           ((if Units.Table (U).Unit_Kind = 'p' then T_Package
+             else T_Subprogram));
 
          Get_Name_String (UR.Uname);
 
@@ -959,11 +943,8 @@ package body Gprls is
 
          Get_Name_String (Withs.Table (W).Uname);
 
-         if Name_Buffer (Name_Len) = 's' then
-            Output_Token (T_Spec);
-         else
-            Output_Token (T_Body);
-         end if;
+         Output_Token
+           ((if Name_Buffer (Name_Len) = 's' then T_Spec else T_Body));
 
          Write_Eol;
 

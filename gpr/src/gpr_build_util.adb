@@ -439,13 +439,10 @@ package body Gpr_Build_Util is
                      --  For library projects, use the library ALI directory,
                      --  for other projects, use the object directory.
 
-                     if ALI_Project.Library then
-                        Get_Name_String
-                          (ALI_Project.Library_ALI_Dir.Display_Name);
-                     else
-                        Get_Name_String
-                          (ALI_Project.Object_Directory.Display_Name);
-                     end if;
+                     Get_Name_String
+                       ((if ALI_Project.Library then
+                           ALI_Project.Library_ALI_Dir.Display_Name
+                         else ALI_Project.Object_Directory.Display_Name));
 
                      Add_Str_To_Name_Buffer (ALI);
 
@@ -515,12 +512,7 @@ package body Gpr_Build_Util is
       --  If the creation of the mapping file was successful, we add the switch
       --  to the arguments of gnatbind.
 
-      if OK then
-         return Mapping_Path;
-
-      else
-         return No_Path;
-      end if;
+      return (if OK then Mapping_Path else No_Path);
    end Create_Binder_Mapping_File;
 
    -----------------
@@ -719,12 +711,10 @@ package body Gpr_Build_Util is
             end if;
 
          elsif Project.Library then
-            if Activity = SAL_Binding and then Extended then
-               Add_Dir (Project.Object_Directory.Display_Name);
-
-            else
-               Add_Dir (Project.Library_ALI_Dir.Display_Name);
-            end if;
+            Add_Dir
+              ((if Activity = SAL_Binding and then Extended then
+                  Project.Object_Directory.Display_Name
+                else Project.Library_ALI_Dir.Display_Name));
 
          else
             Add_Dir (Project.Object_Directory.Display_Name);
@@ -766,11 +756,10 @@ package body Gpr_Build_Util is
          declare
             Name : constant String := Get_Name_String (N);
          begin
-            if Debug.Debug_Flag_F and then Is_Absolute_Path (Name) then
-               Write_Str (File_Name (Name));
-            else
-               Write_Str (Name);
-            end if;
+            Write_Str
+              ((if Debug.Debug_Flag_F and then Is_Absolute_Path (Name) then
+                  File_Name (Name)
+                else Name));
          end;
 
          Write_Str (""" ");
@@ -1390,11 +1379,8 @@ package body Gpr_Build_Util is
       function Next_Main return String is
          Info : constant Main_Info := Next_Main;
       begin
-         if Info = No_Main_Info then
-            return "";
-         else
-            return Get_Name_String (Info.File);
-         end if;
+         return
+           (if Info = No_Main_Info then "" else Get_Name_String (Info.File));
       end Next_Main;
 
       function Next_Main return Main_Info is
@@ -1413,11 +1399,9 @@ package body Gpr_Build_Util is
 
       function Number_Of_Mains (Tree : Project_Tree_Ref) return Natural is
       begin
-         if Tree = null then
-            return Names.Last_Index;
-         else
-            return Builder_Data (Tree).Number_Of_Mains;
-         end if;
+         return
+           (if Tree = null then Names.Last_Index
+            else Builder_Data (Tree).Number_Of_Mains);
       end Number_Of_Mains;
 
       -----------
@@ -1467,11 +1451,7 @@ package body Gpr_Build_Util is
    function Path_Or_File_Name (Path : Path_Name_Type) return String is
       Path_Name : constant String := Get_Name_String (Path);
    begin
-      if Debug.Debug_Flag_F then
-         return File_Name (Path_Name);
-      else
-         return Path_Name;
-      end if;
+      return (if Debug.Debug_Flag_F then File_Name (Path_Name) else Path_Name);
    end Path_Or_File_Name;
 
    -----------------
@@ -1863,17 +1843,14 @@ package body Gpr_Build_Util is
                      exit Source_Loop when Root_Source = No_Source;
 
                      Root_Found := False;
-                     if Pat_Root then
-                        Root_Found := Root_Source.Unit /= No_Unit_Index
+                     Root_Found :=
+                       (if Pat_Root then
+                          Root_Source.Unit /= No_Unit_Index
                           and then Match
                             (Get_Name_String (Root_Source.Unit.Name),
-                             Root_Pattern);
-
-                     else
-                        Root_Found :=
-                          Root_Source.Unit /= No_Unit_Index
-                            and then Root_Source.Unit.Name = Unit_Name;
-                     end if;
+                             Root_Pattern)
+                        else Root_Source.Unit /= No_Unit_Index
+                          and then Root_Source.Unit.Name = Unit_Name);
 
                      if Root_Found then
                         case Root_Source.Kind is
@@ -2020,11 +1997,8 @@ package body Gpr_Build_Util is
 
       function Element (Rank : Positive) return File_Name_Type is
       begin
-         if Rank <= Q.Last then
-            return Q.Table (Rank).Info.Id.File;
-         else
-            return No_File;
-         end if;
+         return
+           (if Rank <= Q.Last then Q.Table (Rank).Info.Id.File else No_File);
       end Element;
 
       ----------------------------
@@ -2119,11 +2093,10 @@ package body Gpr_Build_Util is
                   then
                      --  Always provide a non null location
 
-                     if Source.Location = No_Location then
-                        Location := Source.Project.Location;
-                     else
-                        Location := Source.Location;
-                     end if;
+                     Location :=
+                       (if Source.Location = No_Location then
+                          Source.Project.Location
+                        else Source.Location);
 
                      Error_Msg_Name_1 := Source.Language.Display_Name;
                      Error_Msg_File_1 := Source.File;
