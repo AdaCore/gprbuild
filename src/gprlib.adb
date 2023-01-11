@@ -566,7 +566,7 @@ procedure Gprlib is
                         --  Set Success to True only if the newly
                         --  created file has been correctly written.
 
-                        Success := Status and Actual_Len = Len + 3;
+                        Success := Status and then Actual_Len = Len + 3;
                      end if;
                   end if;
                end if;
@@ -2466,7 +2466,7 @@ begin
    --  files with no Ada sources (e.g. C only). Do not consider this as
    --  an error in this case.
 
-   if Object_Files.Is_Empty and not CodePeer_Mode then
+   if Object_Files.Is_Empty and then not CodePeer_Mode then
       Fail_Program (null, "no object files specified");
    end if;
 

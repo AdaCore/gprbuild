@@ -121,16 +121,16 @@ package body GPR.Compilation.Sync is
       ---------
 
       entry Get
-        (Job   : out Gpr_Data;
-         Files : out File_Data_Set.Vector;
-         Stop  : out Boolean) when Jobs.Length > 0 or No_More is
+        (Job  : out Gpr_Data; Files : out File_Data_Set.Vector;
+         Stop : out Boolean)
+        when Jobs.Length > 0 or else No_More is
       begin
          if Jobs.Length = 0 and then No_More then
             Stop := True;
 
          else
             Stop := False;
-            Job := Jobs.First_Element;
+            Job  := Jobs.First_Element;
             Jobs.Delete_First;
 
             if not PF_Initialized then

@@ -1936,7 +1936,7 @@ package body GPR.Conf is
       --  at the compiler roots.
 
       Config_Try_Again :=
-        Fallback_Try_Again or Project_Node_Tree.Incomplete_With;
+        Fallback_Try_Again or else Project_Node_Tree.Incomplete_With;
 
       Process_Project_And_Apply_Config
         (Main_Project               => Main_Project,

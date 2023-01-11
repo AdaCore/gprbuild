@@ -679,7 +679,9 @@ procedure Gprslave is
       Is_Debug : Boolean := False;
       Force    : Boolean := False) is
    begin
-      if Force or (Verbose and not Is_Debug) or (Debug and Is_Debug) then
+      if Force or else (Verbose and then not Is_Debug)
+        or else (Debug and then Is_Debug)
+      then
          IO.Message (Str, Is_Debug);
       end if;
    end Display;
@@ -690,7 +692,9 @@ procedure Gprslave is
       Is_Debug : Boolean := False;
       Force    : Boolean := False) is
    begin
-      if Force or (Verbose and not Is_Debug) or (Debug and Is_Debug) then
+      if Force or else (Verbose and then not Is_Debug)
+        or else (Debug and then Is_Debug)
+      then
          IO.Message (Builder, Str, Is_Debug);
       end if;
    end Display;

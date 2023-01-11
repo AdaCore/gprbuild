@@ -1008,7 +1008,7 @@ procedure Gprls.Main is
          end;
       end if;
 
-      if No_Files_In_Command_Line and not Closure then
+      if No_Files_In_Command_Line and then not Closure then
          --  Get all the compilable sources of the project
          declare
             Unit    : GPR.Unit_Index;
@@ -1043,8 +1043,7 @@ procedure Gprls.Main is
                      if not Subunit then
                         Add_File
                           (Get_Name_String (Unit.File_Names (Impl).Object),
-                           Tree,
-                           Source => Unit.File_Names (Impl));
+                           Tree, Source => Unit.File_Names (Impl));
                      end if;
                   end if;
 
@@ -1052,12 +1051,12 @@ procedure Gprls.Main is
                  and then not Unit.File_Names (Spec).Locally_Removed
                  and then
                --  We have a spec with no body. Check if it is for this project
+
                  (All_Projects
                   or else Unit.File_Names (Spec).Project = Project)
                then
                   Add_File
-                    (Get_Name_String (Unit.File_Names (Spec).Object),
-                     Tree,
+                    (Get_Name_String (Unit.File_Names (Spec).Object), Tree,
                      Source => Unit.File_Names (Spec));
                end if;
 
@@ -1092,7 +1091,8 @@ procedure Gprls.Main is
                      if All_Projects
                        or else
                          Ultimate_Extending_Project_Of
-                           (Unit.File_Names (Impl).Project) = Project
+                           (Unit.File_Names (Impl).Project) =
+                         Project
                      then
                         Subunit := False;
 
@@ -1119,12 +1119,11 @@ procedure Gprls.Main is
                               Canonical_Case_File_Name (Dep_Name);
 
                               if Dep_Name in File_Name | File_Name & ".ali"
-                                or else File_Name in Object_Name
-                                  | Get_Name_String
-                                    (Unit.File_Names (Impl).File)
-                                      | Get_Name_String
-                                        (Unit.File_Names (Impl)
-                                         .Display_File)
+                                or else File_Name in Object_Name |
+                                    Get_Name_String
+                                      (Unit.File_Names (Impl).File) |
+                                    Get_Name_String
+                                      (Unit.File_Names (Impl).Display_File)
                               then
                                  FN_Source.Source := Unit.File_Names (Impl);
                                  FN_Source.Tree   := Tree;
@@ -1137,8 +1136,9 @@ procedure Gprls.Main is
                   elsif Unit.File_Names (Spec) /= null
                     and then not Unit.File_Names (Spec).Locally_Removed
                     and then
-                  --  We have a spec with no body. Check if it is for this
-                  --  project.
+                     --  We have a spec with no body. Check if it is for this
+                     --  project.
+
                     (All_Projects
                      or else Unit.File_Names (Spec).Project = Project)
                   then
@@ -1152,11 +1152,10 @@ procedure Gprls.Main is
                         Canonical_Case_File_Name (Dep_Name);
 
                         if Dep_Name in File_Name | File_Name & ".ali"
-                          or else File_Name in Object_Name
-                            | Get_Name_String
-                              (Unit.File_Names (Spec).File)
-                                | Get_Name_String
-                                  (Unit.File_Names (Spec).Display_File)
+                          or else File_Name in Object_Name                  |
+                              Get_Name_String (Unit.File_Names (Spec).File) |
+                              Get_Name_String
+                                (Unit.File_Names (Spec).Display_File)
                         then
                            FN_Source.Source := Unit.File_Names (Spec);
                            FN_Source.Tree   := Tree;

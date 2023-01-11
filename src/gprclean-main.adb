@@ -961,7 +961,7 @@ begin
    --  generated, gprclean will delete it if it was specified using
    --  --autoconf=.
 
-   Delete_Autoconf_File := Delete_Autoconf_File or Autoconf_Specified;
+   Delete_Autoconf_File := Delete_Autoconf_File or else Autoconf_Specified;
 
    if Configuration_Project_Path /= null then
       Free (Config_Project_File_Name);
@@ -993,7 +993,7 @@ begin
       Slave_Env :=
         new String'(Aux.Compute_Slave_Env (Project_Tree, Slave_Env_Auto));
 
-      if Slave_Env_Auto and not Opt.Quiet_Output then
+      if Slave_Env_Auto and then not Opt.Quiet_Output then
          Put_Line ("slave environment is " & Slave_Env.all);
       end if;
    end if;
@@ -1060,7 +1060,7 @@ begin
    --  In verbose mode, if Delete has not been called, indicate that
    --  no file needs to be deleted.
 
-   if Verbose_Mode and (not File_Deleted) then
+   if Verbose_Mode and then (not File_Deleted) then
       New_Line;
 
       if Do_Nothing then

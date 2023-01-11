@@ -999,14 +999,14 @@ package body GPR.Part is
                   --  If we have one, get the project id of the limited
                   --  imported project file, and do not parse it.
 
-                  if (In_Limited or Limited_Withs)
+                  if (In_Limited or else Limited_Withs)
                     and then Project_Stack.Last > 1
                   then
                      declare
                         Canonical_Path_Name : Path_Name_Type;
 
                      begin
-                        Name_Len := Resolved_Path'Length;
+                        Name_Len                    := Resolved_Path'Length;
                         Name_Buffer (1 .. Name_Len) := Resolved_Path;
                         Canonical_Case_File_Name (Name_Buffer (1 .. Name_Len));
                         Canonical_Path_Name := Name_Find;
@@ -1029,18 +1029,14 @@ package body GPR.Part is
 
                   if No (Withed_Project) then
                      Parse_Single_Project
-                       (In_Tree           => In_Tree,
-                        Project           => Withed_Project,
+                       (In_Tree => In_Tree, Project => Withed_Project,
                         Extends_All       => Extends_All,
                         Path_Name_Id      => Imported_Path_Name_Id,
-                        Extended          => False,
-                        From_Extended     => From_Extended,
-                        In_Limited        => In_Limited or Limited_Withs,
-                        Packages_To_Check => Packages_To_Check,
-                        Depth             => Depth,
+                        Extended => False, From_Extended => From_Extended,
+                        In_Limited        => In_Limited or else Limited_Withs,
+                        Packages_To_Check => Packages_To_Check, Depth => Depth,
                         Current_Dir       => Current_Dir,
-                        Is_Config_File    => Is_Config_File,
-                        Env               => Env);
+                        Is_Config_File    => Is_Config_File, Env => Env);
 
                   else
                      Extends_All := Is_Extending_All (Withed_Project, In_Tree);

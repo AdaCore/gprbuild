@@ -4514,12 +4514,11 @@ package body GPR.Nmsc is
          Check_Aggregate_Library_Dirs;
       end if;
 
-      if Project.Library and not Data.In_Aggregate_Lib then
+      if Project.Library and then not Data.In_Aggregate_Lib then
          --  Record the library name
 
          Lib_Data_Table.Append
-           ((Name => Project.Library_Name,
-             Proj => Project,
+           ((Name => Project.Library_Name, Proj => Project,
              Tree => Data.Tree));
       end if;
    end Check_Library_Attributes;
@@ -5513,7 +5512,7 @@ package body GPR.Nmsc is
                end if;
             end loop;
 
-            OK := OK and not Underline;
+            OK := OK and then not Underline;
 
             if not OK then
                Error_Msg
@@ -7130,28 +7129,25 @@ package body GPR.Nmsc is
 
          Dir_Exists := Is_Directory (Full_Path_Name.all);
 
-         if not Must_Exist or Dir_Exists then
+         if not Must_Exist or else Dir_Exists then
             declare
                Normed : constant String :=
-                          Normalize_Pathname
-                            (Full_Path_Name.all,
-                             Directory      =>
-                              The_Parent (The_Parent'First .. The_Parent_Last),
-                             Resolve_Links  => False,
-                             Case_Sensitive => True);
+                 Normalize_Pathname
+                   (Full_Path_Name.all,
+                    Directory =>
+                      The_Parent (The_Parent'First .. The_Parent_Last),
+                    Resolve_Links => False, Case_Sensitive => True);
 
                Canonical_Path : constant String :=
-                                  Normalize_Pathname
-                                    (Normed,
-                                     Directory      =>
-                                       The_Parent
-                                         (The_Parent'First .. The_Parent_Last),
-                                     Resolve_Links  =>
-                                        Opt.Follow_Links_For_Dirs,
-                                     Case_Sensitive => False);
+                 Normalize_Pathname
+                   (Normed,
+                    Directory =>
+                      The_Parent (The_Parent'First .. The_Parent_Last),
+                    Resolve_Links  => Opt.Follow_Links_For_Dirs,
+                    Case_Sensitive => False);
 
             begin
-               Name_Len := Normed'Length;
+               Name_Len                    := Normed'Length;
                Name_Buffer (1 .. Name_Len) := Normed;
 
                --  Directories should always end with a directory separator
@@ -7162,7 +7158,7 @@ package body GPR.Nmsc is
 
                Path.Display_Name := Name_Find;
 
-               Name_Len := Canonical_Path'Length;
+               Name_Len                    := Canonical_Path'Length;
                Name_Buffer (1 .. Name_Len) := Canonical_Path;
 
                if Name_Buffer (Name_Len) /= Directory_Separator then
@@ -8219,7 +8215,7 @@ package body GPR.Nmsc is
 
          Recursive_Dirs.Set (Visited, Path.Name, True);
 
-         Success := Subdirectory_Matches (Path, Rank) or Success;
+         Success := Subdirectory_Matches (Path, Rank) or else Success;
 
          Open (Dir, Path_Str);
 
@@ -8277,7 +8273,7 @@ package body GPR.Nmsc is
                         Path2.Name := Name_Find;
 
                         Success :=
-                          Recursive_Find_Dirs (Path2, Rank) or Success;
+                          Recursive_Find_Dirs (Path2, Rank) or else Success;
                      end if;
                   end if;
                end;
@@ -9427,7 +9423,7 @@ package body GPR.Nmsc is
                --  it as it has no sources by itself and so interface won't be
                --  found.
 
-               if Project.Library and not In_Aggregate_Lib then
+               if Project.Library and then not In_Aggregate_Lib then
                   Check_Stand_Alone_Library (Project, Data);
                end if;
 

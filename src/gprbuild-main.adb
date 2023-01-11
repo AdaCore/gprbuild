@@ -236,22 +236,20 @@ procedure Gprbuild.Main is
             exit when Main_Id = No_Main_Info;
 
             Queue.Insert_Project_Sources
-              (Project        => Main_Id.Project,
-               Project_Tree   => Main_Id.Tree,
+              (Project        => Main_Id.Project, Project_Tree => Main_Id.Tree,
                Unique_Compile => Unique_Compile,
-               All_Projects =>
-                  not Unique_Compile
-               or else (Unique_Compile_All_Projects or Recursive));
+               All_Projects   =>
+                 not Unique_Compile
+                 or else (Unique_Compile_All_Projects or else Recursive));
          end loop;
 
       else
          Queue.Insert_Project_Sources
-           (Project        => Main_Project,
-            Project_Tree   => Project_Tree,
+           (Project        => Main_Project, Project_Tree => Project_Tree,
             Unique_Compile => Unique_Compile,
-            All_Projects =>
-               not Unique_Compile
-            or else (Unique_Compile_All_Projects or Recursive));
+            All_Projects   =>
+              not Unique_Compile
+              or else (Unique_Compile_All_Projects or else Recursive));
       end if;
    end Add_Mains_To_Queue;
 
@@ -1851,7 +1849,7 @@ procedure Gprbuild.Main is
 
          Opt.Link_Only := False;
 
-         if not Opt.Compile_Only and not Opt.Bind_Only then
+         if not Opt.Compile_Only and then not Opt.Bind_Only then
             Opt.Compile_Only := True;
             Opt.Bind_Only    := True;
          end if;
@@ -2642,7 +2640,7 @@ begin
       if No_Link then
          Opt.Link_Only := False;
 
-         if not Opt.Compile_Only and not Opt.Bind_Only then
+         if not Opt.Compile_Only and then not Opt.Bind_Only then
             Opt.Compile_Only := True;
             Opt.Bind_Only    := True;
          end if;
@@ -2791,7 +2789,7 @@ begin
          Slave_Env :=
            new String'(Aux.Compute_Slave_Env (Project_Tree, Slave_Env_Auto));
 
-         if Slave_Env_Auto and not Opt.Quiet_Output then
+         if Slave_Env_Auto and then not Opt.Quiet_Output then
             Put ("slave environment is ");
             Put (Slave_Env.all);
             New_Line;
