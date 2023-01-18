@@ -651,18 +651,15 @@ package body Scanner is
          --  bug otherwise arising from "x : integer range 1 .. 10:= 6;"
 
          elsif C = '#'
-           or else (C = ':' and then
-                      (Source (Scan_Ptr + 1) = '.'
-                         or else
-                       Source (Scan_Ptr + 1) in '0' .. '9'
-                         or else
-                       Source (Scan_Ptr + 1) in 'A' .. 'Z'
-                         or else
-                       Source (Scan_Ptr + 1) in 'a' .. 'z'))
+           or else
+           (C = ':'
+            and then
+            (Source (Scan_Ptr + 1) in '.' | '0' .. '9' | 'A' .. 'Z' |
+                 'a' .. 'z'))
          then
             Accumulate_Checksum (C);
             Base_Char := C;
-            Base := Int_Value;
+            Base      := Int_Value;
 
             if Base < 2 or else Base > 16 then
                Base := 16;
@@ -672,9 +669,9 @@ package body Scanner is
 
             --  Scan out extended integer [. integer]
 
-            C := Source (Scan_Ptr);
+            C         := Source (Scan_Ptr);
             Int_Value := 0;
-            Scale := 0;
+            Scale     := 0;
 
             loop
                if C in '0' .. '9' then
@@ -697,31 +694,31 @@ package body Scanner is
                end if;
 
                Int_Value := Max_Int (Int_Value * Base + Extended_Digit_Value);
-               Scale := Scale - 1;
-               Scan_Ptr := Scan_Ptr + 1;
-               C := Source (Scan_Ptr);
+               Scale     := Scale - 1;
+               Scan_Ptr  := Scan_Ptr + 1;
+               C         := Source (Scan_Ptr);
 
                if C = '_' then
                   loop
                      Accumulate_Checksum ('_');
                      Scan_Ptr := Scan_Ptr + 1;
-                     C := Source (Scan_Ptr);
+                     C        := Source (Scan_Ptr);
                      exit when C /= '_';
                   end loop;
 
                elsif C = '.' then
                   Accumulate_Checksum ('.');
-                  Scan_Ptr := Scan_Ptr + 1;
-                  C := Source (Scan_Ptr);
+                  Scan_Ptr      := Scan_Ptr + 1;
+                  C             := Source (Scan_Ptr);
                   Point_Scanned := True;
-                  Scale := 0;
+                  Scale         := 0;
 
                elsif C = Base_Char then
                   Accumulate_Checksum (C);
                   Scan_Ptr := Scan_Ptr + 1;
                   exit;
 
-               elsif C = '#' or else C = ':' then
+               elsif C in '#' | ':' then
                   Scan_Ptr := Scan_Ptr + 1;
                   exit;
 
@@ -740,9 +737,9 @@ package body Scanner is
             Scale := 0;
          end if;
 
-         if Source (Scan_Ptr) = 'e' or else Source (Scan_Ptr) = 'E' then
+         if Source (Scan_Ptr) in 'e' | 'E' then
             Accumulate_Checksum ('e');
-            Scan_Ptr := Scan_Ptr + 1;
+            Scan_Ptr             := Scan_Ptr + 1;
             Exponent_Is_Negative := False;
 
             if Source (Scan_Ptr) = '+' then
@@ -1369,32 +1366,29 @@ package body Scanner is
          --  cases, like A."abs"'Address, and also gives better error
          --  behavior for impossible cases like 123'xxx).
 
-            if Prev_Token = Tok_Identifier
-               or else Prev_Token = Tok_Right_Paren
-               or else Prev_Token = Tok_All
-               or else Prev_Token = Tok_Project
-               or else Prev_Token in Token_Class_Literal
-            then
-               Token := Tok_Apostrophe;
-               return;
+                  if Prev_Token in Tok_Identifier | Tok_Right_Paren | Tok_All |
+                        Tok_Project | Token_Class_Literal
+                  then
+                     Token := Tok_Apostrophe;
+                     return;
 
-            --  Otherwise the apostrophe starts a character literal
+                     --  Otherwise the apostrophe starts a character literal
 
-            else
-               --  Case of wide character literal
+                  else
+                     --  Case of wide character literal
 
-               if Start_Of_Wide_Character then
-                  Wptr := Scan_Ptr;
-                  Scan_Wide (Source, Scan_Ptr, Code, Err);
-                  Accumulate_Checksum (Code);
+                     if Start_Of_Wide_Character then
+                        Wptr := Scan_Ptr;
+                        Scan_Wide (Source, Scan_Ptr, Code, Err);
+                        Accumulate_Checksum (Code);
 
-                  if Err then
-                     Code := Character'Pos (' ');
-                  end if;
+                        if Err then
+                           Code := Character'Pos (' ');
+                        end if;
 
-                  if Source (Scan_Ptr) = ''' then
-                     Scan_Ptr := Scan_Ptr + 1;
-                  end if;
+                        if Source (Scan_Ptr) = ''' then
+                           Scan_Ptr := Scan_Ptr + 1;
+                        end if;
 
                --  If we do not find a closing quote in the expected place then
                --  assume that we have a misguided attempt at a string literal.
@@ -1402,39 +1396,39 @@ package body Scanner is
                --  However, if previous token is RANGE, then we return an
                --  apostrophe instead since this gives better error recovery
 
-               elsif Source (Scan_Ptr + 1) /= ''' then
-                  if Prev_Token = Tok_Range then
-                     Token := Tok_Apostrophe;
-                     return;
+                     elsif Source (Scan_Ptr + 1) /= ''' then
+                        if Prev_Token = Tok_Range then
+                           Token := Tok_Apostrophe;
+                           return;
 
-                  else
-                     Scan_Ptr := Scan_Ptr - 1;
-                     Error_Msg
-                       ("strings are delimited by double quote character",
-                        Scan_Ptr);
-                     Slit;
-                     Post_Scan;
-                     return;
-                  end if;
+                        else
+                           Scan_Ptr := Scan_Ptr - 1;
+                           Error_Msg
+                             ("strings are delimited by double quote character",
+                              Scan_Ptr);
+                           Slit;
+                           Post_Scan;
+                           return;
+                        end if;
 
-               --  Otherwise we have a (non-wide) character literal
+                        --  Otherwise we have a (non-wide) character literal
 
-               else
-                  Accumulate_Checksum (Source (Scan_Ptr));
+                     else
+                        Accumulate_Checksum (Source (Scan_Ptr));
 
-                  Code := Get_Char_Code (Source (Scan_Ptr));
-                  Scan_Ptr := Scan_Ptr + 2;
-               end if;
+                        Code     := Get_Char_Code (Source (Scan_Ptr));
+                        Scan_Ptr := Scan_Ptr + 2;
+                     end if;
 
                --  Fall through here with Scan_Ptr updated past the closing
                --  quote, and Code set to the Char_Code value for the literal
 
-               Accumulate_Checksum (''');
-               Token := Tok_Char_Literal;
-               Character_Code := Code;
-               Post_Scan;
-               return;
-            end if;
+                     Accumulate_Checksum (''');
+                     Token          := Tok_Char_Literal;
+                     Character_Code := Code;
+                     Post_Scan;
+                     return;
+                  end if;
          end Char_Literal_Case;
 
          --  Right parenthesis
@@ -1534,37 +1528,35 @@ package body Scanner is
             begin
                --  OK literal if digit followed by digit or underscore
 
-               if C in '0' .. '9' or else C = '_' then
-                  null;
+                  if C in '0' .. '9' | '_' then
+                     null;
 
-               --  OK literal if digit not followed by identifier char
+                     --  OK literal if digit not followed by identifier char
 
-               elsif not Identifier_Char (C) then
-                  null;
+                  elsif not Identifier_Char (C) then
+                     null;
 
                --  OK literal if digit followed by e/E followed by digit/sign.
                --  We also allow underscore after the E, which is an error, but
                --  better handled by Nlit than deciding this is an identifier.
 
-               elsif (C = 'e' or else C = 'E')
-                 and then (Source (Scan_Ptr + 2) in '0' .. '9'
-                             or else Source (Scan_Ptr + 2) = '+'
-                             or else Source (Scan_Ptr + 2) = '-'
-                             or else Source (Scan_Ptr + 2) = '_')
-               then
-                  null;
+                  elsif (C in 'e' | 'E')
+                    and then
+                    (Source (Scan_Ptr + 2) in '0' .. '9' | '+' | '-' | '_')
+                  then
+                     null;
 
-               --  Here we have what really looks like an identifier that
-               --  starts with a digit, so give error msg.
+                     --  Here we have what really looks like an identifier that
+                     --  starts with a digit, so give error msg.
 
-               else
-                  Name_Len := 1;
-                  Underline_Found := False;
-                  Name_Buffer (1) := Source (Scan_Ptr);
-                  Accumulate_Checksum (Name_Buffer (1));
-                  Scan_Ptr := Scan_Ptr + 1;
-                  goto Scan_Identifier;
-               end if;
+                  else
+                     Name_Len        := 1;
+                     Underline_Found := False;
+                     Name_Buffer (1) := Source (Scan_Ptr);
+                     Accumulate_Checksum (Name_Buffer (1));
+                     Scan_Ptr := Scan_Ptr + 1;
+                     goto Scan_Identifier;
+                  end if;
             end;
 
             --  Here we have an OK integer literal
@@ -1700,52 +1692,46 @@ package body Scanner is
                --  Skip to end of line
 
                loop
-                  if Source (Scan_Ptr) in Graphic_Character
-                       or else
-                     Source (Scan_Ptr) = HT
-                  then
-                     Scan_Ptr := Scan_Ptr + 1;
+                     if Source (Scan_Ptr) in Graphic_Character | HT then
+                        Scan_Ptr := Scan_Ptr + 1;
 
-                  --  Done if line terminator or EOF
+                        --  Done if line terminator or EOF
 
-                  elsif Source (Scan_Ptr) in Line_Terminator
-                          or else
-                        Source (Scan_Ptr) = EOF
-                  then
-                     exit;
+                     elsif Source (Scan_Ptr) in Line_Terminator | EOF then
+                        exit;
 
                   --  If we have a wide character, we have to scan it out,
                   --  because it might be a legitimate line terminator
 
-                  elsif Start_Of_Wide_Character then
-                     declare
-                        Wptr : constant Source_Ptr := Scan_Ptr;
-                        Code : Char_Code;
-                        Err  : Boolean;
+                     elsif Start_Of_Wide_Character then
+                        declare
+                           Wptr : constant Source_Ptr := Scan_Ptr;
+                           Code : Char_Code;
+                           Err  : Boolean;
 
-                     begin
-                        Scan_Wide (Source, Scan_Ptr, Code, Err);
+                        begin
+                           Scan_Wide (Source, Scan_Ptr, Code, Err);
 
                         --  If not well formed wide character, then just skip
                         --  past it and ignore it.
 
-                        if Err then
-                           Scan_Ptr := Wptr + 1;
+                           if Err then
+                              Scan_Ptr := Wptr + 1;
 
-                        --  If UTF_32 terminator, terminate comment scan
+                              --  If UTF_32 terminator, terminate comment scan
 
-                        elsif Is_UTF_32_Line_Terminator (UTF_32 (Code)) then
-                           Scan_Ptr := Wptr;
-                           exit;
-                        end if;
-                     end;
+                           elsif Is_UTF_32_Line_Terminator (UTF_32 (Code)) then
+                              Scan_Ptr := Wptr;
+                              exit;
+                           end if;
+                        end;
 
                   --  Else keep going (don't worry about bad comment chars
                   --  in this context, we just want to find the end of line.
 
-                  else
-                     Scan_Ptr := Scan_Ptr + 1;
-                  end if;
+                     else
+                        Scan_Ptr := Scan_Ptr + 1;
+                     end if;
                end loop;
 
             elsif Source (Scan_Ptr) = '$' then
@@ -1913,9 +1899,7 @@ package body Scanner is
       --  digits, which we expect to be the most common characters.
 
       loop
-         if Source (Scan_Ptr) in 'a' .. 'z'
-           or else Source (Scan_Ptr) in '0' .. '9'
-         then
+         if Source (Scan_Ptr) in 'a' .. 'z' | '0' .. '9' then
             Name_Buffer (Name_Len + 1) := Source (Scan_Ptr);
             Accumulate_Checksum (Source (Scan_Ptr));
 
@@ -2350,8 +2334,8 @@ package body Scanner is
       elsif Chr = LF then
          P := P + 1;
 
-      elsif Chr = FF or else Chr = VT then
-         P := P + 1;
+      elsif Chr in FF | VT then
+         P        := P + 1;
          Physical := False;
          return;
 

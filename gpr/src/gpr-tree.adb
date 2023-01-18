@@ -128,8 +128,7 @@ package body GPR.Tree is
 
             --  Create new N_Comment node
 
-            if (Where = After or else Where = After_End)
-              and then Token /= Tok_EOF
+            if (Where in After | After_End) and then Token /= Tok_EOF
               and then Comments.Table (J).Follows_Empty_Line
             then
                Comments.Table (1 .. Comments.Last - J + 1) :=
@@ -389,7 +388,7 @@ package body GPR.Tree is
          if not Node_With_Comments (Of_Kind) then
             Unkept_Comments := True;
 
-         elsif Of_Kind /= N_Comment and then Of_Kind /= N_Comment_Zones then
+         elsif Of_Kind not in N_Comment | N_Comment_Zones then
 
             Project_Node_Table.Increment_Last (In_Tree.Project_Nodes);
             In_Tree.Project_Nodes.Table
@@ -407,11 +406,10 @@ package body GPR.Tree is
                Project_Node_Table.Increment_Last (In_Tree.Project_Nodes);
                In_Tree.Project_Nodes.Table
                  (Project_Node_Table.Last (In_Tree.Project_Nodes)) :=
-                 (Kind   => N_Comment,
-                  Flag1  => Comments.Table (J).Follows_Empty_Line,
-                  Flag2  => Comments.Table (J).Is_Followed_By_Empty_Line,
-                  Value  => Comments.Table (J).Value,
-                  others => <>);
+                 (Kind  => N_Comment,
+                  Flag1 => Comments.Table (J).Follows_Empty_Line,
+                  Flag2 => Comments.Table (J).Is_Followed_By_Empty_Line,
+                  Value => Comments.Table (J).Value, others => <>);
 
                --  Link it to the N_Comment_Zones node, if it is the first,
                --  otherwise to the previous one.
@@ -1639,28 +1637,25 @@ package body GPR.Tree is
             when Tok_Comment =>
                --  If this is a line comment, add it to the comment table
 
-               if Prev_Token = Tok_End_Of_Line
-                 or else Prev_Token = No_Token
-               then
+               if Prev_Token in Tok_End_Of_Line | No_Token then
                   Comments.Increment_Last;
                   Comments.Table (Comments.Last) :=
-                    (Value                     => Comment_Id,
-                     Follows_Empty_Line        => Empty_Line,
+                    (Value => Comment_Id, Follows_Empty_Line => Empty_Line,
                      Is_Followed_By_Empty_Line => False);
 
-               --  Otherwise, it is an end of line comment. If there is an
-               --  end of line node specified, associate the comment with
-               --  this node.
+                  --  Otherwise, it is an end of line comment. If there is an
+                  --  end of line node specified, associate the comment with
+                  --  this node.
 
                elsif Present (End_Of_Line_Node) then
                   declare
                      Zones : constant Project_Node_Id :=
-                               Comment_Zones_Of (End_Of_Line_Node, In_Tree);
+                       Comment_Zones_Of (End_Of_Line_Node, In_Tree);
                   begin
                      In_Tree.Project_Nodes.Table (Zones).Value := Comment_Id;
                   end;
 
-               --  Otherwise, this end of line node cannot be kept
+                  --  Otherwise, this end of line node cannot be kept
 
                else
                   Unkept_Comments := True;

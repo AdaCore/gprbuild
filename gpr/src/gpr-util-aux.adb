@@ -342,7 +342,7 @@ package body GPR.Util.Aux is
 
       begin
          for J in Arg'Range loop
-            if Arg (J) = '\' or else Arg (J) = ' ' or else Arg (J) = '"' then
+            if Arg (J) in '\' | ' ' | '"' then
                Add ('\');
             end if;
 
@@ -357,12 +357,12 @@ package body GPR.Util.Aux is
       Tempdir.Create_Temp_File (Resp_File, Name => Name_1);
       Record_Temp_File (null, Name_1);
 
-      if Format = GNU or else Format = GCC_GNU then
+      if Format in GNU | GCC_GNU then
          Status := Write (Resp_File, GNU_Header'Address, GNU_Header'Length);
       end if;
 
       for Object of Objects loop
-         if Format = GNU or else Format = GCC_GNU then
+         if Format in GNU | GCC_GNU then
             Status :=
               Write (Resp_File, GNU_Opening'Address, GNU_Opening'Length);
          end if;
@@ -370,17 +370,16 @@ package body GPR.Util.Aux is
          Status :=
            Write (Resp_File, Object (1)'Address, Object'Length);
 
-         if Format = GNU or else Format = GCC_GNU then
+         if Format in GNU | GCC_GNU then
             Status :=
               Write (Resp_File, GNU_Closing'Address, GNU_Closing'Length);
 
          else
-            Status :=
-              Write (Resp_File, ASCII.LF'Address, 1);
+            Status := Write (Resp_File, ASCII.LF'Address, 1);
          end if;
       end loop;
 
-      if Format = GNU or else Format = GCC_GNU then
+      if Format in GNU | GCC_GNU then
          Status := Write (Resp_File, GNU_Footer'Address, GNU_Footer'Length);
       end if;
 
@@ -419,15 +418,10 @@ package body GPR.Util.Aux is
             Close (Resp_File, Closing_Status);
       end case;
 
-      if        Format = GCC
-        or else Format = GCC_GNU
-        or else Format = GCC_Object_List
-        or else Format = GCC_Option_List
-      then
+      if Format in GCC | GCC_GNU | GCC_Object_List | GCC_Option_List then
          for Argument of Other_Arguments loop
             declare
-               Arg : constant String :=
-                       Modified_Argument (Argument);
+               Arg : constant String := Modified_Argument (Argument);
 
             begin
                Status := Write (Resp_File, Arg (1)'Address, Arg'Length);

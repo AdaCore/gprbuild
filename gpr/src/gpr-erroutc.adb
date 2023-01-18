@@ -252,14 +252,9 @@ package body GPR.Erroutc is
          --  legal Ada program.
 
          when WCEM_Brackets =>
-            return P <= S'Last - 2
-              and then S (P) = '['
-              and then S (P + 1) = '"'
-              and then (S (P + 2) in '0' .. '9'
-                            or else
-                           S (P + 2) in 'a' .. 'f'
-                            or else
-                        S (P + 2) in 'A' .. 'F');
+            return
+              P <= S'Last - 2 and then S (P) = '[' and then S (P + 1) = '"'
+              and then (S (P + 2) in '0' .. '9' | 'a' .. 'f' | 'A' .. 'F');
 
          --  All other encoding methods use the upper bit set in the first
          --  character to uniquely represent a wide character.
@@ -645,13 +640,11 @@ package body GPR.Erroutc is
          --  If operator name or character literal name, just print it as is
          --  Also print as is if it ends in a right paren (case of x'val(nnn))
 
-         if Name_Buffer (1) = '"'
-           or else Name_Buffer (1) = '''
-           or else Name_Buffer (Name_Len) = ')'
+         if Name_Buffer (1) in '"' | ''' or else Name_Buffer (Name_Len) = ')'
          then
             Set_Msg_Name_Buffer;
 
-         --  Else output with surrounding quotes in proper casing mode
+            --  Else output with surrounding quotes in proper casing mode
 
          else
             Set_Casing (Mixed_Case);

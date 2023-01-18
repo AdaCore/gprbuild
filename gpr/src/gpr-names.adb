@@ -573,11 +573,11 @@ package body GPR.Names is
          declare
             CC : constant Character := Get_Character (C);
          begin
-            if CC in 'a' .. 'z' or else CC in '0' .. '9' then
+            if CC in 'a' .. 'z' | '0' .. '9' then
                Name_Buffer (Name_Len) := CC;
             else
                Name_Buffer (Name_Len) := 'U';
-               Name_Len := Name_Len + 2;
+               Name_Len               := Name_Len + 2;
                Hex_Image (Word (C), Name_Buffer (Name_Len - 1 .. Name_Len));
             end if;
          end;

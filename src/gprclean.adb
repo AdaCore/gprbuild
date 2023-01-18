@@ -286,11 +286,9 @@ package body Gprclean is
                         if Last > 0 then
                            if Name (1) = '[' then
                               In_Generated :=
-                                Name (1 .. Last) =
-                                Library_Label (Generated_Object_Files)
-                                or else
-                                  Name (1 .. Last) =
-                                Library_Label (Generated_Source_Files);
+                                Name (1 .. Last) in
+                                  Library_Label (Generated_Object_Files) |
+                                    Library_Label (Generated_Source_Files);
 
                            elsif In_Generated then
                               if Is_Regular_File (Name (1 .. Last)) then
@@ -329,9 +327,9 @@ package body Gprclean is
                      if (Is_Static (Project)
                          and then Name (1 .. Last) =  Archive_Name)
                        or else
-                         ((Project.Library_Kind = Dynamic
-                           or else Project.Library_Kind = Relocatable)
-                          and then Name (1 .. Last) = DLL_Name)
+
+                       ((Project.Library_Kind in Dynamic | Relocatable)
+                        and then Name (1 .. Last) = DLL_Name)
                      then
                         Delete (Lib_Directory, Name (1 .. Last));
                      end if;
@@ -341,8 +339,7 @@ package body Gprclean is
                Close (Direc);
 
                if Project.Config.Symbolic_Link_Supported then
-                  if (Project.Library_Kind = Dynamic
-                      or else Project.Library_Kind = Relocatable)
+                  if (Project.Library_Kind in Dynamic | Relocatable)
                     and then Project.Lib_Internal_Name /= No_Name
                   then
                      declare
@@ -371,9 +368,10 @@ package body Gprclean is
                                     Read (Direc, Name, Last);
                                     exit when Last = 0;
 
-                                    if (Is_Regular_File (Name (1 .. Last))
-                                        or else
-                                        Is_Symbolic_Link (Name (1 .. Last)))
+                                    if
+                                      (Is_Regular_File (Name (1 .. Last))
+                                       or else Is_Symbolic_Link
+                                         (Name (1 .. Last)))
                                       and then Name (1 .. Last) = Maj_Version
                                     then
                                        Delete

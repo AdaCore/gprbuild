@@ -522,7 +522,7 @@ package body GPR.Err is
 
       loop
          C := Source_Text (Sfile) (S);
-         exit when C = ASCII.LF or else C = ASCII.CR or else C = EOF;
+         exit when C in ASCII.LF | ASCII.CR | EOF;
 
          if Errs then
             Write_Char (C);
@@ -550,9 +550,7 @@ package body GPR.Err is
       if Debug_Tokens then
          Write_Line (Token_Type'Image (Token));
 
-         if Token = Tok_Identifier
-           or else Token = Tok_String_Literal
-         then
+         if Token in Tok_Identifier | Tok_String_Literal then
             Write_Line ("  " & Get_Name_String (Token_Name));
          end if;
       end if;
@@ -665,10 +663,10 @@ package body GPR.Err is
 
          --  Warning message (? or < insertion sequence)
 
-         elsif Msg (J) = '?' or else Msg (J) = '<' then
-            Is_Warning_Msg := Msg (J) = '?' or else Error_Msg_Warn;
+         elsif Msg (J) in '?' | '<' then
+            Is_Warning_Msg   := Msg (J) = '?' or else Error_Msg_Warn;
             Warning_Msg_Char := ' ';
-            J := J + 1;
+            J                := J + 1;
 
             if Is_Warning_Msg then
                declare
@@ -677,16 +675,14 @@ package body GPR.Err is
                   if J <= Msg'Last then
                      if Msg (J) = C then
                         Warning_Msg_Char := '?';
-                        J := J + 1;
+                        J                := J + 1;
 
                      elsif J < Msg'Last and then Msg (J + 1) = C
-                       and then (Msg (J) in 'a' .. 'z' or else
-                                 Msg (J) in 'A' .. 'Z' or else
-                                 Msg (J) = '*'         or else
-                                 Msg (J) = '$')
+                       and then
+                       (Msg (J) in 'a' .. 'z' | 'A' .. 'Z' | '*' | '$')
                      then
                         Warning_Msg_Char := Msg (J);
-                        J := J + 2;
+                        J                := J + 2;
                      end if;
                   end if;
                end;

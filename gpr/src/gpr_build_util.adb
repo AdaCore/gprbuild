@@ -304,13 +304,7 @@ package body Gpr_Build_Util is
                   if Name_Len < 3
                     or else Name_Buffer (2) /= '-'
                     or else
-                      (Name_Buffer (1) /= 'a'
-                       and then
-                       Name_Buffer (1) /= 'g'
-                       and then
-                       Name_Buffer (1) /= 'i'
-                       and then
-                       Name_Buffer (1) /= 's')
+                     (Name_Buffer (1) not in 'a' | 'g' | 'i' | 's')
                   then
                      if Opt.Verbosity_Level > Opt.Low
                      then
@@ -2447,15 +2441,12 @@ package body Gpr_Build_Util is
               (Builder_Package).Decl.Arrays,
             Shared    => Project_Tree.Shared);
 
-         if Main_Project.Qualifier = Aggregate or else
-           Main_Project.Qualifier = Aggregate_Library
-         then
-            Other_Switches := GPR.Util.Value_Of
-              (Name                    => All_Other_Names,
-               Index                   => 0,
-               Attribute_Or_Array_Name => Name_Switches,
-               In_Package              => Builder_Package,
-               Shared                  => Project_Tree.Shared);
+         if Main_Project.Qualifier in Aggregate | Aggregate_Library then
+            Other_Switches :=
+              GPR.Util.Value_Of
+                (Name                    => All_Other_Names, Index => 0,
+                 Attribute_Or_Array_Name => Name_Switches,
+                 In_Package => Builder_Package, Shared => Project_Tree.Shared);
 
          else
             Mains.Reset;
@@ -2470,8 +2461,8 @@ package body Gpr_Build_Util is
 
                   begin
                      while Language /= No_Language_Index loop
-                        if Language.Config.Compiler_Driver
-                           not in No_File | Empty_File
+                        if Language.Config.Compiler_Driver not in No_File |
+                              Empty_File
                         then
                            if Lang /= No_Name then
                               Lang := No_Name;
@@ -2493,13 +2484,14 @@ package body Gpr_Build_Util is
 
                   if Source /= No_Source then
                      if Switches_For_Main = Nil_Variable_Value then
-                        Switches_For_Main := Value_Of
-                          (Name                    => Name_Id (Source.File),
-                           Attribute_Or_Array_Name => Name_Switches,
-                           In_Package              => Builder_Package,
-                           Shared                  => Project_Tree.Shared,
-                           Force_Lower_Case_Index  => False,
-                           Allow_Wildcards         => True);
+                        Switches_For_Main :=
+                          Value_Of
+                            (Name                    => Name_Id (Source.File),
+                             Attribute_Or_Array_Name => Name_Switches,
+                             In_Package              => Builder_Package,
+                             Shared                  => Project_Tree.Shared,
+                             Force_Lower_Case_Index  => False,
+                             Allow_Wildcards         => True);
 
                         --  If not found, try without extension.
                         --  That's because gnatmake accepts truncated file
@@ -2508,13 +2500,14 @@ package body Gpr_Build_Util is
                         if Switches_For_Main = Nil_Variable_Value
                           and then Source.Unit /= null
                         then
-                           Switches_For_Main := Value_Of
-                             (Name                    => Source.Unit.Name,
-                              Attribute_Or_Array_Name => Name_Switches,
-                              In_Package              => Builder_Package,
-                              Shared                  => Project_Tree.Shared,
-                              Force_Lower_Case_Index  => False,
-                              Allow_Wildcards         => True);
+                           Switches_For_Main :=
+                             Value_Of
+                               (Name                    => Source.Unit.Name,
+                                Attribute_Or_Array_Name => Name_Switches,
+                                In_Package              => Builder_Package,
+                                Shared                  => Project_Tree.Shared,
+                                Force_Lower_Case_Index  => False,
+                                Allow_Wildcards         => True);
                         end if;
                      end if;
 
@@ -2537,38 +2530,38 @@ package body Gpr_Build_Util is
 
             while Default_Switches_Array /= No_Array
               and then
-                Project_Tree.Shared.Arrays.Table
-                  (Default_Switches_Array).Name /= Name_Default_Switches
+                Project_Tree.Shared.Arrays.Table (Default_Switches_Array)
+                  .Name /=
+                Name_Default_Switches
             loop
                Default_Switches_Array :=
-                 Project_Tree.Shared.Arrays.Table
-                   (Default_Switches_Array).Next;
+                 Project_Tree.Shared.Arrays.Table (Default_Switches_Array)
+                   .Next;
             end loop;
 
             if Lang /= No_Name then
-               Switches_For_Lang := GPR.Util.Value_Of
-                 (Name                    => Lang,
-                  Index                   => 0,
-                  Attribute_Or_Array_Name => Name_Switches,
-                  In_Package              => Builder_Package,
-                  Shared                  => Project_Tree.Shared,
-                  Force_Lower_Case_Index  => True);
+               Switches_For_Lang :=
+                 GPR.Util.Value_Of
+                   (Name                    => Lang, Index => 0,
+                    Attribute_Or_Array_Name => Name_Switches,
+                    In_Package              => Builder_Package,
+                    Shared                  => Project_Tree.Shared,
+                    Force_Lower_Case_Index  => True);
 
-               Defaults := GPR.Util.Value_Of
-                 (Name                    => Lang,
-                  Index                   => 0,
-                  Attribute_Or_Array_Name => Name_Default_Switches,
-                  In_Package              => Builder_Package,
-                  Shared                  => Project_Tree.Shared,
-                  Force_Lower_Case_Index  => True);
+               Defaults :=
+                 GPR.Util.Value_Of
+                   (Name                    => Lang, Index => 0,
+                    Attribute_Or_Array_Name => Name_Default_Switches,
+                    In_Package              => Builder_Package,
+                    Shared                  => Project_Tree.Shared,
+                    Force_Lower_Case_Index  => True);
             end if;
 
-            Other_Switches := GPR.Util.Value_Of
-              (Name                    => All_Other_Names,
-               Index                   => 0,
-               Attribute_Or_Array_Name => Name_Switches,
-               In_Package              => Builder_Package,
-               Shared                  => Project_Tree.Shared);
+            Other_Switches :=
+              GPR.Util.Value_Of
+                (Name                    => All_Other_Names, Index => 0,
+                 Attribute_Or_Array_Name => Name_Switches,
+                 In_Package => Builder_Package, Shared => Project_Tree.Shared);
 
             if not Quiet_Output
               and then Mains.Number_Of_Mains (Project_Tree) > 1
@@ -2579,24 +2572,24 @@ package body Gpr_Build_Util is
 
                if Switches_For_Lang /= Nil_Variable_Value then
                   Put_Line
-                    ("Warning: using Builder'Switches("""
-                     & Get_Name_String (Lang)
-                     & """), as there are several mains");
+                    ("Warning: using Builder'Switches(""" &
+                     Get_Name_String (Lang) &
+                     """), as there are several mains");
 
                elsif Other_Switches /= Nil_Variable_Value then
                   Put_Line
-                    ("Warning: using Builder'Switches(others), "
-                     & "as there are several mains");
+                    ("Warning: using Builder'Switches(others), " &
+                     "as there are several mains");
 
                elsif Defaults /= Nil_Variable_Value then
                   Put_Line
-                    ("Warning: using Builder'Default_Switches("""
-                     & Get_Name_String (Lang)
-                     & """), as there are several mains");
+                    ("Warning: using Builder'Default_Switches(""" &
+                     Get_Name_String (Lang) &
+                     """), as there are several mains");
                else
                   Put_Line
-                    ("Warning: using no switches from package "
-                     & "Builder, as there are several mains");
+                    ("Warning: using no switches from package " &
+                     "Builder, as there are several mains");
                end if;
             end if;
          end if;

@@ -534,12 +534,12 @@ procedure Gprlib is
                   --  beginning of the P line.
 
                   for Index in 1 .. Len - 3 loop
-                     if (S (Index) = ASCII.LF or else S (Index) = ASCII.CR)
+                     if (S (Index) in ASCII.LF | ASCII.CR)
                        and then S (Index + 1) = 'P'
                      then
-                        S (Index + 5 .. Len + 3) := S (Index + 2 .. Len);
+                        S (Index + 5 .. Len + 3)   := S (Index + 2 .. Len);
                         S (Index + 2 .. Index + 4) := " SL";
-                        P_Line_Found := True;
+                        P_Line_Found               := True;
                         exit;
                      end if;
                   end loop;
@@ -1101,10 +1101,7 @@ procedure Gprlib is
                      Quotes_Needed := False;
 
                      for Ch of Arg loop
-                        if Ch = ' ' or else
-                          Ch = ASCII.HT or else
-                          Ch = '"'
-                        then
+                        if Ch in ' ' | ASCII.HT | '"' then
                            Quotes_Needed := True;
                            exit;
                         end if;

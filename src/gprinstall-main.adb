@@ -272,7 +272,7 @@ procedure Gprinstall.Main is
          elsif Arg = "-h" then
             Usage_Needed := True;
 
-         elsif Arg = "-p" or else Arg = "--create-missing-dirs" then
+         elsif Arg in "-p" | "--create-missing-dirs" then
             Create_Dest_Dir := True;
 
          elsif Arg'Length >= 2 and then Arg (2) = 'P' then

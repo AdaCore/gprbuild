@@ -3402,9 +3402,9 @@ package body GPR.Proc is
                Is_Encapsulated := Name_Buffer (1 .. Name_Len) = "encapsulated";
 
                if Is_Encapsulated then
-                  while List /= null and then List /= Mark loop
+                  while List not in null | Mark loop
                      List.From_Encapsulated_Lib := Is_Encapsulated;
-                     List := List.Next;
+                     List                       := List.Next;
                   end loop;
                end if;
 

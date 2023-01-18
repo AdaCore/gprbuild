@@ -308,10 +308,8 @@ procedure Build_Shared_Lib is
                   Arguments.Delete_Last;
                end loop;
 
-               if Resp_File_Format = GCC
-                 or else Resp_File_Format = GCC_GNU
-                 or else Resp_File_Format = GCC_Object_List
-                 or else Resp_File_Format = GCC_Option_List
+               if Resp_File_Format in GCC | GCC_GNU | GCC_Object_List |
+                     GCC_Option_List
                then
                   Arguments.Append
                     ("@" & Get_Name_String (Response_File_Name));
@@ -322,7 +320,7 @@ procedure Build_Shared_Lib is
                      Response_File_Switches.Replace_Element
                        (Response_File_Switches.Last_Index,
                         Response_File_Switches.Last_Element &
-                          Get_Name_String (Response_File_Name));
+                        Get_Name_String (Response_File_Name));
                      Arguments.Append_Vector (Response_File_Switches);
                   end if;
 

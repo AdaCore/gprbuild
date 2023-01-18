@@ -1736,7 +1736,7 @@ package body GPR.Util is
       if not File.End_Of_File_Reached then
          loop
             C := File.Buffer (File.Cursor);
-            exit when C = ASCII.CR or else C = ASCII.LF;
+            exit when C in ASCII.CR | ASCII.LF;
             Last := Last + 1;
             Line (Last) := C;
             Advance;
@@ -1748,7 +1748,7 @@ package body GPR.Util is
             exit when Last = Line'Last;
          end loop;
 
-         if C = ASCII.CR or else C = ASCII.LF then
+         if C in ASCII.CR | ASCII.LF then
             Advance;
 
             if File.End_Of_File_Reached then
@@ -2217,22 +2217,13 @@ package body GPR.Util is
 
       --  Definitely predefined if prefix is a- i- or s- followed by letter
 
-      if Name_Len >=  3
-        and then Name_Buffer (2) = '-'
-        and then (Name_Buffer (1) = 'a'
-                    or else
-                  Name_Buffer (1) = 'g'
-                    or else
-                  Name_Buffer (1) = 'i'
-                    or else
-                  Name_Buffer (1) = 's')
-        and then (Name_Buffer (3) in 'a' .. 'z'
-                    or else
-                  Name_Buffer (3) in 'A' .. 'Z')
+      if Name_Len >= 3 and then Name_Buffer (2) = '-'
+        and then (Name_Buffer (1) in 'a' | 'g' | 'i' | 's')
+        and then (Name_Buffer (3) in 'a' .. 'z' | 'A' .. 'Z')
       then
          return True;
 
-      --  Definitely false if longer than 12 characters (8.3)
+         --  Definitely false if longer than 12 characters (8.3)
 
       elsif Name_Len > 8 then
          return False;
@@ -2377,9 +2368,7 @@ package body GPR.Util is
 
       procedure Check_Project (P : Project_Id) is
       begin
-         if P.Qualifier = Aggregate
-           or else P.Qualifier = Aggregate_Library
-         then
+         if P.Qualifier in Aggregate | Aggregate_Library then
             declare
                List : Aggregated_Project_List := P.Aggregated_Projects;
             begin
@@ -4376,7 +4365,7 @@ package body GPR.Util is
       is
          TS : constant Time_Stamp_Type := File_Stamp (Get_Path_Name_Id (Path));
       begin
-         if TS /= Empty_Time_Stamp and then TS /= Stamp then
+         if TS not in Empty_Time_Stamp | Stamp then
             if Opt.Verbosity_Level > Opt.Low then
                Put_Line ("   -> different time stamp for " & Path);
 
@@ -5839,7 +5828,7 @@ package body GPR.Util is
                Verbose_Mode    := False;
                Verbosity_Level := Opt.None;
 
-            elsif Verbosity = "verbose" or else Verbosity = "verbose_low" then
+            elsif Verbosity in "verbose" | "verbose_low" then
                Quiet_Output    := False;
                Verbose_Mode    := True;
                Verbosity_Level := Opt.Low;

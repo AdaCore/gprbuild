@@ -758,8 +758,7 @@ procedure Gprls.Main is
                   --  Find the beginning of the next line
 
                   Index := Last;
-                  while Buffer (Index) = ASCII.CR or else
-                        Buffer (Index) = ASCII.LF
+                  while Buffer (Index) in ASCII.CR | ASCII.LF
                   loop
                      Index := Index + 1;
                   end loop;

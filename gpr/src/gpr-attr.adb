@@ -1825,7 +1825,7 @@ package body GPR.Attr is
      (Pkg : Package_Node_Id) return Attribute_Node_Id
    is
    begin
-      if Pkg = Empty_Package or else Pkg = Unknown_Package then
+      if Pkg in Empty_Package | Unknown_Package then
          return Empty_Attribute;
       else
          return
@@ -1839,7 +1839,7 @@ package body GPR.Attr is
 
    function Is_Package_Known (Pkg : Package_Node_Id) return Boolean is
    begin
-      if Pkg = Empty_Package or else Pkg = Unknown_Package then
+      if Pkg in Empty_Package | Unknown_Package then
          return False;
       else
          return Package_Attributes.Table (Pkg.Value).Known;

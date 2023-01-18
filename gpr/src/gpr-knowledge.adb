@@ -567,9 +567,7 @@ package body GPR.Knowledge is
 
          begin
             for S in Static_Value'Range loop
-               if Static_Value (S) /= ' '
-                 and then Static_Value (S) /= ASCII.LF
-               then
+               if Static_Value (S) not in ' ' | ASCII.LF then
                   Has_Static := True;
                   exit;
                end if;
@@ -2258,20 +2256,16 @@ package body GPR.Knowledge is
 
       if not Allow_Empty_Elements then
          while First <= Words'Last
-           and then (Words (First) = Separator1
-                     or else Words (First) = Separator2)
+           and then (Words (First) in Separator1 | Separator2)
          loop
             First := First + 1;
          end loop;
       end if;
 
       while First <= Words'Last loop
-         if Words (First) /= Separator1
-           and then Words (First) /= Separator2
-         then
+         if Words (First) not in Separator1 | Separator2 then
             Last := First + 1;
-            while Last <= Words'Last
-              and then Words (Last) /= Separator1
+            while Last <= Words'Last and then Words (Last) /= Separator1
               and then Words (Last) /= Separator2
             loop
                Last := Last + 1;
@@ -3164,18 +3158,20 @@ package body GPR.Knowledge is
          return False;
       end if;
 
-      if Filter.Path /= No_Name and then Filter.Path /= Comp.Path then
+      if Filter.Path not in No_Name | Comp.Path then
          if Current_Verbosity /= Default then
-            Put_Verbose ("Filter=" & To_String (Base, Filter, True)
-                         & ": path does not match");
+            Put_Verbose
+              ("Filter=" & To_String (Base, Filter, True) &
+               ": path does not match");
          end if;
          return False;
       end if;
 
-      if Filter.Version /= No_Name and then Filter.Version /= Comp.Version then
+      if Filter.Version not in No_Name | Comp.Version then
          if Current_Verbosity /= Default then
-            Put_Verbose ("Filter=" & To_String (Base, Filter, True)
-                         & ": version does not match");
+            Put_Verbose
+              ("Filter=" & To_String (Base, Filter, True) &
+               ": version does not match");
          end if;
          return False;
       end if;
@@ -3208,12 +3204,11 @@ package body GPR.Knowledge is
 
       end if;
 
-      if Filter.Language_LC /= No_Name
-        and then Filter.Language_LC /= Comp.Language_LC
-      then
+      if Filter.Language_LC not in No_Name | Comp.Language_LC then
          if Current_Verbosity /= Default then
-            Put_Verbose ("Filter=" & To_String (Base, Filter, True)
-                         & ": language does not match");
+            Put_Verbose
+              ("Filter=" & To_String (Base, Filter, True) &
+               ": language does not match");
          end if;
          return False;
       end if;
@@ -3244,26 +3239,25 @@ package body GPR.Knowledge is
          Comp := Compiler_Lists.Element (C);
 
          if Comp.Selected
-           and then (Filter.Name = No_Name
-                     or else
-                       (Comp.Name /= No_Name
-                        and then Match
-                          (Filter.Name_Re.all, Get_Name_String (Comp.Name)))
-                     or else Comp.Base_Name = Filter.Name)
            and then
-             (Filter.Version_Re = null
-              or else
-                (Comp.Version /= No_Name
-                 and then Match
-                   (Filter.Version_Re.all, Get_Name_String (Comp.Version))))
-           and then (Filter.Runtime_Re = null
-                     or else
-                       (Comp.Runtime /= No_Name
-                        and then Match
-                          (Filter.Runtime_Re.all,
-                           Runtime_Base_Name (Comp.Runtime))))
-           and then (Filter.Language_LC = No_Name
-                     or else Filter.Language_LC = Comp.Language_LC)
+           (Filter.Name = No_Name
+            or else
+            (Comp.Name /= No_Name
+             and then Match (Filter.Name_Re.all, Get_Name_String (Comp.Name)))
+            or else Comp.Base_Name = Filter.Name)
+           and then
+           (Filter.Version_Re = null
+            or else
+            (Comp.Version /= No_Name
+             and then Match
+               (Filter.Version_Re.all, Get_Name_String (Comp.Version))))
+           and then
+           (Filter.Runtime_Re = null
+            or else
+            (Comp.Runtime /= No_Name
+             and then Match
+               (Filter.Runtime_Re.all, Runtime_Base_Name (Comp.Runtime))))
+           and then (Filter.Language_LC in No_Name | Comp.Language_LC)
          then
             Matching_Compiler := Comp;
             Matched           := True;
@@ -3371,8 +3365,7 @@ package body GPR.Knowledge is
 
    procedure Skip_Spaces (Str : String; Index : in out Integer) is
    begin
-      while Index <= Str'Last
-        and then (Str (Index) = ' ' or else Str (Index) = ASCII.LF)
+      while Index <= Str'Last and then (Str (Index) in ' ' | ASCII.LF)
       loop
          Index := Index + 1;
       end loop;
@@ -3380,8 +3373,7 @@ package body GPR.Knowledge is
 
    procedure Skip_Spaces_Backward (Str : String; Index : in out Integer) is
    begin
-      while Index >= Str'First
-        and then (Str (Index) = ' ' or else Str (Index) = ASCII.LF)
+      while Index >= Str'First and then (Str (Index) in ' ' | ASCII.LF)
       loop
          Index := Index - 1;
       end loop;
@@ -3804,16 +3796,14 @@ package body GPR.Knowledge is
       Last : Natural := Name'Last;
    begin
       if Last > 7 and then
-        (Name (Last) = Directory_Separator or else
-         Name (Last) = '/')
+         (Name (Last) in Directory_Separator | '/')
       then
          Last := Last - 1;
       end if;
 
       if Last > 6 and then
         Name (Last - 5 .. Last) = "adalib" and then
-        (Name (Last - 6) = Directory_Separator or else
-         Name (Last - 6) = '/')
+         (Name (Last - 6) in Directory_Separator | '/')
       then
          Last := Last - 6;
       else
