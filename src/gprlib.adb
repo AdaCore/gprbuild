@@ -1505,42 +1505,46 @@ procedure Gprlib is
             Objcopy_Args : String_Vectors.Vector;
 
          begin
-            --  Read the linker options from the binder-generated file.
-
-            Open (BG_File, In_File, "b__" & Library_Name.all & ".adb");
+            --  Read the linker options from the binder-generated file if we
+            --  did the standalone process.
 
             Create (IO_File, Out_File, Options_File);
 
-            while not End_Of_File (BG_File) loop
-               Get_Line (BG_File, Line, Last);
-               exit when Line (1 .. Last) = Begin_Info;
-            end loop;
+            if not ALIs.Is_Empty then
+               Open (BG_File, In_File, "b__" & Library_Name.all & ".adb");
 
-            while not End_Of_File (BG_File) loop
-               Get_Line (BG_File, Line, Last);
-               exit when Line (1 .. Last) = End_Info;
+               while not End_Of_File (BG_File) loop
+                  Get_Line (BG_File, Line, Last);
+                  exit when Line (1 .. Last) = Begin_Info;
+               end loop;
 
-               if not Start_Retrieving and then Line (9 .. 10) = "-L" then
-                  Start_Retrieving := True;
-               end if;
+               while not End_Of_File (BG_File) loop
+                  Get_Line (BG_File, Line, Last);
+                  exit when Line (1 .. Last) = End_Info;
 
-               if Start_Retrieving then
-                  --  Don't store -static and -shared flags, they may cause
-                  --  issues when linking with the library.
-                  --  Don't store -lgnat and -lgnarl for encapsulated because
-                  --  libgnat.a and libgnarl.a already encapsulated.
-
-                  if Line (9 .. Last) not in Dash_Static | Dash_Shared
-                    and then not
-                      (Standalone = Encapsulated
-                       and then Line (9 .. Last) in Dash_Lgnat | Dash_Lgnarl)
-                  then
-                     Put_Line (IO_File, Line (9 .. Last));
+                  if not Start_Retrieving and then Line (9 .. 10) = "-L" then
+                     Start_Retrieving := True;
                   end if;
-               end if;
-            end loop;
 
-            Close (BG_File);
+                  if Start_Retrieving then
+                     --  Don't store -static and -shared flags, they may cause
+                     --  issues when linking with the library.
+                     --  Don't store -lgnat and -lgnarl for encapsulated because
+                     --  libgnat.a and libgnarl.a already encapsulated.
+
+                     if Line (9 .. Last) not in Dash_Static | Dash_Shared
+                       and then not
+                         (Standalone = Encapsulated
+                          and then Line (9 .. Last) in Dash_Lgnat | Dash_Lgnarl)
+                     then
+                        Put_Line (IO_File, Line (9 .. Last));
+                     end if;
+                  end if;
+               end loop;
+
+               Close (BG_File);
+            end if;
+
             Close (IO_File);
 
             --  Call objcopy to add a section to Linker_Option_Object_File,
