@@ -3295,9 +3295,6 @@ package body Gprbuild.Post_Compile is
                  (Exchange_File, Library_Label (Major_Minor_Id_Supported));
             end if;
 
-            Process_Imported_Libraries
-              (For_Project, There_Are_SALs => Disregard);
-
             --  Relocatable
 
             Put_Line (Exchange_File, Library_Label (Relocatable));
@@ -3319,8 +3316,6 @@ package body Gprbuild.Post_Compile is
             Write_Leading_Library_Options;
 
             Write_Library_Rpath_Options;
-
-            Write_Imported_Libraries;
          end if;
 
          Write_Runtime_Library_Dir;
@@ -3335,7 +3330,17 @@ package body Gprbuild.Post_Compile is
 
          Write_Toolchain_Version;
 
+         if not Is_Static (For_Project)
+           or else For_Project.Standalone_Library = Encapsulated
+         then
+            Process_Imported_Libraries
+              (For_Project, There_Are_SALs => Disregard);
+
+            Write_Imported_Libraries;
+         end if;
+
          if For_Project.Standalone_Library /= No then
+
             if For_Project.Lib_Auto_Init then
                Put_Line (Exchange_File, Library_Label (Auto_Init));
             end if;
@@ -4769,7 +4774,7 @@ package body Gprbuild.Post_Compile is
                Proj_List := Proj_List.Next;
             end loop;
 
-            if Main_Source.Unit = No_Unit_Index and then (not Dep_Files) then
+            if Main_Source.Unit = No_Unit_Index and then not Dep_Files then
                Close (Exchange_File);
 
                begin
