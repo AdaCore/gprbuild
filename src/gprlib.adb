@@ -317,6 +317,9 @@ procedure Gprlib is
    function Is_Gnarl_Dependent return Boolean;
    --  Detects from the .ali files if there is a dependency on libgnarl
 
+   procedure Process_Common;
+   --  Process common part of shared & static libraries
+
    procedure Process_Shared;
    --  Process a shared library
 
@@ -707,6 +710,28 @@ procedure Gprlib is
       Put_Line (Name_Buffer (1 .. Name_Len));
    end Display_Command;
 
+   --------------------
+   -- Process_Common --
+   --------------------
+
+   procedure Process_Common is
+   begin
+
+      Libgnarl_Needed := Is_Gnarl_Dependent;
+
+      for Dir of Imported_Library_Directories loop
+         Library_Switches_Table.Append ("-L" & Dir);
+         if not Path_Option.Is_Empty then
+            Add_Rpath (Dir);
+         end if;
+      end loop;
+
+      for Libname of Imported_Library_Names loop
+         Library_Switches_Table.Append ("-l" & Libname);
+      end loop;
+
+   end Process_Common;
+
    --------------------------
    -- Process_Encapsulated --
    --------------------------
@@ -804,17 +829,6 @@ procedure Gprlib is
       end if;
 
       GPR.Initialize (GPR.No_Project_Tree);
-
-      for Dir of Imported_Library_Directories loop
-         Library_Switches_Table.Append ("-L" & Dir);
-         if not Path_Option.Is_Empty then
-            Add_Rpath (Dir);
-         end if;
-      end loop;
-
-      for Libname of Imported_Library_Names loop
-         Library_Switches_Table.Append ("-l" & Libname);
-      end loop;
 
       if Use_GNAT_Lib and then not Runtime_Library_Dirs.Is_Empty then
          if Standalone = Encapsulated then
@@ -1358,6 +1372,8 @@ procedure Gprlib is
             Fail_Program
               (null, "unable to locate linker " & Partial_Linker.all);
          end if;
+
+         Library_Options_Table.Append (Library_Switches_Table);
       end if;
 
       if Archive_Builder = null then
@@ -2515,7 +2531,7 @@ begin
          S_Osinte_Ads := Name_Find;
       end if;
 
-      Libgnarl_Needed := Is_Gnarl_Dependent;
+      Process_Common;
 
       if Relocatable then
          Process_Shared;
