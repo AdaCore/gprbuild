@@ -907,10 +907,10 @@ package body GPR.Nmsc is
       Id.File                := File_Name;
       Id.Display_File        := Display_File;
       Id.Dep_Name            := Dependency_Name
-                                  (File_Name, Lang_Id.Config.Dependency_Kind);
+        (File_Name, Lang_Id.Config.Dependency_Kind);
       Id.Naming_Exception    := Naming_Exception;
       Id.Object              := Object_Name
-                                  (File_Name, Config.Object_File_Suffix);
+        (File_Name, Config.Object_File_Prefix, Config.Object_File_Suffix);
       Id.Switches            := Switches_Name (File_Name);
 
       --  Add the source id to the Unit_Sources_HT hash table, if the unit name
@@ -1698,6 +1698,20 @@ package body GPR.Nmsc is
                                   Lang_Index.Config.Source_File_Switches,
                                 From_List => Element.Value.Values,
                                 In_Tree   => Data.Tree);
+
+                           --  Attribute Object_File_Prefix (<language>)
+
+                        elsif Current_Array.Name = Name_Object_File_Prefix then
+                           if Get_Name_String (Element.Value.Value) = "" then
+                              Error_Msg
+                              (Data.Flags,
+                               "FIXME: SNM: object file prefix may be empty",
+                               Element.Value.Location, Project);
+
+                           else
+                              Lang_Index.Config.Object_File_Prefix :=
+                              Element.Value.Value;
+                           end if;
 
                            --  Attribute Object_File_Suffix (<language>)
 
@@ -9034,8 +9048,11 @@ package body GPR.Nmsc is
             Id.Dep_Name         :=
               Dependency_Name (Id.File, Id.Language.Config.Dependency_Kind);
             Id.Naming_Exception := Src.Naming_Exception;
-            Id.Object           :=
-              Object_Name (Id.File, Id.Language.Config.Object_File_Suffix);
+            Id.Object           := Object_Name
+              (Id.File,
+               Id.Language.Config.Object_File_Prefix,
+               Id.Language.Config.Object_File_Suffix);
+
             Id.Switches         := Switches_Name (Id.File);
 
             --  Add the source id to the Unit_Sources_HT hash table, if the

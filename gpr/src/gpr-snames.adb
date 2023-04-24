@@ -249,6 +249,7 @@ package body GPR.Snames is
       Add_Name ("naming");
       Add_Name ("none");
       Add_Name ("object_artifact_extensions");
+      Add_Name ("object_file_prefix");
       Add_Name ("object_file_suffix");
       Add_Name ("object_file_switches");
       Add_Name ("object_generated");

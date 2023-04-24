@@ -1546,13 +1546,13 @@ procedure Gprlib is
                   if Start_Retrieving then
                      --  Don't store -static and -shared flags, they may cause
                      --  issues when linking with the library.
-                     --  Don't store -lgnat and -lgnarl for encapsulated because
-                     --  libgnat.a and libgnarl.a already encapsulated.
+                     --  Don't store -lgnat and -lgnarl for encapsulated
+                     --  because libgnat.a and libgnarl.a already encapsulated.
 
                      if Line (9 .. Last) not in Dash_Static | Dash_Shared
                        and then not
-                         (Standalone = Encapsulated
-                          and then Line (9 .. Last) in Dash_Lgnat | Dash_Lgnarl)
+                       (Standalone = Encapsulated
+                        and then Line (9 .. Last) in Dash_Lgnat | Dash_Lgnarl)
                      then
                         Put_Line (IO_File, Line (9 .. Last));
                      end if;

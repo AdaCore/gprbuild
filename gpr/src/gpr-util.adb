@@ -2044,7 +2044,9 @@ package body GPR.Util is
             Main_Source_File := Other_Part (Source).File;
             Source.Object :=
               Object_Name
-                (Main_Source_File, Source.Language.Config.Object_File_Suffix);
+               (Main_Source_File,
+                Source.Language.Config.Object_File_Prefix,
+                Source.Language.Config.Object_File_Suffix);
             Source.Dep_Name :=
               Dependency_Name
                 (Source.Object, Source.Language.Config.Dependency_Kind);
@@ -2057,6 +2059,8 @@ package body GPR.Util is
                  Source_Index       => Source.Index,
                  Index_Separator    =>
                    Source.Language.Config.Multi_Unit_Object_Separator,
+                 Object_File_Prefix =>
+                   Source.Language.Config.Object_File_Prefix,
                  Object_File_Suffix =>
                    Source.Language.Config.Object_File_Suffix);
 
