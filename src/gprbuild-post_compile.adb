@@ -1710,7 +1710,9 @@ package body Gprbuild.Post_Compile is
                              Force_Lower_Case_Index => True,
                              Shared                 => Project_Tree.Shared);
 
-                        if not Switches.Default then
+                        if not Switches.Default
+			   and then Switches.Kind = List
+                        then
                            Write_List
                              (Gprexch.Binding_Options, Switches.Values);
                         end if;
