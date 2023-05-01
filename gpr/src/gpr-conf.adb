@@ -2,7 +2,7 @@
 --                                                                          --
 --                           GPR PROJECT MANAGER                            --
 --                                                                          --
---            Copyright (C) 2006-2022, Free Software Foundation, Inc.       --
+--            Copyright (C) 2006-2023, Free Software Foundation, Inc.       --
 --                                                                          --
 -- This library is free software;  you can redistribute it and/or modify it --
 -- under terms of the  GNU General Public License  as published by the Free --
@@ -23,6 +23,8 @@
 ------------------------------------------------------------------------------
 
 with Ada.Directories; use Ada.Directories;
+with Ada.Environment_Variables;
+with Ada.Unchecked_Deallocation;
 
 with GNAT.Directory_Operations; use GNAT.Directory_Operations;
 with GNAT.Case_Util;            use GNAT.Case_Util;
@@ -40,15 +42,9 @@ with GPR.Util;   use GPR.Util;
 with GPR.Snames; use GPR.Snames;
 with GPR.Tempdir;
 
-with Ada.Unchecked_Deallocation;
-
 package body GPR.Conf is
 
    Auto_Cgpr : constant String := "auto.cgpr";
-
-   Config_Project_Env_Var : constant String := "GPR_CONFIG";
-   --  Name of the environment variable that provides the name of the
-   --  configuration file to use.
 
    Gprconfig_Name : constant String := "gprconfig";
 
@@ -612,8 +608,8 @@ package body GPR.Conf is
 
       Selected_Target : String_Access := new String'(Target_Name);
 
-      function Default_File_Name return String;
-      --  Return the name of the default config file that should be tested
+      function Default_CGPR_Name return String;
+      --  Return the name of the default config file that should be looked up
 
       procedure Do_Autoconf;
       --  Generate a new config file through gprconfig. In case of error, this
@@ -793,6 +789,7 @@ package body GPR.Conf is
                end loop Project_Loop;
 
                if Tgt_Name /= No_Name then
+                  Free (Selected_Target);
                   Selected_Target := new String'(Get_Name_String (Tgt_Name));
                end if;
             end;
@@ -831,44 +828,54 @@ package body GPR.Conf is
       end Get_Project_Attribute;
 
       -----------------------
-      -- Default_File_Name --
+      -- Default_CGPR_Name --
       -----------------------
 
-      function Default_File_Name return String is
+      function Default_CGPR_Name return String is
          Ada_RTS : constant String := Runtime_Name_For (Name_Ada);
-         Tmp     : String_Access;
+
+         GPR_CONFIG_Var : constant String := "GPR_CONFIG";
+         --  Name of the environment variable that provides the name of the
+         --  configuration file to use or dir in which to look it up.
+
+         CGPR_From_Platform : constant String :=
+            (if Selected_Target'Length > 0 then
+               (if Ada_RTS /= "" then
+                  Selected_Target.all & '-' & Ada_RTS
+                else
+                  Selected_Target.all
+               )
+            elsif Ada_RTS /= "" then
+               Ada_RTS
+            else
+               "default"
+            ) & Config_Project_File_Extension;
+         --  Name of default configuration file for the platform - depending
+         --  on what if anything is explicitly defined this is either
+         --  <target>-<rts>.cgpr, <target>.gpr, <rts>.gpr, or default.cgpr.
 
       begin
-         if Selected_Target'Length /= 0 then
-            if Ada_RTS /= "" then
-               return
-                 Selected_Target.all & '-' &
-                 Ada_RTS & Config_Project_File_Extension;
-            else
-               return
-                 Selected_Target.all & Config_Project_File_Extension;
-            end if;
 
-         elsif Ada_RTS /= "" then
-            return Ada_RTS & Config_Project_File_Extension;
+         --  Check if GPR_CONFIG is defined; if defined then provided it's a
+         --  dir look for platform cgpr in it, otherwise use it directly; if
+         --  not defined look for platform cgpr in the current dir.
 
-         else
-            Tmp := Getenv (Config_Project_Env_Var);
-
+         if Ada.Environment_Variables.Exists (GPR_CONFIG_Var) then
             declare
-               T : constant String := Tmp.all;
-
+               GPR_CONFIG : constant String :=
+                  Ada.Environment_Variables.Value (GPR_CONFIG_Var);
             begin
-               Free (Tmp);
-
-               if T'Length = 0 then
-                  return Default_Config_Name;
+               if Is_Directory (GPR_CONFIG) then
+                  return GPR_CONFIG & Directory_Separator & CGPR_From_Platform;
                else
-                  return T;
+                  return GPR_CONFIG;
                end if;
             end;
+         else
+            return CGPR_From_Platform;
          end if;
-      end Default_File_Name;
+
+      end Default_CGPR_Name;
 
       -----------------
       -- Do_Autoconf --
@@ -1481,8 +1488,8 @@ package body GPR.Conf is
                     Normalize_Pathname
                       (Get_Name_String (Project.Directory.Display_Name) &
                            Directory_Separator & Runtime_Dir);
-                  Runtime_Path : String_Access :=
-                    Getenv (Name => "GPR_RUNTIME_PATH");
+                  Runtime_Path : String :=
+                    Ada.Environment_Variables.Value ("GPR_RUNTIME_PATH", "");
 
                begin
                   if Dir'Length > 0 and then Is_Directory (Dir) then
@@ -1492,12 +1499,10 @@ package body GPR.Conf is
                      --  If Environment variable GPR_RUNTIME_PATH is defined,
                      --  look for the runtime directory in this path.
 
-                     if Runtime_Path /= null
-                        and then Runtime_Path'Length > 0
-                     then
+                     if Runtime_Path'Length > 0 then
                         RTS_Dir := Locate_Directory
                           (Dir_Name => Runtime_Dir,
-                           Path     => Runtime_Path.all);
+                           Path     => Runtime_Path);
                      end if;
 
                      if RTS_Dir = null then
@@ -1508,7 +1513,6 @@ package body GPR.Conf is
                      end if;
                   end if;
 
-                  Free (Runtime_Path);
                end;
             end if;
 
@@ -1578,7 +1582,7 @@ package body GPR.Conf is
          end;
 
       else
-         Config_File_Path := Locate_Config_File (Default_File_Name);
+         Config_File_Path := Locate_Config_File (Default_CGPR_Name);
       end if;
 
       Automatically_Generated :=
@@ -2050,7 +2054,7 @@ package body GPR.Conf is
       --  Add a directory at the end of the Project Path
 
       procedure Free_Pointers (Ptr : in out Compiler_Root_Ptr);
-      --  Clean up temporary compiler data gathered during path search.
+      --  Clean up temporary compiler data gathered during path search
 
       Compiler_Root : Compiler_Root_Ptr;
       Prefix        : String_Access;

@@ -29,35 +29,35 @@ the desired configuration of toolsets. A tool, GPRconfig, described in
 chapter most of the examples can use autoconfiguration.
 
 GPRbuild will start its build process by trying to locate a configuration
-file. The following tests are performed in the specified order, and the
-first that matches provides the configuration file to use.
+file, using the following rules.
 
-* If a file has a base names that matches `<target>-<rts>.cgpr`,
-  `<target.cgpr`, `<rts>.cgpr` or `default.cgpr` is found in
-  the default configuration files directory, this file is used. The target
-  and rts parameters are specified via the `--target` and `--RTS`
-  switches of `gprbuild`. The default directory is :file:`share/gpr`
-  in the installation directory of `gprbuild`
+* If either `--config` or `--autoconf` switches are specified, the argument
+  of this switch is used as configuration file.
 
-* If not found, the environment variable `GPR_CONFIG` is tested
-  to check whether it contains the name of a valid configuration file. This
-  can either be an absolute path name or a base name that will be searched
-  in the same default directory as above.
+* If neither switch is specified, and both target and rts are explicitly
+  specified in the project or on the command line, then configuration file
+  is called `<target>-<rts>.cgpr`; if only target or only rts is specified, it
+  is called `<target.cgpr` or `<rts>.cgpr` respectively; if neither
+  is specified, it is called `default.cgpr`. This file is looked for in the
+  current directory.
 
-* If still not found and you used the `--autoconf` switch, then
-  a new configuration file is automatically generated based on the specified
-  target and on the list of languages specified in your projects.
+* If the environment variable `GPR_CONFIG` is specified, the above rule is
+  modified as follows: if this variable designates a directory, then this
+  directory is searched for the configuration file instead of the current
+  directory; otherwise, the value of this variable is used as a configuration
+  file name (absolute or relative).
 
-  GPRbuild assumes that there are known compilers on your path for each of
-  the necessary languages. It is preferable and often necessary to manually
-  generate your own configuration file when:
+GPRbuild assumes that there are known compilers on your path for each of
+the necessary languages. A user can manually generate a
+configuration file (and reference it using `--config` switch); this is
+especially useful when:
 
   * using cross compilers (in which case you need to use gprconfig's
-    :samp:`--target=`) option,
-  * using a specific Ada runtime (e.g. :samp:`--RTS=sjlj`),
-  * working with compilers not in the path or not first in the path, or
-  * autoconfiguration does not give the expected results.
-
+    :samp:`--target=`) option;
+  * using a specific Ada runtime (e.g. :samp:`--RTS=sjlj`);
+  * working with compilers not in the path or not first in the path;
+  * autoconfiguration does not give the expected results;
+  * autoconfiguration perceptively delays the build.
 
 GPRconfig provides several ways of generating configuration files. By
 default, a simple interactive mode lists all the known compilers for all
