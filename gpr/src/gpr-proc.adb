@@ -842,15 +842,12 @@ package body GPR.Proc is
 
                         --  First, if there is a package, look into the package
 
-                        if Current_Term_Kind = N_Variable_Reference then
                            The_Variable_Id :=
-                             Shared.Packages.Table
-                               (The_Package).Decl.Variables;
-                        else
-                           The_Variable_Id :=
-                             Shared.Packages.Table
-                               (The_Package).Decl.Attributes;
-                        end if;
+                             (if Current_Term_Kind = N_Variable_Reference then
+                                Shared.Packages.Table (The_Package).Decl
+                                  .Variables
+                              else Shared.Packages.Table (The_Package).Decl
+                                  .Attributes);
 
                         while The_Variable_Id /= No_Variable
                           and then Shared.Variable_Elements.Table
@@ -867,11 +864,10 @@ package body GPR.Proc is
 
                         --  If we have not found it, look into the project
 
-                        if Current_Term_Kind = N_Variable_Reference then
-                           The_Variable_Id := The_Project.Decl.Variables;
-                        else
-                           The_Variable_Id := The_Project.Decl.Attributes;
-                        end if;
+                           The_Variable_Id :=
+                             (if Current_Term_Kind = N_Variable_Reference then
+                                The_Project.Decl.Variables
+                              else The_Project.Decl.Attributes);
 
                         while The_Variable_Id /= No_Variable
                           and then Shared.Variable_Elements.Table
@@ -885,13 +881,12 @@ package body GPR.Proc is
                      end if;
 
                      if From_Project_Node_Tree.Incomplete_With then
-                        if The_Variable_Id = No_Variable then
-                           The_Variable := Nil_Variable_Value;
-                        else
                            The_Variable :=
-                             Shared.Variable_Elements.Table
-                               (The_Variable_Id).Value;
-                        end if;
+                             (if The_Variable_Id = No_Variable then
+                                Nil_Variable_Value
+                              else Shared.Variable_Elements.Table
+                                  (The_Variable_Id)
+                                  .Value);
 
                      else
                         pragma Assert (The_Variable_Id /= No_Variable,
@@ -951,12 +946,10 @@ package body GPR.Proc is
                         end Same_Index;
 
                      begin
-                        if The_Package /= No_Package then
                            The_Array :=
-                             Shared.Packages.Table (The_Package).Decl.Arrays;
-                        else
-                           The_Array := The_Project.Decl.Arrays;
-                        end if;
+                             (if The_Package /= No_Package then
+                                Shared.Packages.Table (The_Package).Decl.Arrays
+                              else The_Project.Decl.Arrays);
 
                         while The_Array /= No_Array
                           and then
@@ -992,33 +985,27 @@ package body GPR.Proc is
                              Shared.Array_Elements.Table (The_Element).Value;
 
                         else
-                           if Expression_Kind_Of
-                               (The_Current_Term, From_Project_Node_Tree) =
-                                                                       List
-                           then
                               The_Variable :=
-                                (Project              => Project,
-                                 Kind                 => List,
-                                 Location             => No_Location,
-                                 Default              => True,
-                                 String_Type          => Empty_Project_Node,
-                                 Values               => Nil_String,
-                                 Concat               =>
-                                   Is_Config_Concatenable
+                                (if
+                                   Expression_Kind_Of
                                      (The_Current_Term,
-                                      From_Project_Node_Tree),
-                                 From_Implicit_Target => False);
-                           else
-                              The_Variable :=
-                                (Project              => Project,
-                                 Kind                 => Single,
-                                 Location             => No_Location,
-                                 Default              => True,
-                                 String_Type          => Empty_Project_Node,
-                                 Value                => Empty_String,
-                                 Index                => 0,
-                                 From_Implicit_Target => False);
-                           end if;
+                                      From_Project_Node_Tree) =
+                                   List
+                                 then
+                                   (Project     => Project, Kind => List,
+                                    Location => No_Location, Default => True,
+                                    String_Type => Empty_Project_Node,
+                                    Values      => Nil_String,
+                                    Concat      =>
+                                      Is_Config_Concatenable
+                                        (The_Current_Term,
+                                         From_Project_Node_Tree),
+                                    From_Implicit_Target => False)
+                                 else (Project => Project, Kind => Single,
+                                    Location => No_Location, Default => True,
+                                    String_Type          => Empty_Project_Node,
+                                    Value => Empty_String, Index => 0,
+                                    From_Implicit_Target => False));
                         end if;
                      end;
                   end if;
@@ -1098,13 +1085,14 @@ package body GPR.Proc is
                                     end if;
 
                                  when Canonical_Target_Value =>
-                                    if Opt.Target_Value_Canonical = null then
-                                       The_Variable.Value := Empty_String;
-
-                                    else
-                                       The_Variable.Value := Get_Name_Id
-                                         (Opt.Target_Value_Canonical.all);
-                                    end if;
+                                          The_Variable.Value :=
+                                            (if
+                                               Opt.Target_Value_Canonical =
+                                               null
+                                             then Empty_String
+                                             else Get_Name_Id
+                                                 (Opt
+                                                    .Target_Value_Canonical.all));
 
                                  when Runtime_Value =>
                                     null;
@@ -1584,11 +1572,7 @@ package body GPR.Proc is
          begin
             while Proj /= No_Project loop
                if Proj.Name = With_Name then
-                  if No_Extending then
-                     Temp_Result := Proj;
-                  else
-                     Temp_Result := Result;
-                  end if;
+                  Temp_Result := (if No_Extending then Proj else Result);
 
                   exit;
                end if;
@@ -1630,7 +1614,7 @@ package body GPR.Proc is
                      return Result;
 
                   elsif Util.Starts_With
-                          (Get_Name_String (Result.Name), Grand & '.')
+                      (Get_Name_String (Result.Name), Grand & '.')
                   then
                      Result := Recursive_Parent_Search (Result);
 
@@ -1642,11 +1626,10 @@ package body GPR.Proc is
                   List := List.Next;
                end loop;
 
-               if Proj.Extends /= No_Project then
-                  return Recursive_Parent_Search (Proj.Extends);
-               end if;
-
-               return No_Project;
+               return
+                 (if Proj.Extends /= No_Project then
+                    Recursive_Parent_Search (Proj.Extends)
+                  else No_Project);
             end Recursive_Parent_Search;
 
          begin
@@ -1819,12 +1802,9 @@ package body GPR.Proc is
                Str_Type : constant Project_Node_Id :=
                  String_Type_Of (Declaration, Node_Tree);
             begin
-               if No (Str_Type) then
-                  Current_String := Empty_Project_Node;
-
-               else
-                  Current_String := First_Literal_String (Str_Type, Node_Tree);
-               end if;
+               Current_String :=
+                 (if No (Str_Type) then Empty_Project_Node
+                  else First_Literal_String (Str_Type, Node_Tree));
 
                while Present (Current_String)
                  and then
@@ -2043,11 +2023,9 @@ package body GPR.Proc is
          --  First find if the associative array attribute already has elements
          --  declared.
 
-         if Pkg /= No_Package then
-            New_Array := Shared.Packages.Table (Pkg).Decl.Arrays;
-         else
-            New_Array := Project.Decl.Arrays;
-         end if;
+         New_Array :=
+           (if Pkg /= No_Package then Shared.Packages.Table (Pkg).Decl.Arrays
+            else Project.Decl.Arrays);
 
          while New_Array /= No_Array
            and then Shared.Arrays.Table (New_Array).Name /= Current_Item_Name
@@ -2249,11 +2227,9 @@ package body GPR.Proc is
 
          --  Look for the array in the appropriate list
 
-         if Pkg /= No_Package then
-            The_Array := Shared.Packages.Table (Pkg).Decl.Arrays;
-         else
-            The_Array := Project.Decl.Arrays;
-         end if;
+         The_Array :=
+           (if Pkg /= No_Package then Shared.Packages.Table (Pkg).Decl.Arrays
+            else Project.Decl.Arrays);
 
          while The_Array /= No_Array
            and then Shared.Arrays.Table (The_Array).Name /= Name
@@ -2372,18 +2348,16 @@ package body GPR.Proc is
          --  First, find the list where to find the variable or attribute
 
          if Is_Attribute then
-            if Pkg /= No_Package then
-               Var := Shared.Packages.Table (Pkg).Decl.Attributes;
-            else
-               Var := Project.Decl.Attributes;
-            end if;
+            Var :=
+              (if Pkg /= No_Package then
+                 Shared.Packages.Table (Pkg).Decl.Attributes
+               else Project.Decl.Attributes);
 
          else
-            if Pkg /= No_Package then
-               Var := Shared.Packages.Table (Pkg).Decl.Variables;
-            else
-               Var := Project.Decl.Variables;
-            end if;
+            Var :=
+              (if Pkg /= No_Package then
+                 Shared.Packages.Table (Pkg).Decl.Variables
+               else Project.Decl.Variables);
          end if;
 
          --  Loop through the list, to find if it has already been declared
@@ -3052,11 +3026,9 @@ package body GPR.Proc is
                --  In aggregate library, aggregated projects are parsed using
                --  the aggregate library tree.
 
-               if Project.Qualifier = Aggregate_Library then
-                  Tree := In_Tree;
-               else
-                  Tree := List.Tree;
-               end if;
+               Tree :=
+                 (if Project.Qualifier = Aggregate_Library then In_Tree
+                  else List.Tree);
 
                --  We can only do the phase 1 of the processing, since we do
                --  not have access to the configuration file yet (this is

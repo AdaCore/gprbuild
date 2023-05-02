@@ -1660,12 +1660,10 @@ package body GPR.Part is
             then
                Error_Msg_Name_1 := Expected_Name;
 
-               if Is_Config_File then
-                  Extension := new String'(Config_Project_File_Extension);
-
-               else
-                  Extension := new String'(Project_File_Extension);
-               end if;
+               Extension :=
+                 (if Is_Config_File then
+                    new String'(Config_Project_File_Extension)
+                  else new String'(Project_File_Extension));
 
                Error_Msg
                  (Env.Flags,
@@ -2264,15 +2262,9 @@ package body GPR.Part is
          end if;
 
          if Index >= Name_Len then
-            if Is_Alphanumeric (Name_Buffer (Name_Len)) then
-
-               --  All checks have succeeded. Return name in Name_Buffer
-
-               return Name_Find;
-
-            else
-               return No_Name;
-            end if;
+            return
+              (if Is_Alphanumeric (Name_Buffer (Name_Len)) then Name_Find
+               else No_Name);
 
          elsif Name_Buffer (Index) = '-' then
             Index := Index + 1;

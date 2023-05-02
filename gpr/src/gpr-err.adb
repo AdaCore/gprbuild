@@ -253,11 +253,8 @@ package body GPR.Err is
 
       procedure Write_File_Name (Name : File_Name_Type) is
       begin
-         if Name = No_File then
-            Write_Str ("(null)");
-         else
-            Write_Str (Get_Name_String (Name));
-         end if;
+         Write_Str
+           ((if Name = No_File then "(null)" else Get_Name_String (Name)));
       end Write_File_Name;
 
    begin
@@ -287,11 +284,10 @@ package body GPR.Err is
 
          while E /= No_Error_Msg loop
             if not Errors.Table (E).Deleted then
-               if Full_Path_Name_For_Brief_Errors then
-                  Write_File_Name (Full_Ref_Name (Errors.Table (E).Sfile));
-               else
-                  Write_File_Name (Reference_Name (Errors.Table (E).Sfile));
-               end if;
+               Write_File_Name
+                 ((if Full_Path_Name_For_Brief_Errors then
+                     Full_Ref_Name (Errors.Table (E).Sfile)
+                   else Reference_Name (Errors.Table (E).Sfile)));
 
                Write_Char (':');
                Write_Int (Int (Errors.Table (E).Line));
@@ -364,11 +360,9 @@ package body GPR.Err is
          Write_Str (" ");
          Write_Int (Num_Source_Lines (Main_Source_File));
 
-         if Num_Source_Lines (Main_Source_File) = 1 then
-            Write_Str (" line: ");
-         else
-            Write_Str (" lines: ");
-         end if;
+         Write_Str
+           ((if Num_Source_Lines (Main_Source_File) = 1 then " line: "
+             else " lines: "));
 
          if Total_Errors_Detected = 0 then
             Write_Str ("No errors");

@@ -488,11 +488,7 @@ package body Gprinstall.Install is
                                       To_Lower
                                         (Get_Name_String (V.Value.Value));
                            begin
-                              if Val = "false" then
-                                 Active := False;
-                              else
-                                 Active := True;
-                              end if;
+                              Active := Val /= "false";
                            end;
 
                         elsif V.Name = Name_Side_Debug then
@@ -501,11 +497,7 @@ package body Gprinstall.Install is
                                       To_Lower
                                         (Get_Name_String (V.Value.Value));
                            begin
-                              if Val = "true" then
-                                 Side_Debug := True;
-                              else
-                                 Side_Debug := False;
-                              end if;
+                              Side_Debug := Val = "true";
                            end;
 
                         elsif V.Name = Name_Install_Project then
@@ -514,11 +506,7 @@ package body Gprinstall.Install is
                                       To_Lower
                                         (Get_Name_String (V.Value.Value));
                            begin
-                              if Val = "false" then
-                                 Install_Project := False;
-                              else
-                                 Install_Project := True;
-                              end if;
+                              Install_Project := Val /= "false";
                            end;
 
                         end if;
@@ -604,11 +592,10 @@ package body Gprinstall.Install is
          begin
             --  .default is always omitted from the directory name
 
-            if Suffix and then Build_Name.all /= "default" then
-               return '.' & Build_Name.all;
-            else
-               return "";
-            end if;
+            return
+              (if Suffix and then Build_Name.all /= "default" then
+                 '.' & Build_Name.all
+               else "");
          end Get_Suffix;
 
       begin
@@ -680,11 +667,7 @@ package body Gprinstall.Install is
                                       To_Lower
                                         (Get_Name_String (V.Value.Value));
                            begin
-                              if Val = "false" then
-                                 return False;
-                              else
-                                 return True;
-                              end if;
+                              return Val /= "false";
                            end;
                         end if;
                      end;
@@ -718,11 +701,9 @@ package body Gprinstall.Install is
 
          function Get_Exec_Suffix return String is
          begin
-            if Project.Config.Executable_Suffix = No_Name then
-               return "";
-            else
-               return Get_Name_String (Project.Config.Executable_Suffix);
-            end if;
+            return
+              (if Project.Config.Executable_Suffix = No_Name then ""
+               else Get_Name_String (Project.Config.Executable_Suffix));
          end Get_Exec_Suffix;
 
          Builder_Package  : constant Package_Id :=
@@ -803,11 +784,9 @@ package body Gprinstall.Install is
 
       function Exec_Dir return String is
       begin
-         if Is_Absolute_Path (Exec_Subdir.V.all) then
-            return Exec_Subdir.V.all;
-         else
-            return Prefix_Dir.V.all & Exec_Subdir.V.all;
-         end if;
+         return
+           (if Is_Absolute_Path (Exec_Subdir.V.all) then Exec_Subdir.V.all
+            else Prefix_Dir.V.all & Exec_Subdir.V.all);
       end Exec_Dir;
 
       -------------
@@ -839,11 +818,10 @@ package body Gprinstall.Install is
 
       function Link_Lib_Dir return String is
       begin
-         if Is_Absolute_Path (Link_Lib_Subdir.V.all) then
-            return Link_Lib_Subdir.V.all;
-         else
-            return Prefix_Dir.V.all & Link_Lib_Subdir.V.all;
-         end if;
+         return
+           (if Is_Absolute_Path (Link_Lib_Subdir.V.all) then
+              Link_Lib_Subdir.V.all
+            else Prefix_Dir.V.all & Link_Lib_Subdir.V.all);
       end Link_Lib_Dir;
 
       -----------------
@@ -875,11 +853,10 @@ package body Gprinstall.Install is
 
       function Project_Dir return String is
       begin
-         if Is_Absolute_Path (Project_Subdir.V.all) then
-            return Project_Subdir.V.all;
-         else
-            return Prefix_Dir.V.all & Project_Subdir.V.all;
-         end if;
+         return
+           (if Is_Absolute_Path (Project_Subdir.V.all) then
+              Project_Subdir.V.all
+            else Prefix_Dir.V.all & Project_Subdir.V.all);
       end Project_Dir;
 
       ---------
@@ -924,11 +901,7 @@ package body Gprinstall.Install is
          end if;
 
          if Dry_Run or else Opt.Verbose_Mode then
-            if Sym_Link then
-               Put ("ln -s ");
-            else
-               Put ("cp ");
-            end if;
+            Put ((if Sym_Link then "ln -s " else "cp "));
 
             Put (From);
             Put (" ");
@@ -972,11 +945,9 @@ package body Gprinstall.Install is
             then
                if Create_Dest_Dir then
                   begin
-                     if Sym_Link then
-                        Create_Path (Containing_Directory (From));
-                     else
-                        Create_Path (To);
-                     end if;
+                     Create_Path
+                       ((if Sym_Link then Containing_Directory (From)
+                         else To));
                   exception
                      when Text_IO.Use_Error =>
                         --  Cannot create path, permission issue
@@ -1198,12 +1169,10 @@ package body Gprinstall.Install is
             Sid  : Source_Id;
 
          begin
-            if Project.Qualifier = Aggregate_Library then
-               Iter := For_Each_Source (Tree, Locally_Removed => False);
-            else
-               Iter := For_Each_Source
-                 (Tree, Project, Locally_Removed => False);
-            end if;
+            Iter :=
+              (if Project.Qualifier = Aggregate_Library then
+                 For_Each_Source (Tree, Locally_Removed => False)
+               else For_Each_Source (Tree, Project, Locally_Removed => False));
 
             loop
                Sid := Element (Iter);
@@ -1261,14 +1230,13 @@ package body Gprinstall.Install is
                            Proj : Project_Id := Sid.Project;
                            Ssid : Source_Id;
                         begin
-                           if Other_Part (Sid) = null
-                             or else Sid.Naming_Exception = No
-                             or else All_Sources
-                           then
-                              Ssid := Sid;
-                           else
-                              Ssid := Other_Part (Sid);
-                           end if;
+                           Ssid :=
+                             (if
+                                Other_Part (Sid) = null
+                                or else Sid.Naming_Exception = No
+                                or else All_Sources
+                              then Sid
+                              else Other_Part (Sid));
 
                            if Project.Qualifier = Aggregate_Library then
                               Proj := Project;
@@ -1413,11 +1381,9 @@ package body Gprinstall.Install is
                   K := K - 1;
                end loop;
 
-               if K = 0 then
-                  return Pathname;
-               else
-                  return Pathname (K + 1 .. Pathname'Last);
-               end if;
+               return
+                 (if K = 0 then Pathname
+                  else Pathname (K + 1 .. Pathname'Last));
             end Get_Pattern;
 
          begin
@@ -1985,11 +1951,9 @@ package body Gprinstall.Install is
 
             --  Project objects and/or library
 
-            if Project.Library then
-               Line := +"         for Library_Dir use """;
-            else
-               Line := +"         for Object_Dir use """;
-            end if;
+            Line :=
+              (if Project.Library then +"         for Library_Dir use """
+               else +"         for Object_Dir use """);
 
             Line := Line
               & Relative_Path
@@ -2200,12 +2164,10 @@ package body Gprinstall.Install is
          function Image (Id : Variable_Id) return String is
             V : constant Variable_Value := Vels (Id).Value;
          begin
-            if V.Default then
-               return "";
-            else
-               return "for " & Get_Name_String (Vels (Id).Name) & " use "
-                 & Image (V);
-            end if;
+            return
+              (if V.Default then ""
+               else "for " & Get_Name_String (Vels (Id).Name) & " use " &
+                 Image (V));
          end Image;
 
          function Image (Var : Variable_Value) return String is
@@ -2587,11 +2549,8 @@ package body Gprinstall.Install is
             Put ("Project ");
             Put (Filename);
 
-            if Dry_Run then
-               Put_Line (" would be installed");
-            else
-               Put_Line (" installed");
-            end if;
+            Put_Line
+              ((if Dry_Run then " would be installed" else " installed"));
 
             New_Line;
          end if;
@@ -2840,11 +2799,9 @@ package body Gprinstall.Install is
             if Project.Library then
                Line := +"library ";
             else
-               if Has_Sources (Project) then
-                  Line := +"standard ";
-               else
-                  Line := +"abstract ";
-               end if;
+               Line :=
+                 (if Has_Sources (Project) then +"standard "
+                  else +"abstract ");
             end if;
 
             Line := Line & "project ";

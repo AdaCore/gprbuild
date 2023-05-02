@@ -788,13 +788,9 @@ package body Gprbuild.Link is
 
          --  Start with the minimal options
 
-         if First_Object = Objects.First_Index then
-            --  Creation of a new archive
-            Arguments.Append_Vector (Archive_Builder_Opts);
-         else
-            --  Append objects to an existing archive
-            Arguments.Append_Vector (Archive_Builder_Append_Opts);
-         end if;
+         Arguments.Append_Vector
+           ((if First_Object = Objects.First_Index then Archive_Builder_Opts
+             else Archive_Builder_Append_Opts));
 
          --  Followed by the archive name
 
@@ -975,23 +971,18 @@ package body Gprbuild.Link is
          Name_Len := 0;
 
          if Opt.Verbose_Mode then
-            if Opt.Verbosity_Level = Opt.Low then
-               Add_Str_To_Name_Buffer
-                 (Base_Name (Path.all, Executable_Suffix.all));
-            else
-               Add_Str_To_Name_Buffer (Path.all);
-            end if;
+            Add_Str_To_Name_Buffer
+              ((if Opt.Verbosity_Level = Opt.Low then
+                  Base_Name (Path.all, Executable_Suffix.all)
+                else Path.all));
 
             for Arg of Arguments loop
                if Arg.Displayed then
                   Add_Str_To_Name_Buffer (" ");
 
-                  if Arg.Simple_Name then
-                     Add_Str_To_Name_Buffer (Base_Name (Arg.Name));
-
-                  else
-                     Add_Str_To_Name_Buffer (Arg.Name);
-                  end if;
+                  Add_Str_To_Name_Buffer
+                    ((if Arg.Simple_Name then Base_Name (Arg.Name)
+                      else Arg.Name));
 
                elsif Display_Ellipse then
                   Add_Str_To_Name_Buffer (" ...");
@@ -1069,14 +1060,11 @@ package body Gprbuild.Link is
       --  Start of processing for Get_Linker_Options
 
    begin
-      if For_Project.Config.Linker_Lib_Dir_Option = No_Name then
-         Linker_Lib_Dir_Option := new String'("-L");
-
-      else
-         Linker_Lib_Dir_Option :=
-           new String'
-             (Get_Name_String (For_Project.Config.Linker_Lib_Dir_Option));
-      end if;
+      Linker_Lib_Dir_Option :=
+        (if For_Project.Config.Linker_Lib_Dir_Option = No_Name then
+           new String'("-L")
+         else new String'
+             (Get_Name_String (For_Project.Config.Linker_Lib_Dir_Option)));
 
       Linker_Opts.Clear;
 
@@ -2548,21 +2536,13 @@ package body Gprbuild.Link is
                      Library_Dirs.Set
                        (Library_Projs (J).Proj.Library_Dir.Name, True);
 
-                     if Main_Proj.Config.Linker_Lib_Dir_Option = No_Name then
-                        Add_To_Other_Arguments
-                          ("-L"
-                           & Get_Name_String
-                               (Library_Projs
-                                  (J).Proj.Library_Dir.Display_Name));
-
-                     else
-                        Add_To_Other_Arguments
-                          (Get_Name_String
-                             (Main_Proj.Config.Linker_Lib_Dir_Option)
-                           & Get_Name_String
-                               (Library_Projs
-                                  (J).Proj.Library_Dir.Display_Name));
-                     end if;
+                     Add_To_Other_Arguments
+                       ((if Main_Proj.Config.Linker_Lib_Dir_Option = No_Name
+                         then "-L"
+                         else Get_Name_String
+                             (Main_Proj.Config.Linker_Lib_Dir_Option)) &
+                        Get_Name_String
+                          (Library_Projs (J).Proj.Library_Dir.Display_Name));
 
                      if Opt.Run_Path_Option
                        and then
@@ -2576,18 +2556,12 @@ package body Gprbuild.Link is
                      end if;
                   end if;
 
-                  if Main_Proj.Config.Linker_Lib_Name_Option = No_Name then
-                     Add_To_Other_Arguments
-                       ("-l" & Get_Name_String
-                                 (Library_Projs (J).Proj.Library_Name));
-
-                  else
-                     Add_To_Other_Arguments
-                       (Get_Name_String
-                          (Main_Proj.Config.Linker_Lib_Name_Option)
-                        & Get_Name_String
-                            (Library_Projs (J).Proj.Library_Name));
-                  end if;
+                  Add_To_Other_Arguments
+                    ((if Main_Proj.Config.Linker_Lib_Name_Option = No_Name then
+                        "-l"
+                      else Get_Name_String
+                          (Main_Proj.Config.Linker_Lib_Name_Option)) &
+                     Get_Name_String (Library_Projs (J).Proj.Library_Name));
                end if;
             end if;
          end loop;
@@ -3239,11 +3213,10 @@ package body Gprbuild.Link is
                end loop;
 
                if Arg_Length > Main_Proj.Config.Max_Command_Line_Length then
-                  if Main_Proj.Config.Resp_File_Options = No_Name_List then
-                     Min_Number_Of_Objects := 0;
-                  else
-                     Min_Number_Of_Objects := 1;
-                  end if;
+                  Min_Number_Of_Objects :=
+                    (if Main_Proj.Config.Resp_File_Options = No_Name_List then
+                       0
+                     else 1);
 
                   --  Don't create a response file if there would not be
                   --  a smaller number of arguments.

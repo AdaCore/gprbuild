@@ -765,11 +765,9 @@ package body Scanner is
                Scan_Integer;
             end if;
 
-            if Exponent_Is_Negative then
-               Scale := Scale - Int_Value;
-            else
-               Scale := Scale + Int_Value;
-            end if;
+            Scale :=
+              (if Exponent_Is_Negative then Scale - Int_Value
+               else Scale + Int_Value);
          end if;
 
          --  Case of real literal to be returned
@@ -782,16 +780,7 @@ package body Scanner is
          else
             Token := Tok_Integer_Literal;
 
-            if Scale = 0 then
-               Int_Literal_Value := Num_Value;
-
-            --  Avoid doing possibly expensive calculations in cases like
-            --  parsing 163E800_000# when semantics will not be done anyway.
-            --  This is especially useful when parsing garbled input.
-
-            else
-               Int_Literal_Value := 0;
-            end if;
+            Int_Literal_Value := (if Scale = 0 then Num_Value else 0);
          end if;
 
          if Checksum_Accumulate_Token_Checksum then
@@ -2226,11 +2215,9 @@ package body Scanner is
       --  we allow brackets encoding regardless of the standard encoding
       --  method being used, but otherwise we use this standard method.
 
-      if Chr = '[' then
-         C := Char_Code (WC_In (Chr, WCEM_Brackets));
-      else
-         C := Char_Code (WC_In (Chr, Wide_Character_Encoding_Method));
-      end if;
+      C :=
+        (if Chr = '[' then Char_Code (WC_In (Chr, WCEM_Brackets))
+         else Char_Code (WC_In (Chr, Wide_Character_Encoding_Method)));
 
       Err := False;
 
@@ -2341,11 +2328,7 @@ package body Scanner is
 
    begin
       if Chr = CR then
-         if Source (P + 1) = LF then
-            P := P + 2;
-         else
-            P := P + 1;
-         end if;
+         P := P + (if Source (P + 1) = LF then 2 else 1);
 
       elsif Chr = LF then
          P := P + 1;

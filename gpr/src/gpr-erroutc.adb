@@ -358,13 +358,12 @@ package body GPR.Erroutc is
             --  than one error message occurs at the same flag position).
 
             if P = Errors.Table (T).Sptr then
-               if (Flag_Num = 1 and then not Mult_Flags)
-                 or else Flag_Num > 9
-               then
-                  Write_Char ('|');
-               else
-                  Write_Char (Character'Val (Character'Pos ('0') + Flag_Num));
-               end if;
+               Write_Char
+                 ((if
+                     (Flag_Num = 1 and then not Mult_Flags)
+                     or else Flag_Num > 9
+                   then '|'
+                   else Character'Val (Character'Pos ('0') + Flag_Num)));
 
                --  Skip past the corresponding source text character
 
@@ -438,11 +437,7 @@ package body GPR.Erroutc is
             M := M / 10;
 
             if D = 0 then
-               if Z then
-                  C := '0';
-               else
-                  C := ' ';
-               end if;
+               C := (if Z then '0' else ' ');
             else
                Z := True;
                C := Character'Val (D + 48);

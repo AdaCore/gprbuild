@@ -453,11 +453,7 @@ package body GPR.Strt is
       end if;
 
       if Expr_Kind = Undefined then
-         if Ext_List then
-            Expr_Kind := List;
-         else
-            Expr_Kind := Single;
-         end if;
+         Expr_Kind := (if Ext_List then List else Single);
       end if;
 
       Expect (Tok_Left_Paren, "`(`");
@@ -888,16 +884,13 @@ package body GPR.Strt is
 
                   --  Now, look if it can be a project name
 
-                  if Names.Table (1).Name =
+                  The_Project :=
+                    (if
+                       Names.Table (1).Name =
                        Name_Of (Current_Project, In_Tree)
-                  then
-                     The_Project := Current_Project;
-
-                  else
-                     The_Project :=
-                       Imported_Or_Extended_Project_Of
-                         (Current_Project, In_Tree, Names.Table (1).Name);
-                  end if;
+                     then Current_Project
+                     else Imported_Or_Extended_Project_Of
+                         (Current_Project, In_Tree, Names.Table (1).Name));
 
                   if No (The_Project) then
 
@@ -989,16 +982,11 @@ package body GPR.Strt is
 
                      --  Check if the long project is imported or extended
 
-                     if Long_Project = Name_Of (Current_Project, In_Tree) then
-                        The_Project := Current_Project;
-
-                     else
-                        The_Project :=
-                          Imported_Or_Extended_Project_Of
-                            (Current_Project,
-                             In_Tree,
-                             Long_Project);
-                     end if;
+                     The_Project :=
+                       (if Long_Project = Name_Of (Current_Project, In_Tree)
+                        then Current_Project
+                        else Imported_Or_Extended_Project_Of
+                            (Current_Project, In_Tree, Long_Project));
 
                      --  If the long project exists, then this is the prefix
                      --  of the attribute.
@@ -1011,16 +999,12 @@ package body GPR.Strt is
                         --  Otherwise, check if the short project is imported
                         --  or extended.
 
-                        if Short_Project =
-                             Name_Of (Current_Project, In_Tree)
-                        then
-                           The_Project := Current_Project;
-
-                        else
-                           The_Project := Imported_Or_Extended_Project_Of
-                                            (Current_Project, In_Tree,
-                                             Short_Project);
-                        end if;
+                        The_Project :=
+                          (if
+                             Short_Project = Name_Of (Current_Project, In_Tree)
+                           then Current_Project
+                           else Imported_Or_Extended_Project_Of
+                               (Current_Project, In_Tree, Short_Project));
 
                         --  If short project does not exist, report an error
 
@@ -1250,11 +1234,9 @@ package body GPR.Strt is
          Set_Project_Node_Of (Variable, In_Tree, To => Specified_Project);
          Set_Package_Node_Of (Variable, In_Tree, To => Specified_Package);
 
-         if Present (Specified_Project) then
-            The_Project := Specified_Project;
-         else
-            The_Project := Current_Project;
-         end if;
+         The_Project :=
+           (if Present (Specified_Project) then Specified_Project
+            else Current_Project);
 
          Current_Variable := Empty_Project_Node;
 
@@ -1319,13 +1301,11 @@ package body GPR.Strt is
                      --  the variable is declared in one of the projects the
                      --  current project extends.
 
-                     if No (Parent_Project_Of (Proj, In_Tree)) then
-                        Proj :=
+                     Proj :=
+                       (if No (Parent_Project_Of (Proj, In_Tree)) then
                           Extended_Project_Of
-                            (Project_Declaration_Of (Proj, In_Tree), In_Tree);
-                     else
-                        Proj := Parent_Project_Of (Proj, In_Tree);
-                     end if;
+                            (Project_Declaration_Of (Proj, In_Tree), In_Tree)
+                        else Parent_Project_Of (Proj, In_Tree));
 
                      Set_Project_Node_Of (Variable, In_Tree, To => Proj);
 

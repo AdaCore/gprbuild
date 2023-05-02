@@ -221,18 +221,10 @@ package body GPR.Compilation.Sync is
 
                else
                   if I_Regexp'Length = 0 then
-                     if Match (S_Name, E_Regexp) then
-                        Is_File := False;
-                     else
-                        Is_File := True;
-                     end if;
+                     Is_File := not Match (S_Name, E_Regexp);
 
                   else
-                     if Match (S_Name, I_Regexp) then
-                        Is_File := True;
-                     else
-                        Is_File := False;
-                     end if;
+                     Is_File := Match (S_Name, I_Regexp);
                   end if;
 
                   if Is_File then

@@ -928,11 +928,9 @@ procedure Gprlib is
 
          --  Make sure that the init procedure is never "adainit"
 
-         if Library_Name.all = "ada" then
-            Bind_Options.Append ("-Lada_");
-         else
-            Bind_Options.Append ("-L" & Library_Name.all);
-         end if;
+         Bind_Options.Append
+           ((if Library_Name.all = "ada" then "-Lada_"
+             else "-L" & Library_Name.all));
 
          if Auto_Init and then SALs_Use_Constructors then
             --  Check that pragma Linker_Constructor is supported
@@ -1664,11 +1662,10 @@ procedure Gprlib is
             --  of the archive, only put on the command line a number of
             --  character lower that Maximum_Size.
 
-            if First_AB_Object_Pos > AB_Objects.First_Index then
-               AB_Options := AB_Append_Options;
-            else
-               AB_Options := AB_Create_Options;
-            end if;
+            AB_Options :=
+              (if First_AB_Object_Pos > AB_Objects.First_Index then
+                 AB_Append_Options
+               else AB_Create_Options);
 
             AB_Options.Append (Library_Path_Name.all);
 

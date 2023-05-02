@@ -535,12 +535,9 @@ procedure Gprclean.Main is
                        (Switch (Relocate_Build_Tree_Option'Length + 2
                         .. Switch'Last));
                   begin
-                     if Is_Absolute_Path (Dir) then
-                        Build_Tree_Dir := new String'(Dir);
-                     else
-                        Build_Tree_Dir :=
-                          new String'(Get_Current_Dir & Dir);
-                     end if;
+                     Build_Tree_Dir :=
+                       (if Is_Absolute_Path (Dir) then new String'(Dir)
+                        else new String'(Get_Current_Dir & Dir));
                   end;
                end if;
 
@@ -654,15 +651,10 @@ procedure Gprclean.Main is
                declare
                   Prj : constant String := Switch (3 .. Switch'Last);
                begin
-                  if Prj'Length > 1
-                    and then Prj (Prj'First) = '='
-                  then
-                     Project_File_Name :=
-                       new String'
-                         (Prj (Prj'First + 1 ..  Prj'Last));
-                  else
-                     Project_File_Name := new String'(Prj);
-                  end if;
+                  Project_File_Name :=
+                    (if Prj'Length > 1 and then Prj (Prj'First) = '=' then
+                       new String'(Prj (Prj'First + 1 .. Prj'Last))
+                     else new String'(Prj));
                end;
 
             else
@@ -1063,10 +1055,8 @@ begin
    if Verbose_Mode and (not File_Deleted) then
       New_Line;
 
-      if Do_Nothing then
-         Put_Line ("No file needs to be deleted");
-      else
-         Put_Line ("No file has been deleted");
-      end if;
+      Put_Line
+        ((if Do_Nothing then "No file needs to be deleted"
+          else "No file has been deleted"));
    end if;
 end Gprclean.Main;

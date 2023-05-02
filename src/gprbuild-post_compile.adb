@@ -829,14 +829,10 @@ package body Gprbuild.Post_Compile is
                         --  directory, for other projects, use the
                         --  object directory.
 
-                        if ALI_Project.Library and then not From_Object_Dir
-                        then
-                           Get_Name_String
-                             (ALI_Project.Library_ALI_Dir.Display_Name);
-                        else
-                           Get_Name_String
-                             (ALI_Project.Object_Directory.Display_Name);
-                        end if;
+                        Get_Name_String
+                          ((if ALI_Project.Library and then not From_Object_Dir
+                            then ALI_Project.Library_ALI_Dir.Display_Name
+                            else ALI_Project.Object_Directory.Display_Name));
 
                         Add_Str_To_Name_Buffer (ALI);
 
@@ -1877,15 +1873,14 @@ package body Gprbuild.Post_Compile is
                      Elem := Project_Tree.Shared.String_Elements.Table (List);
                      Get_Name_String (Elem.Value);
 
-                     if Is_Absolute_Path (Name_Buffer (1 .. Name_Len)) then
-                        OK := Is_Regular_File (Name_Buffer (1 .. Name_Len));
-
-                     else
-                        OK := Is_Regular_File
-                          (Get_Name_String (For_Project.Object_Directory.Name)
-                           & Directory_Separator
-                           & Name_Buffer (1 .. Name_Len));
-                     end if;
+                     OK :=
+                       (if Is_Absolute_Path (Name_Buffer (1 .. Name_Len)) then
+                          Is_Regular_File (Name_Buffer (1 .. Name_Len))
+                        else Is_Regular_File
+                            (Get_Name_String
+                               (For_Project.Object_Directory.Name) &
+                             Directory_Separator &
+                             Name_Buffer (1 .. Name_Len)));
 
                      if not OK then
                         Error_Msg
@@ -2430,11 +2425,10 @@ package body Gprbuild.Post_Compile is
             begin
                Next_Proj := For_Project.Extends;
 
-               if For_Project.Qualifier = Aggregate_Library then
-                  Iter := For_Each_Source (Project_Tree);
-               else
-                  Iter := For_Each_Source (Project_Tree, For_Project);
-               end if;
+               Iter :=
+                 (if For_Project.Qualifier = Aggregate_Library then
+                    For_Each_Source (Project_Tree)
+                  else For_Each_Source (Project_Tree, For_Project));
 
                loop
                   while GPR.Element (Iter) /= No_Source
@@ -2539,11 +2533,10 @@ package body Gprbuild.Post_Compile is
          begin
             Next_Proj := For_Project.Extends;
 
-            if For_Project.Qualifier = Aggregate_Library then
-               Iter := For_Each_Source (Project_Tree);
-            else
-               Iter := For_Each_Source (Project_Tree, For_Project);
-            end if;
+            Iter :=
+              (if For_Project.Qualifier = Aggregate_Library then
+                 For_Each_Source (Project_Tree)
+               else For_Each_Source (Project_Tree, For_Project));
 
             loop
                --  Look for the Source_Id corresponding to this unit
@@ -3779,12 +3772,11 @@ package body Gprbuild.Post_Compile is
 
          if Roots = null then
             if Main_Source.Unit = No_Unit_Index then
-               if Main_Project.Qualifier = Aggregate_Library then
-                  Iter := For_Each_Source (Project_Tree);
-               else
-                  Iter := For_Each_Source
-                    (Project_Tree, Encapsulated_Libs => False);
-               end if;
+               Iter :=
+                 (if Main_Project.Qualifier = Aggregate_Library then
+                    For_Each_Source (Project_Tree)
+                  else For_Each_Source
+                      (Project_Tree, Encapsulated_Libs => False));
 
                while GPR.Element (Iter) /= No_Source loop
                   Initialize_Source_Record (GPR.Element (Iter));
@@ -3879,15 +3871,14 @@ package body Gprbuild.Post_Compile is
          begin
             Position := Projects.Find (Project.Path.Display_Name);
 
-            if Project_File_Paths.Has_Element (Position)
-              and then Project_File_Paths.Element (Position).Line (1)
-              /= ASCII.NUL
-            then
-               return Project_File_Paths.Element (Position).Line;
-            end if;
-
-            return String (Osint.File_Stamp (Project.Path.Display_Name)) & ' '
-              & Get_Project_Checksum (Project);
+            return
+              (if
+                 Project_File_Paths.Has_Element (Position)
+                 and then Project_File_Paths.Element (Position).Line (1) /=
+                   ASCII.NUL
+               then Project_File_Paths.Element (Position).Line
+               else String (Osint.File_Stamp (Project.Path.Display_Name)) &
+                 ' ' & Get_Project_Checksum (Project));
          end Get_Project_Checkline;
 
       begin
@@ -4262,17 +4253,13 @@ package body Gprbuild.Post_Compile is
                         while Proj /= No_Project loop
                            Name_Len := 0;
 
-                           if Proj.Library
-                             and then
-                               Proj.Library_ALI_Dir /= No_Path_Information
-                           then
-                              Get_Name_String_And_Append
-                                (Proj.Library_ALI_Dir.Display_Name);
-
-                           else
-                              Get_Name_String_And_Append
-                                (Proj.Object_Directory.Display_Name);
-                           end if;
+                           Get_Name_String_And_Append
+                             ((if
+                                 Proj.Library
+                                 and then Proj.Library_ALI_Dir /=
+                                   No_Path_Information
+                               then Proj.Library_ALI_Dir.Display_Name
+                               else Proj.Object_Directory.Display_Name));
 
                            Add_Char_To_Name_Buffer
                              (Directory_Separator);

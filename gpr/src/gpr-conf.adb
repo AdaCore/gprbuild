@@ -570,11 +570,10 @@ package body GPR.Conf is
    is
       C : constant Language_Maps.Cursor := Self.Find (Lang);
    begin
-      if Language_Maps.Has_Element (C) then
-         return Get_Name_String (Language_Maps.Element (C));
-      else
-         return "";
-      end if;
+      return
+        (if Language_Maps.Has_Element (C) then
+           Get_Name_String (Language_Maps.Element (C))
+         else "");
    end Get_Element_Or_Empty;
 
    --------------------------------------
@@ -840,14 +839,11 @@ package body GPR.Conf is
 
       begin
          if Selected_Target'Length /= 0 then
-            if Ada_RTS /= "" then
-               return
-                 Selected_Target.all & '-' &
-                 Ada_RTS & Config_Project_File_Extension;
-            else
-               return
-                 Selected_Target.all & Config_Project_File_Extension;
-            end if;
+            return
+              (if Ada_RTS /= "" then
+                 Selected_Target.all & '-' & Ada_RTS &
+                 Config_Project_File_Extension
+               else Selected_Target.all & Config_Project_File_Extension);
 
          elsif Ada_RTS /= "" then
             return Ada_RTS & Config_Project_File_Extension;
@@ -861,11 +857,7 @@ package body GPR.Conf is
             begin
                Free (Tmp);
 
-               if T'Length = 0 then
-                  return Default_Config_Name;
-               else
-                  return T;
-               end if;
+               return (if T'Length = 0 then Default_Config_Name else T);
             end;
          end if;
       end Default_File_Name;
@@ -1052,11 +1044,10 @@ package body GPR.Conf is
                Arg_Last := 4;
 
             elsif Normalized_Hostname /= "" then
-               if At_Least_One_Compiler_Command then
-                  Args (4) := new String'("--target=all");
-               else
-                  Args (4) := new String'("--target=" & Normalized_Hostname);
-               end if;
+               Args (4) :=
+                 (if At_Least_One_Compiler_Command then
+                    new String'("--target=all")
+                  else new String'("--target=" & Normalized_Hostname));
 
                Arg_Last := 4;
             end if;
@@ -1072,11 +1063,9 @@ package body GPR.Conf is
             end if;
 
             if Opt.Verbose_Mode and then Opt.Verbosity_Level > Opt.Low then
-               if Opt.Verbosity_Level = Opt.High then
-                  Write_Str (Gprconfig_Path.all);
-               else
-                  Write_Str (Gprconfig_Name);
-               end if;
+               Write_Str
+                 ((if Opt.Verbosity_Level = Opt.High then Gprconfig_Path.all
+                   else Gprconfig_Name));
 
                for J in 1 .. Arg_Last loop
                   Write_Char (' ');
@@ -1390,15 +1379,14 @@ package body GPR.Conf is
                           Get_Name_String (Variable.Value);
 
                      begin
-                        if Is_Absolute_Path (Compiler_Command) then
-                           Result (Count) := new String'
-                             (Config_Common
-                              & Containing_Directory (Compiler_Command) & ","
-                              & Simple_Name (Compiler_Command));
-                        else
-                           Result (Count) := new String'
-                             (Config_Common & ',' & Compiler_Command);
-                        end if;
+                        Result (Count) :=
+                          (if Is_Absolute_Path (Compiler_Command) then
+                             new String'
+                               (Config_Common &
+                                Containing_Directory (Compiler_Command) & "," &
+                                Simple_Name (Compiler_Command))
+                           else new String'
+                               (Config_Common & ',' & Compiler_Command));
                      end;
                   end if;
                end;
@@ -1677,14 +1665,13 @@ package body GPR.Conf is
    function Locate_Config_File (Name : String) return String_Access is
       Prefix_Path : constant String := Executable_Prefix_Path;
    begin
-      if Prefix_Path'Length /= 0 then
-         return Locate_Regular_File
-           (Name,
-            "." & Path_Separator &
-            Prefix_Path & "share" & Directory_Separator & "gpr");
-      else
-         return Locate_Regular_File (Name, ".");
-      end if;
+      return
+        (if Prefix_Path'Length /= 0 then
+           Locate_Regular_File
+             (Name,
+              "." & Path_Separator & Prefix_Path & "share" &
+              Directory_Separator & "gpr")
+         else Locate_Regular_File (Name, "."));
    end Locate_Config_File;
 
    ------------------------------------
@@ -2615,18 +2602,13 @@ package body GPR.Conf is
 
                   begin
                      if Runtime'Length > 0 then
-                        if Is_Absolute_Path (Runtime) then
-                           Root := new String'(Runtime);
-
-                        else
-                           Root :=
-                             new String'
-                               (Prefix.all &
-                                  Directory_Separator &
-                                  Opt.Target_Value.all &
-                                  Directory_Separator &
-                                  Runtime);
-                        end if;
+                        Root :=
+                          (if Is_Absolute_Path (Runtime) then
+                             new String'(Runtime)
+                           else new String'
+                               (Prefix.all & Directory_Separator &
+                                Opt.Target_Value.all & Directory_Separator &
+                                Runtime));
 
                         Runtime_Root := Compiler_Root.Runtimes;
                         while Runtime_Root /= null loop

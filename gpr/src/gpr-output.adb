@@ -113,17 +113,7 @@ package body GPR.Output is
             --  If line is too long or if it's a blank line, just write the
             --  buffer.
 
-            if Len > Buffer_Max
-              or else Buffer (1 .. Len) = (1 => ASCII.LF)
-            then
-               Write_Buffer (Buffer (1 .. Len));
-
-            --  Otherwise, construct a new buffer with preceding spaces, and
-            --  write that.
-
-            else
-               Write_Buffer (Buffer (1 .. Len));
-            end if;
+            Write_Buffer (Buffer (1 .. Len));
 
          exception
             when Write_Error =>

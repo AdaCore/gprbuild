@@ -150,12 +150,7 @@ package body GPR.Compilation.Process is
 
    function Get_Slave_For (Pid : Id) return String is
    begin
-      if Pid.Kind = Local then
-         return "";
-
-      else
-         return Results.Get_Slave_For (Pid);
-      end if;
+      return (if Pid.Kind = Local then "" else Results.Get_Slave_For (Pid));
    end Get_Slave_For;
 
    ----------
@@ -165,11 +160,10 @@ package body GPR.Compilation.Process is
    function Hash (Process : Id) return Header_Num is
       Modulo : constant Integer := Integer (Header_Num'Last) + 1;
    begin
-      if Process.Kind = Local then
-         return Header_Num (Pid_To_Integer (Process.Pid) mod Modulo);
-      else
-         return Header_Num (Process.R_Pid mod Remote_Id (Modulo));
-      end if;
+      return
+        (if Process.Kind = Local then
+           Header_Num (Pid_To_Integer (Process.Pid) mod Modulo)
+         else Header_Num (Process.R_Pid mod Remote_Id (Modulo)));
    end Hash;
 
    ------------------------
@@ -234,11 +228,9 @@ package body GPR.Compilation.Process is
          use type Failures_Slave_Set.Cursor;
          Pos : constant Failures_Slave_Set.Cursor := Failed_Proc.Find (Pid);
       begin
-         if Pos = Failures_Slave_Set.No_Element then
-            return "";
-         else
-            return Failures_Slave_Set.Element (Pos);
-         end if;
+         return
+           (if Pos = Failures_Slave_Set.No_Element then ""
+            else Failures_Slave_Set.Element (Pos));
       end Get_Slave_For;
 
       ---------------------------

@@ -159,12 +159,9 @@ package body Gprbuild is
 
    function Archive_Suffix (For_Project : Project_Id) return String is
    begin
-      if For_Project.Config.Archive_Suffix = No_File then
-         return ".a";
-
-      else
-         return Get_Name_String (For_Project.Config.Archive_Suffix);
-      end if;
+      return
+        (if For_Project.Config.Archive_Suffix = No_File then ".a"
+         else Get_Name_String (For_Project.Config.Archive_Suffix));
    end Archive_Suffix;
 
    -------------------
@@ -496,11 +493,8 @@ package body Gprbuild is
          Put (' ');
          Put (Name);
 
-         if Outstanding_Processes <= 1 then
-            Put_Line (" process");
-         else
-            Put_Line (" processes");
-         end if;
+         Put_Line
+           ((if Outstanding_Processes <= 1 then " process" else " processes"));
       end if;
    end Display_Processes;
 

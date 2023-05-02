@@ -339,11 +339,7 @@ package body GPR.Knowledge is
    is
       Attr : constant Node := Get_Named_Item (Attributes (N), Attribute);
    begin
-      if Attr = null then
-         return Default;
-      else
-         return Node_Value (Attr);
-      end if;
+      return (if Attr = null then Default else Node_Value (Attr));
    end Get_Attribute;
 
    --------------------------
@@ -414,11 +410,7 @@ package body GPR.Knowledge is
          return False;
 
       else
-         if B = Windows_Pattern then
-            return True;
-         else
-            return False;
-         end if;
+         return B = Windows_Pattern;
       end if;
    end Is_Windows_Executable;
 
@@ -464,14 +456,12 @@ package body GPR.Knowledge is
 
    function Name_As_Directory (Dir : String) return String is
    begin
-      if Dir = ""
-        or else Dir (Dir'Last) = Directory_Separator
-        or else Dir (Dir'Last) = '/'
-      then
-         return Dir;
-      else
-         return Dir & Directory_Separator;
-      end if;
+      return
+        (if
+           Dir = "" or else Dir (Dir'Last) = Directory_Separator
+           or else Dir (Dir'Last) = '/'
+         then Dir
+         else Dir & Directory_Separator);
    end Name_As_Directory;
 
    ----------------------------------
@@ -742,13 +732,11 @@ package body GPR.Knowledge is
                            Compiler.Prefix_Index := -1;
                      end;
 
-                     if not Ends_With (Val, Exec_Suffix.all) then
-                        Compiler.Executable_Re := new Pattern_Matcher'
-                          (Compile ("^" & Val & Exec_Suffix.all & "$"));
-                     else
-                        Compiler.Executable_Re := new Pattern_Matcher'
-                          (Compile ("^" & Val & "$"));
-                     end if;
+                     Compiler.Executable_Re :=
+                       (if Ends_With (Val, Exec_Suffix.all) then
+                          new Pattern_Matcher'(Compile ("^" & Val & "$"))
+                        else new Pattern_Matcher'
+                            (Compile ("^" & Val & Exec_Suffix.all & "$")));
                      Base.Check_Executable_Regexp := True;
                   end if;
 
@@ -1689,11 +1677,8 @@ package body GPR.Knowledge is
         or else Path_To_Check = "/"
         or else Path_To_Check = "" & Directory_Separator
       then
-         if Group = -1 then
-            Val := Value_If_Match;
-         else
-            Val := Get_String (Group_Match);
-         end if;
+         Val :=
+           (if Group = -1 then Value_If_Match else Get_String (Group_Match));
 
          if Contents /= null
            and then Is_Regular_File (Current_Dir)
@@ -1979,13 +1964,11 @@ package body GPR.Knowledge is
                   Extracted_From := Node.Var_Name;
 
                when Value_Constant =>
-                  if Node.Value = No_Name then
-                     Tmp_Result := Null_Unbounded_String;
-                  else
-                     Tmp_Result := To_Unbounded_String
-                       (Substitute_Variables_In_Compiler_Description
-                          (Get_Name_String (Node.Value), Comp));
-                  end if;
+                  Tmp_Result :=
+                    (if Node.Value = No_Name then Null_Unbounded_String
+                     else To_Unbounded_String
+                         (Substitute_Variables_In_Compiler_Description
+                            (Get_Name_String (Node.Value), Comp)));
                   From_Static := True;
                   Put_Verbose
                     (Attribute & ": constant := " & To_String (Tmp_Result));
@@ -2142,11 +2125,9 @@ package body GPR.Knowledge is
                      C      : String_Lists.Cursor;
                      Filter : Name_Id;
                   begin
-                     if Node.Typ = Value_Filter then
-                        Filter := Node.Filter;
-                     else
-                        Filter := No_Name;
-                     end if;
+                     Filter :=
+                       (if Node.Typ = Value_Filter then Node.Filter
+                        else No_Name);
 
                      --  When an external value is defined as a static string,
                      --  the only valid separator is ','. When computed
@@ -2603,14 +2584,11 @@ package body GPR.Knowledge is
       function Runtime_Or_Empty return String is
       begin
          if Comp.Runtime /= No_Name then
-            if Comp.Alt_Runtime = No_Name then
-               return " (" & Get_Name_String (Comp.Runtime) & " runtime)";
-            else
-               return
-                 " (" & Get_Name_String (Comp.Runtime) &
-                 " [" & Get_Name_String (Comp.Alt_Runtime) &
-                 "] runtime)";
-            end if;
+            return
+              (if Comp.Alt_Runtime = No_Name then
+                 " (" & Get_Name_String (Comp.Runtime) & " runtime)"
+               else " (" & Get_Name_String (Comp.Runtime) & " [" &
+                 Get_Name_String (Comp.Alt_Runtime) & "] runtime)");
          else
             return "";
          end if;
@@ -2641,11 +2619,9 @@ package body GPR.Knowledge is
 
       function Target return String is
       begin
-         if Show_Target then
-            return " on " & Get_Name_String (Comp.Target);
-         else
-            return "";
-         end if;
+         return
+           (if Show_Target then " on " & Get_Name_String (Comp.Target)
+            else "");
       end Target;
 
    begin
@@ -2759,11 +2735,7 @@ package body GPR.Knowledge is
 
       function Executable_Pattern return String is
       begin
-         if On_Windows then
-            return "*.{exe,bat,cmd}";
-         else
-            return "";
-         end if;
+         return (if On_Windows then "*.{exe,bat,cmd}" else "");
       end Executable_Pattern;
 
       C      : CDM.Cursor;
@@ -3810,15 +3782,14 @@ package body GPR.Knowledge is
          Last := Last - 1;
       end if;
 
-      if Last > 6 and then
-        Name (Last - 5 .. Last) = "adalib" and then
-        (Name (Last - 6) = Directory_Separator or else
-         Name (Last - 6) = '/')
-      then
-         Last := Last - 6;
-      else
-         Last := Name'Last;
-      end if;
+      Last :=
+        (if
+           Last > 6 and then Name (Last - 5 .. Last) = "adalib"
+           and then
+           (Name (Last - 6) = Directory_Separator
+            or else Name (Last - 6) = '/')
+         then Last - 6
+         else Name'Last);
 
       Name_Len := Last;
       Name_Buffer (1 .. Last) := Name (1 .. Last);
@@ -4363,11 +4334,7 @@ package body GPR.Knowledge is
       function Compare (Name1, Name2 : Name_Id) return Compare_Type is
       begin
          if Name1 = No_Name then
-            if Name2 = No_Name then
-               return Equal;
-            else
-               return Before;
-            end if;
+            return (if Name2 = No_Name then Equal else Before);
 
          elsif Name2 = No_Name then
             return After;
@@ -4667,21 +4634,10 @@ package body GPR.Knowledge is
                               Idx : constant Natural := Index (N1, "gnatmake");
 
                            begin
-                              if LC = "ada" and then Idx /= 0 then
-                                 --  For Ada, gnatmake was previously used
-                                 --  to detect a GNAT compiler. However, as
-                                 --  gnatmake may not be present in all the
-                                 --  GNAT distributions, gnatls is now used.
-                                 --  For upward compatibility, replace gnatmake
-                                 --  with gnatls, so that a GNAT compiler may
-                                 --  be decteted.
-
-                                 return
-                                   Replace_Slice (N1, Idx, Idx + 7, "gnatls");
-
-                              else
-                                 return N1;
-                              end if;
+                              return
+                                (if LC = "ada" and then Idx /= 0 then
+                                   Replace_Slice (N1, Idx, Idx + 7, "gnatls")
+                                 else N1);
                            end Name;
 
                         begin
@@ -4840,12 +4796,7 @@ package body GPR.Knowledge is
 
    function Runtime_Dir_Of (Comp : Compiler_Access) return Name_Id is
    begin
-      if Comp = null then
-         return No_Name;
-
-      else
-         return Comp.Runtime_Dir;
-      end if;
+      return (if Comp = null then No_Name else Comp.Runtime_Dir);
    end Runtime_Dir_Of;
 
    ----------

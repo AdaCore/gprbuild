@@ -407,11 +407,9 @@ package body Gprbuild.Compile is
                         Simple_Name => not Opt.Verbose_Mode);
 
                      if not Opt.Quiet_Output then
-                        if Opt.Verbose_Mode then
-                           Put (Exec_Path.all);
-                        else
-                           Put (Exec_Name);
-                        end if;
+                        Put
+                          ((if Opt.Verbose_Mode then Exec_Path.all
+                            else Exec_Name));
 
                         Put (" ");
 
@@ -2876,12 +2874,9 @@ package body Gprbuild.Compile is
                for Opt of Compilation_Options loop
                   Add_Str_To_Name_Buffer (" ");
 
-                  if Opt.Simple_Name then
-                     Add_Str_To_Name_Buffer (Base_Name (Opt.Name));
-
-                  else
-                     Add_Str_To_Name_Buffer (Opt.Name);
-                  end if;
+                  Add_Str_To_Name_Buffer
+                    ((if Opt.Simple_Name then Base_Name (Opt.Name)
+                      else Opt.Name));
                end loop;
 
                Put_Line (Name_Buffer (1 .. Name_Len));
@@ -3446,11 +3441,10 @@ package body Gprbuild.Compile is
                --  Record the last recorded option index, to be able to
                --  write the switches file later.
 
-               if Id.Language.Config.Object_Generated then
-                  Last_Switches_For_File := Compilation_Options.Last_Index;
-               else
-                  Last_Switches_For_File := -1;
-               end if;
+               Last_Switches_For_File :=
+                 (if Id.Language.Config.Object_Generated then
+                    Compilation_Options.Last_Index
+                  else -1);
 
                Add_Dependency_Options (Id);
                Set_Env_For_Include_Dirs (Id, Source_Project);

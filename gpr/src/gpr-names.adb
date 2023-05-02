@@ -650,11 +650,8 @@ package body GPR.Names is
       Get_Name_String (U);
       Write_Str (Name_Buffer (1 .. Name_Len - 2));
 
-      if Name_Buffer (Name_Len) = 's' then
-         Write_Str (" (spec)");
-      else
-         Write_Str (" (body)");
-      end if;
+      Write_Str
+        ((if Name_Buffer (Name_Len) = 's' then " (spec)" else " (body)"));
    end Write_Unit_Name;
 
 end GPR.Names;

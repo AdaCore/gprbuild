@@ -143,11 +143,7 @@ package body GPR.Compilation.Slave is
    function Channel (Host : String) return Protocol.Communication_Channel is
       S : constant Slave := Slaves.Find (Host);
    begin
-      if S = No_Slave then
-         return No_Channel;
-      else
-         return S.Channel;
-      end if;
+      return (if S = No_Slave then No_Channel else S.Channel);
    end Channel;
 
    ----------------------------
@@ -538,14 +534,13 @@ package body GPR.Compilation.Slave is
                               RD : constant String :=
                                      Get_Name_String (V.Value.Value);
                            begin
-                              if Is_Absolute_Path (RD) then
-                                 Root_Dir := To_Unbounded_String (RD);
-                              else
-                                 Root_Dir := To_Unbounded_String
-                                   (Normalize_Pathname
-                                      (To_String (Root_Dir)
-                                       & Directory_Separator & RD));
-                              end if;
+                              Root_Dir :=
+                                (if Is_Absolute_Path (RD) then
+                                   To_Unbounded_String (RD)
+                                 else To_Unbounded_String
+                                     (Normalize_Pathname
+                                        (To_String (Root_Dir) &
+                                         Directory_Separator & RD)));
 
                               if not Exists (To_String (Root_Dir))
                                 or else not Is_Directory (To_String (Root_Dir))
@@ -835,11 +830,9 @@ package body GPR.Compilation.Slave is
          S        : constant Slave := (Sock => Socket, others => <>);
          Position : constant Slave_S.Cursor := Pool.Find (S);
       begin
-         if Slave_S.Has_Element (Position) then
-            return Slave_S.Element (Position);
-         else
-            return No_Slave;
-         end if;
+         return
+           (if Slave_S.Has_Element (Position) then Slave_S.Element (Position)
+            else No_Slave);
       end Find;
 
       function Find (Host : String) return Slave is

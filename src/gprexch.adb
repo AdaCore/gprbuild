@@ -34,12 +34,9 @@ package body Gprexch is
 
    function Binding_Label (Section : Binding_Section) return String is
    begin
-      if Binding_Labels (Section) = null then
-         return "";
-
-      else
-         return Binding_Labels (Section).all;
-      end if;
+      return
+        (if Binding_Labels (Section) = null then ""
+         else Binding_Labels (Section).all);
    end Binding_Label;
 
    -------------------------
@@ -82,12 +79,9 @@ package body Gprexch is
 
    function Library_Label (Section : Library_Section) return String is
    begin
-      if Library_Labels (Section) = null then
-         return "";
-
-      else
-         return Library_Labels (Section).all;
-      end if;
+      return
+        (if Library_Labels (Section) = null then ""
+         else Library_Labels (Section).all);
    end Library_Label;
 
 --  Package elaboration code (build the lists of section labels)

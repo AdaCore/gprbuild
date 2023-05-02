@@ -459,14 +459,9 @@ begin
          end if;
       end if;
 
-      if Is_Absolute_Path (Library_Version.all) then
-         Library_Version_Path := Library_Version;
-
-      else
-         Library_Version_Path :=
-           new String'
-             (Library_Directory.all & Library_Version.all);
-      end if;
+      Library_Version_Path :=
+        (if Is_Absolute_Path (Library_Version.all) then Library_Version
+         else new String'(Library_Directory.all & Library_Version.all));
 
       --  Now that the table has been filled, call Build
 
