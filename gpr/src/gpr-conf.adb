@@ -1488,7 +1488,7 @@ package body GPR.Conf is
                     Normalize_Pathname
                       (Get_Name_String (Project.Directory.Display_Name) &
                            Directory_Separator & Runtime_Dir);
-                  Runtime_Path : String :=
+                  Runtime_Path : constant String :=
                     Ada.Environment_Variables.Value ("GPR_RUNTIME_PATH", "");
 
                begin
