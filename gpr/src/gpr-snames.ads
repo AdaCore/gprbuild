@@ -231,6 +231,7 @@ package GPR.Snames is
    Name_Naming                           : constant Name_Id := Name_Id (L) - N;
    Name_None                             : constant Name_Id := Name_Id (L) - N;
    Name_Object_Artifact_Extensions       : constant Name_Id := Name_Id (L) - N;
+   Name_Object_File_Prefix               : constant Name_Id := Name_Id (L) - N;
    Name_Object_File_Suffix               : constant Name_Id := Name_Id (L) - N;
    Name_Object_File_Switches             : constant Name_Id := Name_Id (L) - N;
    Name_Object_Generated                 : constant Name_Id := Name_Id (L) - N;

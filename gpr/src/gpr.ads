@@ -824,6 +824,9 @@ package GPR is
       --  path name is appended to the last switch in the list.
       --  Example: ("-i", "");
 
+      Object_File_Prefix : Name_Id := No_Name;
+      --  Optional alternate object file prefix
+
       Object_File_Suffix : Name_Id := No_Name;
       --  Optional alternate object file suffix
 
@@ -2588,6 +2591,7 @@ package GPR is
 
    function Object_Name
      (Source_File_Name   : File_Name_Type;
+      Object_File_Prefix : Name_Id := No_Name;
       Object_File_Suffix : Name_Id := No_Name) return File_Name_Type;
    --  Returns the object file name corresponding to a source file name
 
@@ -2595,6 +2599,7 @@ package GPR is
      (Source_File_Name   : File_Name_Type;
       Source_Index       : Int;
       Index_Separator    : Character;
+      Object_File_Prefix : Name_Id := No_Name;
       Object_File_Suffix : Name_Id := No_Name) return File_Name_Type;
    --  Returns the object file name corresponding to a unit in a multi-source
    --  file.

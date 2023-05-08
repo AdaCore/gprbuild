@@ -1293,15 +1293,33 @@ package body GPR is
 
    function Object_Name
      (Source_File_Name   : File_Name_Type;
+      Object_File_Prefix : Name_Id := No_Name;
       Object_File_Suffix : Name_Id := No_Name) return File_Name_Type
    is
+      Prefixed_Source_File_Name : File_Name_Type;
    begin
+      --  FIXME: SNM: Object_File_Prefix
+
+      --  New_Line;
+      --  Put_Line ("FIXME: SNM: Object_File_Prefix, Put_Lines Debuging:");
+      --  Put_Line ("Source_File_Name = " &
+      --            Get_Name_String (Source_File_Name));
+      --  Put_Line ("Object_File_Prefix = " &
+      --            Get_Name_String (Object_File_Prefix));
+      --  Put_Line ("Object_File_Suffix = " &
+      --            Get_Name_String (Object_File_Suffix));
+      --  New_Line;
+
+      Get_Name_String (Object_File_Prefix);
+      Get_Name_String_And_Append (Source_File_Name);
+      Prefixed_Source_File_Name := Name_Find;
+
       if Object_File_Suffix = No_Name then
          return Extend_Name
-           (Source_File_Name, Object_Suffix);
+           (Prefixed_Source_File_Name, Object_Suffix);
       else
          return Extend_Name
-           (Source_File_Name, Get_Name_String (Object_File_Suffix));
+           (Prefixed_Source_File_Name, Get_Name_String (Object_File_Suffix));
       end if;
    end Object_Name;
 
@@ -1309,13 +1327,16 @@ package body GPR is
      (Source_File_Name   : File_Name_Type;
       Source_Index       : Int;
       Index_Separator    : Character;
+      Object_File_Prefix : Name_Id := No_Name;
       Object_File_Suffix : Name_Id := No_Name) return File_Name_Type
    is
       Index_Img : constant String := Source_Index'Img;
       Last      : Natural;
 
    begin
-      Get_Name_String (Source_File_Name);
+      --  FIXME: SNM: Object_File_Prefix
+      Get_Name_String (Object_File_Prefix);
+      Get_Name_String_And_Append (Source_File_Name);
 
       Last := Name_Len;
       while Last > 1 and then Name_Buffer (Last) /= '.' loop

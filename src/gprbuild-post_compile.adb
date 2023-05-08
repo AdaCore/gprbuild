@@ -1711,7 +1711,7 @@ package body Gprbuild.Post_Compile is
                              Shared                 => Project_Tree.Shared);
 
                         if not Switches.Default
-			   and then Switches.Kind = List
+                          and then Switches.Kind = List
                         then
                            Write_List
                              (Gprexch.Binding_Options, Switches.Values);

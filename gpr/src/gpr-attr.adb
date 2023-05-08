@@ -819,6 +819,13 @@ package body GPR.Attr is
          Attr_Kind  => Case_Insensitive_Associative_Array,
          Conf_Conc  => True);
       Add_Attribute
+      (Name_Object_File_Prefix,
+       Var_Kind   => Single,
+       Attr_Kind  => Case_Insensitive_Associative_Array,
+       Conf_Conc  => False);
+      --  FIXME: SNM: Object_File_Prefix
+      --  Conf_Conc  => False); check this
+      Add_Attribute
         (Name_Object_File_Suffix,
          Var_Kind   => Single,
          Attr_Kind  => Case_Insensitive_Associative_Array,
