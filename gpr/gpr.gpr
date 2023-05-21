@@ -30,7 +30,8 @@ library project GPR is
    Target : Target_Type := external ("OS", "UNIX");
 
    type Library_Type_Type is ("relocatable", "static", "static-pic");
-   Gnat_Lib_Type : Library_Type_Type := external ("LIBRARY_TYPE", "static");
+   Gnat_Lib_Type : Library_Type_Type := external
+     ("LIBRARY_TYPE", external ("GPR_LIBRARY_TYPE", "static"));
    Root_Obj_Dir := external ("OBJDIR", ".");
 
    for Library_Kind use Gnat_Lib_Type;
