@@ -814,8 +814,17 @@ package body GPR.Proc is
                           Shared.Packages.Table (The_Package).Next;
                      end loop;
 
-                     pragma Assert
-                       (The_Package /= No_Package, "package not found.");
+                     if The_Package = No_Package then
+                        Get_Name_String (The_Name);
+                        Error_Msg
+                          (Env.Flags,
+                           "unknown package `" &
+                           Name_Buffer (1 .. Name_Len) & "`",
+                           Location_Of
+                             (The_Current_Term, From_Project_Node_Tree),
+                           Project);
+                        goto Process_Next_Term;
+                     end if;
 
                   elsif Kind_Of (The_Current_Term, From_Project_Node_Tree) =
                         N_Attribute_Reference
@@ -1530,6 +1539,7 @@ package body GPR.Proc is
             end case;
          end if;
 
+         <<Process_Next_Term>>
          The_Term := Next_Term (The_Term, From_Project_Node_Tree);
       end loop;
 
