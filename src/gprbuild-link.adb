@@ -2303,9 +2303,11 @@ package body Gprbuild.Link is
 
                                     if Name_Buffer (Name_Len) = ASCII.LF then
                                        Name_Len := Name_Len - 1;
-                                       if Name_Buffer (Name_Len) = ASCII.CR
-                                       then
-                                          Name_Len := Name_Len - 1;
+                                       if not (Name_Len = 0) then
+                                          if Name_Buffer (Name_Len) = ASCII.CR
+                                          then
+                                             Name_Len := Name_Len - 1;
+                                          end if;
                                        end if;
                                        exit Decoding;
                                     end if;
