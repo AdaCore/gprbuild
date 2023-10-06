@@ -284,6 +284,8 @@ package body Gprbuild.Compile is
                      --  will be written in the switches file.
 
                      Source.Id.Object_TS := File_Stamp (Source.Id.Object_Path);
+                     GPR.Util.Update_File_Stamp
+                       (Source.Id.Object_Path, Source.Id.Object_TS);
 
                      --  Write the switches file, now that we have the updated
                      --  time stamp for the object file.
@@ -324,6 +326,8 @@ package body Gprbuild.Compile is
                     or else Source.Id.Project.Library
                   then
                      Source.Id.Object_TS := File_Stamp (Source.Id.Object_Path);
+                     GPR.Util.Update_File_Stamp
+                       (Source.Id.Object_Path, Source.Id.Object_TS);
                   end if;
 
                else
