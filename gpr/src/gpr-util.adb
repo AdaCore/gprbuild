@@ -269,6 +269,22 @@ package body GPR.Util is
       end if;
    end File_Stamp;
 
+   -----------------------
+   -- Update_File_Stamp --
+   -----------------------
+
+   procedure Update_File_Stamp
+     (Path  : Path_Name_Type;
+      Stamp : Time_Stamp_Type)
+   is
+   begin
+      if Path = No_Path then
+         null;
+      else
+         File_Stamp_HTable.Set (Path, (True, Stamp));
+      end if;
+   end Update_File_Stamp;
+
    ----------------------
    -- Locate_Directory --
    ----------------------

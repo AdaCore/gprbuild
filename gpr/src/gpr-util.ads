@@ -942,9 +942,13 @@ package GPR.Util is
    ----------------------
 
    --  There is a hash table to cache the time stamps of files.
-   --  This table needs to be cleared sometimes.
+   --  This table needs to be cleared and updated sometimes.
 
    procedure Clear_Time_Stamp_Cache;
+
+   procedure Update_File_Stamp
+     (Path  : Path_Name_Type;
+      Stamp : Time_Stamp_Type);
 
 private
    type Text_File_Data is record
