@@ -2068,15 +2068,11 @@ package body Gpr_Build_Util is
       function Is_Virtually_Empty return Boolean is
       begin
          if One_Queue_Per_Obj_Dir then
-            for J in Q_First .. Q.Last loop
-               if not Q.Table (J).Processed
-                 and then Available_Obj_Dir (Q.Table (J).Info)
-               then
-                  return False;
-               end if;
-            end loop;
-
-            return True;
+            return
+              (for all J in Q_First .. Q.Last =>
+                 not
+                 (not Q.Table (J).Processed
+                  and then Available_Obj_Dir (Q.Table (J).Info)));
 
          else
             return Is_Empty;

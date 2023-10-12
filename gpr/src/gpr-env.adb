@@ -351,22 +351,13 @@ package body GPR.Env is
          Last : constant Integer := Path'Last - Dir'Length + 1;
 
       begin
-         for J in Path'First .. Last loop
-
-            --  Note: the order of the conditions below is important, since
-            --  it ensures a minimal number of string comparisons.
-
-            if (J = Path'First or else Path (J - 1) = Path_Separator)
+         return
+           (for some J in Path'First .. Last =>
+              (J = Path'First or else Path (J - 1) = Path_Separator)
               and then
-                (J + Dir'Length > Path'Last
-                  or else Path (J + Dir'Length) = Path_Separator)
-              and then Dir = Path (J .. J + Dir'Length - 1)
-            then
-               return True;
-            end if;
-         end loop;
-
-         return False;
+              (J + Dir'Length > Path'Last
+               or else Path (J + Dir'Length) = Path_Separator)
+              and then Dir = Path (J .. J + Dir'Length - 1));
       end Is_Present;
 
    --  Start of processing for Add_To_Path
