@@ -32,6 +32,9 @@ with GPR.Attr.PM; use GPR.Attr.PM;
 with GPR.Err;     use GPR.Err;
 with GPR.Erroutc; use GPR.Erroutc;
 with GPR.Names;   use GPR.Names;
+with GPR.Output;  use GPR.Output;
+with GPR.Osint;   use GPR.Osint;
+with GPR.Sinput;  use GPR.Sinput;
 with GPR.Strt;    use GPR.Strt;
 with GPR.Tree;    use GPR.Tree;
 with GPR.Scans;   use GPR.Scans;
@@ -1307,23 +1310,48 @@ package body GPR.Dect is
                      end if;
                   end loop;
 
-                  --  Issue warning(s) in verbose mode or when a possible
-                  --  misspelling has been found.
+                  --  Issue warnings when a possible misspelling has been found
+                  --  otherwise simply inform in verbose mode
 
-                  if (Verbose_Mode and then Opt.Verbosity_Level > Opt.Low)
-                    or else Close_Enough
-                  then
+                  if Close_Enough then
                      Error_Msg
                        (Flags,
                         "?""" & Name & """ is not a known package name",
                         Token_Ptr);
-                  end if;
-
-                  if Close_Enough then
                      Error_Msg -- CODEFIX
                        (Flags,
                         "\?possible misspelling of """ & Pack.all & '"',
                         Token_Ptr);
+                  else
+                     if (Verbose_Mode and then Opt.Verbosity_Level > Opt.Low)
+                     then
+                        declare
+                           Sfile : Source_File_Index;
+                           Line  : Line_Number;
+                           Col   : Column_Number;
+                           FNT   : File_Name_Type;
+                        begin
+
+                           Sfile    := Get_Source_File_Index (Token_Ptr);
+
+                           if Full_Path_Name_For_Brief_Errors then
+                              FNT := Full_Ref_Name (Sfile);
+                           else
+                              FNT := Reference_Name (Sfile);
+                           end if;
+
+                           Line     := Get_Line_Number (Token_Ptr);
+                           Col      := Get_Column_Number (Token_Ptr);
+                           Write_Line (Get_Name_String (FNT) & ":"
+                                       & Line'Img
+                                         (Line'Img'First + 1 .. Line'Img'Last)
+                                       & ":"
+                                       & Col'Img
+                                         (Col'Img'First + 1 .. Col'Img'Last)
+                                       & ": """ & Name
+                                       & """ is not a known package name");
+                        end;
+                     end if;
                   end if;
                end;
             end if;
