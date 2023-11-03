@@ -743,7 +743,9 @@ package body GPR.Nmsc is
          if Add_Src = False then
             Add_Src := True;
 
-            if Project = Source.Project then
+            if Project = Source.Project
+              and then not Source.Locally_Removed
+            then
                if Prev_Unit = No_Unit_Index then
                   if Data.Flags.Allow_Duplicate_Basenames then
                      Add_Src := True;
@@ -805,7 +807,6 @@ package body GPR.Nmsc is
 
             elsif Prev_Unit /= No_Unit_Index
               and then Prev_Unit.File_Names (Kind) /= null
-              and then not Source.Locally_Removed
               and then Source.Replaced_By = No_Source
               and then not Data.In_Aggregate_Lib
             then
@@ -841,8 +842,7 @@ package body GPR.Nmsc is
 
                Add_Src := False;
 
-            elsif not Source.Locally_Removed
-              and then Source.Replaced_By = No_Source
+            elsif Source.Replaced_By = No_Source
               and then not Data.Flags.Allow_Duplicate_Basenames
               and then Lang_Id.Config.Kind = File_Based
               and then Source.Language.Config.Kind = File_Based
@@ -865,8 +865,7 @@ package body GPR.Nmsc is
                   Add_Src := True;
                end if;
 
-            elsif not Source.Locally_Removed
-              and then Source.Replaced_By /= No_Source
+            elsif Source.Replaced_By /= No_Source
               and then not Data.Flags.Allow_Duplicate_Basenames
               and then Lang_Id.Config.Kind = Unit_Based
               and then Source.Language.Config.Kind = Unit_Based
