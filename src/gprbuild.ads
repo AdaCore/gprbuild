@@ -184,6 +184,9 @@ private
    Cmd_Line_Adc_Files : Name_Id_Maps.Map;
    --  -gnatec command line option values
 
+   Cmd_Line_Target_Dep_Info_Files : Name_Id_Maps.Map;
+   --  -gnateT command line option values
+
    package Compiling_Options_HTable is new GNAT.HTable.Simple_HTable
      (Header_Num => GPR.Header_Num,
       Element    => String_Vector_Access,
