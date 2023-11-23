@@ -2228,6 +2228,16 @@ package body GPR.Util is
    begin
       Get_Name_String (Fname);
 
+      --  Check for extension (not .ads/.adb)
+
+      if Name_Len > 4 and then Name_Buffer (Name_Len - 3) = '.' then
+         if not (Name_Buffer (Name_Len - 3 .. Name_Len) = ".ads"
+                 or Name_Buffer (Name_Len - 3 .. Name_Len) = ".adb")
+         then
+            return False;
+         end if;
+      end if;
+
       --  Remove extension (.ads/.adb) if present
 
       if Name_Len > 4 and then Name_Buffer (Name_Len - 3) = '.' then
@@ -5258,24 +5268,11 @@ package body GPR.Util is
                         end if;
                      end;
 
-                  else
+                  elsif Dep_Src = No_Source
+                    and then ALI.Sdep.Table (D).Checksum /= 0
+                  then
 
-                     if Dep_Src = No_Source
-                       and then not Is_Ada_Predefined_File_Name (Sfile)
-                       and then not Is_Pragmas_Config_File (Sfile)
-                     then
-                        if Opt.Verbosity_Level > Opt.Low then
-                           Put ("  -> """);
-                           Put (Get_Name_String (Sfile));
-                           Put_Line (""" missing");
-                        end if;
-
-                        return True;
-                     end if;
-
-                     if Dep_Src = No_Source
-                       and then Is_Pragmas_Config_File (Sfile)
-                     then
+                     if not Is_Ada_Predefined_File_Name (Sfile) then
                         declare
                            F_And_Cksum_Found : Boolean := False;
                            Timestamp_Found   : Boolean := False;
@@ -5359,6 +5356,8 @@ package body GPR.Util is
                            end if;
                         end;
                      end if;
+
+                  else
 
                      while Dep_Src /= No_Source loop
                         if not Dep_Src.Locally_Removed
@@ -5555,43 +5554,44 @@ package body GPR.Util is
                      --  directory is defined, check if the file exists there,
                      --  and if it does, check its timestamp.
 
-                     if not Found
-                       and then
-                         (Runtime_Source_Dirs /= No_Name_List
-                          or else
-                          Is_Absolute_Path (Get_Name_String (Sfile)))
-                     then
-                        if Is_Absolute_Path (Get_Name_String (Sfile)) then
-                           if Check_Time_Stamps
-                             (Get_Name_String (Sfile),
-                              ALI.Sdep.Table (D).Stamp)
-                           then
-                              return True;
-                           end if;
+                  end if;
 
-                        else
-                           declare
-                              R_Dirs : Name_List_Index := Runtime_Source_Dirs;
-                           begin
-                              while R_Dirs /= No_Name_List loop
-                                 declare
-                                    Nam_Nod : constant Name_Node :=
-                                      Tree.Shared.Name_Lists.Table (R_Dirs);
-                                 begin
-                                    if Check_Time_Stamps
-                                      (Get_Name_String (Nam_Nod.Name) &
-                                         Directory_Separator &
-                                         Get_Name_String (Sfile),
-                                       ALI.Sdep.Table (D).Stamp)
-                                    then
-                                       return True;
-                                    end if;
-
-                                    R_Dirs := Nam_Nod.Next;
-                                 end;
-                              end loop;
-                           end;
+                  if not Found
+                    and then
+                      (Runtime_Source_Dirs /= No_Name_List
+                       or else
+                       Is_Absolute_Path (Get_Name_String (Sfile)))
+                  then
+                     if Is_Absolute_Path (Get_Name_String (Sfile)) then
+                        if Check_Time_Stamps
+                          (Get_Name_String (Sfile),
+                           ALI.Sdep.Table (D).Stamp)
+                        then
+                           return True;
                         end if;
+
+                     else
+                        declare
+                           R_Dirs : Name_List_Index := Runtime_Source_Dirs;
+                        begin
+                           while R_Dirs /= No_Name_List loop
+                              declare
+                                 Nam_Nod : constant Name_Node :=
+                                   Tree.Shared.Name_Lists.Table (R_Dirs);
+                              begin
+                                 if Check_Time_Stamps
+                                   (Get_Name_String (Nam_Nod.Name) &
+                                      Directory_Separator &
+                                      Get_Name_String (Sfile),
+                                    ALI.Sdep.Table (D).Stamp)
+                                 then
+                                    return True;
+                                 end if;
+
+                                 R_Dirs := Nam_Nod.Next;
+                              end;
+                           end loop;
+                        end;
                      end if;
                   end if;
                end if;
