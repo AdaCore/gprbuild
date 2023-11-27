@@ -757,14 +757,15 @@ package GPR.Util is
    end Knowledge;
 
    procedure Need_To_Compile
-     (Source         : Source_Id;
-      Tree           : Project_Tree_Ref;
-      In_Project     : Project_Id;
-      Conf_Paths     : Config_Paths;
-      Must_Compile   : out Boolean;
-      The_ALI        : out ALI.ALI_Id;
-      Object_Check   : Boolean;
-      Always_Compile : Boolean);
+     (Source           : Source_Id;
+      Tree             : Project_Tree_Ref;
+      In_Project       : Project_Id;
+      Conf_Paths       : Config_Paths;
+      Target_Dep_Paths : Config_Paths;
+      Must_Compile     : out Boolean;
+      The_ALI          : out ALI.ALI_Id;
+      Object_Check     : Boolean;
+      Always_Compile   : Boolean);
    --  Check if a source need to be compiled.
    --  A source need to be compiled if:
    --    - Force_Compilations is True

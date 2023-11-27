@@ -2304,7 +2304,8 @@ package body GPR.Util is
    -- Is_Pragmas_Config_File --
    ----------------------------
 
-   function Is_Pragmas_Config_File (Fname : File_Name_Type) return Boolean is
+   function Is_Pragmas_Config_File (Fname : File_Name_Type) return Boolean
+   is
       Filename                  : constant String := Get_Name_String (Fname);
       Pragma_Config_File_Suffix : constant String := ".adc";
 
@@ -4275,14 +4276,15 @@ package body GPR.Util is
    ---------------------
 
    procedure Need_To_Compile
-     (Source         : GPR.Source_Id;
-      Tree           : Project_Tree_Ref;
-      In_Project     : Project_Id;
-      Conf_Paths     : Config_Paths;
-      Must_Compile   : out Boolean;
-      The_ALI        : out ALI.ALI_Id;
-      Object_Check   : Boolean;
-      Always_Compile : Boolean)
+     (Source           : GPR.Source_Id;
+      Tree             : Project_Tree_Ref;
+      In_Project       : Project_Id;
+      Conf_Paths       : Config_Paths;
+      Target_Dep_Paths : Config_Paths;
+      Must_Compile     : out Boolean;
+      The_ALI          : out ALI.ALI_Id;
+      Object_Check     : Boolean;
+      Always_Compile   : Boolean)
    is
       Source_Path         : constant String :=
                               Get_Name_String (Source.Path.Display_Name);
@@ -5174,6 +5176,16 @@ package body GPR.Util is
                                     Conf_Paths_Found (J) := True;
                                  end if;
                               end loop;
+
+                              if not Found then
+                                 for J in Target_Dep_Paths'Range loop
+                                    if Target_Dep_Paths (J).Name =
+                                      Get_Path_Name_Id (Norm_Path)
+                                    then
+                                       Found := True;
+                                    end if;
+                                 end loop;
+                              end if;
 
                               if Absp
                                 and then not Found

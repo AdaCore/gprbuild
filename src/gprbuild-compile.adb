@@ -1266,7 +1266,14 @@ package body Gprbuild.Compile is
       --  Paths of eventual global and local configuration pragmas files
       --  and files from -gnatec= command line parameters.
 
+      Target_Dep_Paths : Config_Paths
+        (1 .. Natural (Cmd_Line_Target_Dep_Info_Files.Length));
+      --  Paths of eventual target dependency files from -gnateT command line
+      --  parameters.
+
       Last_Config_Path : Natural := 0;
+
+      Last_Target_Dependency_Path : Natural := 0;
 
       procedure Add_Config_File_Switch
         (Config    : Language_Config;
@@ -1324,6 +1331,10 @@ package body Gprbuild.Compile is
          Source_Project : Project_Id);
       --  Find the config files for the source and put their paths in
       --  The_Config_Paths.
+
+      procedure Get_Target_Dependency_Paths;
+      --  Find the target dependency files for the source and put their paths
+      --  in Target_Dep_Paths.
 
       procedure Add_Config_File_Switches
         (Id             : Source_Id;
@@ -2603,6 +2614,22 @@ package body Gprbuild.Compile is
          end loop;
       end Get_Config_Paths;
 
+      ---------------------------------
+      -- Get_Target_Dependency_Paths --
+      ---------------------------------
+
+      procedure Get_Target_Dependency_Paths is
+      begin
+         Last_Target_Dependency_Path := 0;
+
+         for CF in Cmd_Line_Target_Dep_Info_Files.Iterate loop
+            Last_Target_Dependency_Path := Last_Target_Dependency_Path + 1;
+            Target_Dep_Paths (Last_Target_Dependency_Path) :=
+              (Name         => Path_Name_Type (Name_Id_Maps.Key (CF)),
+               Display_Name => Path_Name_Type (Name_Id_Maps.Element (CF)));
+         end loop;
+      end Get_Target_Dependency_Paths;
+
       ------------------------------
       -- Add_Config_File_Switches --
       ------------------------------
@@ -3388,17 +3415,19 @@ package body Gprbuild.Compile is
 
       begin
          Get_Config_Paths (Id, Source_Project);
+         Get_Target_Dependency_Paths;
 
          if Always_Compile or else not Source_Project.Externally_Built then
             Need_To_Compile
-              (Source         => Id,
-               Tree           => Source.Tree,
-               In_Project     => Source_Project,
-               Conf_Paths     => The_Config_Paths (1 .. Last_Config_Path),
-               Must_Compile   => Compilation_Needed,
-               The_ALI        => The_ALI,
-               Object_Check   => Object_Checked,
-               Always_Compile => Always_Compile);
+              (Source           => Id,
+               Tree             => Source.Tree,
+               In_Project       => Source_Project,
+               Conf_Paths       => The_Config_Paths (1 .. Last_Config_Path),
+               Target_Dep_Paths => Target_Dep_Paths,
+               Must_Compile     => Compilation_Needed,
+               The_ALI          => The_ALI,
+               Object_Check     => Object_Checked,
+               Always_Compile   => Always_Compile);
 
             if Total_Errors_Detected > 0 then
                Compilation_Phase_Failed
