@@ -599,7 +599,11 @@ package body Gprbuild.Post_Compile is
                Source := GPR.Element (Iter);
                exit when Source = No_Source;
 
-               Initialize_Source_Record (Source);
+               --  Always get the time stamps when the main project is an
+               --  aggregate project.
+
+               Initialize_Source_Record
+                 (Source, Main_Project.Qualifier = Aggregate);
 
                if Is_Compilable (Source)
                  and then Source.Replaced_By = No_Source
