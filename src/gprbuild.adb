@@ -383,7 +383,7 @@ package body Gprbuild is
    procedure Check_Object_Lister is
       List : Name_List_Index;
    begin
-      --  First, make sure that the archive builder (nm) is on the path
+      --  First, make sure that the object lister (nm) is on the path
 
       if Object_Lister_Path = null then
          List := Main_Project.Config.Object_Lister;
