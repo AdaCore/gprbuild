@@ -371,32 +371,46 @@ procedure Gprbuild.Main is
                   begin
                      Canonical_Case_File_Name (Key);
                      Cmd_Line_Adc_Files.Include (Get_Name_Id (Key), Value);
+
+                     if Current_Comp_Option_Table = No_Comp_Option_Table then
+                        --  Normalize option for all compilers
+
+                        All_Language_Compiling_Options.Append
+                          (Arg (Arg'First .. Arg'First + 7) & Key);
+
+                     else
+                        --  Normalize option for a single compiler
+
+                        Current_Comp_Option_Table.Append
+                          (Arg (Arg'First .. Arg'First + 7) & Key);
+                     end if;
                   end;
-               end if;
-
-               if Starts_With (Arg, "-gnateT=")
-               then
-                  declare
-                     Key   : String :=
-                               GNAT.OS_Lib.Normalize_Pathname
-                                 (Arg (Arg'First + 8 .. Arg'Last));
-                     Value : constant Name_Id := Get_Name_Id (Key);
-                  begin
-                     Canonical_Case_File_Name (Key);
-                     Cmd_Line_Target_Dep_Info_Files.Include
-                       (Get_Name_Id (Key), Value);
-                  end;
-               end if;
-
-               if Current_Comp_Option_Table = No_Comp_Option_Table then
-                  --  Option for all compilers
-
-                  All_Language_Compiling_Options.Append (Arg);
 
                else
-                  --  Option for a single compiler
+                  if Starts_With (Arg, "-gnateT=")
+                  then
+                     declare
+                        Key   : String :=
+                                  GNAT.OS_Lib.Normalize_Pathname
+                                    (Arg (Arg'First + 8 .. Arg'Last));
+                        Value : constant Name_Id := Get_Name_Id (Key);
+                     begin
+                        Canonical_Case_File_Name (Key);
+                        Cmd_Line_Target_Dep_Info_Files.Include
+                          (Get_Name_Id (Key), Value);
+                     end;
+                  end if;
 
-                  Current_Comp_Option_Table.Append (Arg);
+                  if Current_Comp_Option_Table = No_Comp_Option_Table then
+                     --  Option for all compilers
+
+                     All_Language_Compiling_Options.Append (Arg);
+
+                  else
+                     --  Option for a single compiler
+
+                     Current_Comp_Option_Table.Append (Arg);
+                  end if;
                end if;
 
             else
