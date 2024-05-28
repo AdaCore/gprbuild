@@ -1,6 +1,6 @@
 include:
-  - project: eng/gpr/gpr
-    file: /.gitlab-ci-shared.yml
+  - project: eng/gpr/gpr-issues
+    file: /.gitlab/.gitlab-ci-shared.yml
 
 stages:
   - build
@@ -10,9 +10,14 @@ build:
   extends: .job_template
   stage: build
   script:
-    # Build using anod
-    - anod build gnat
-
+    # generate a build just in case there's a related change in one of our
+    # repos that need updated tools.
+    - nb_repos=$(($(anod vcs --list | wc -l) - 2))
+    - if [[ $nb_repos > 0 ]]; then
+        exec anod build gprbuild ;
+      else
+        exec anod install gprbuild ;
+      fi
     # and save the gprbuild install
     - tar czf $CI_PROJECT_DIR/gprbuild.tar.gz -C $SANDBOX/$HOST/gprbuild/ install/
   artifacts:
@@ -31,3 +36,58 @@ test_gprbuild:
       - testgprbuild_result.xml
     reports:
       junit: testgprbuild_result.xml
+
+test_gprconfig:
+  extends: .test_template
+  script:
+    - install_packages gprbuild
+    - run_testsuite gprconfig "" test_gprconfig
+  artifacts:
+    when:
+      always
+    paths:
+      - testgprconfig_result.xml
+    reports:
+      junit: testgprconfig_result.xml
+
+test_cross_vxworks:
+  extends: .test_template
+  script:
+    - TARGET=x86_64-vx7r2,23.03,qemu
+    - install_packages gprbuild gnatall
+    - run_testsuite gprbuild "--target=$TARGET -QAdaCC++_Auto,rts=kernel" test_cross_vxworks
+  artifacts:
+    when:
+      always
+    paths:
+      - testcrossvxworks_result.xml
+    reports:
+      junit: testcrossvxworks_result.xml
+
+# ??? To re-enable when gpr/toolchain/gcc#133 is fixed
+.test_cross_linux:
+  extends: .test_template
+  script:
+    - TARGET=armhf-linux,,qemu
+    - install_packages gprbuild gnatall
+    - run_testsuite gprbuild "--target=$TARGET -QAdaCC++_Auto" test_cross_linux
+  artifacts:
+    when:
+      always
+    paths:
+      - testcrosslinux_result.xml
+    reports:
+      junit: testcrosslinux_result.xml
+
+test_gpr2ls:
+  extends: .test_template
+  script:
+    - install_packages gnatall
+    - run_testsuite gprbuild -QAdaCC++_Auto,check-gpr2ls test_gpr2ls
+  artifacts:
+    when:
+      always
+    paths:
+      - testgpr2ls_result.xml
+    reports:
+      junit: testgpr2ls_result.xml
