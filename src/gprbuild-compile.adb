@@ -1568,19 +1568,26 @@ package body Gprbuild.Compile is
             --  Check if the config file switch was not already included in
             --  the compilation options via the command line.
             declare
-               Switch : constant String := Name_Buffer (1 .. Name_Len);
-               Option : constant Option_Type :=
-                          (Name_Len    => Switch'Length,
-                           Name        => Switch,
-                           Displayed   => Opt.Verbose_Mode,
-                           Simple_Name => False);
+               Switch           : constant String :=
+                                    Name_Buffer (1 .. Name_Len);
+               Canonical_Switch : String := Switch;
             begin
-               if not Compilation_Options.Contains (Option) then
-                  Add_Option
-                    (Switch,
-                     To      => Compilation_Options,
-                     Display => Opt.Verbose_Mode);
-               end if;
+               Canonical_Case_File_Name (Canonical_Switch);
+
+               declare
+                  Option : constant Option_Type :=
+                             (Name_Len    => Canonical_Switch'Length,
+                              Name        => Canonical_Switch,
+                              Displayed   => Opt.Verbose_Mode,
+                              Simple_Name => False);
+               begin
+                  if not Compilation_Options.Contains (Option) then
+                     Add_Option
+                       (Switch,
+                        To      => Compilation_Options,
+                        Display => Opt.Verbose_Mode);
+                  end if;
+               end;
             end;
 
             List := Nam.Next;
