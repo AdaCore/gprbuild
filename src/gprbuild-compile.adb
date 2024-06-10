@@ -1571,23 +1571,22 @@ package body Gprbuild.Compile is
                Switch           : constant String :=
                                     Name_Buffer (1 .. Name_Len);
                Canonical_Switch : String := Switch;
+               Add_Switch       : Boolean := True;
             begin
                Canonical_Case_File_Name (Canonical_Switch);
 
-               declare
-                  Option : constant Option_Type :=
-                             (Name_Len    => Canonical_Switch'Length,
-                              Name        => Canonical_Switch,
-                              Displayed   => Opt.Verbose_Mode,
-                              Simple_Name => False);
-               begin
-                  if not Compilation_Options.Contains (Option) then
-                     Add_Option
-                       (Switch,
-                        To      => Compilation_Options,
-                        Display => Opt.Verbose_Mode);
+               for Option of Compilation_Options loop
+                  if Canonical_Switch = Option.Name then
+                     Add_Switch := False;
                   end if;
-               end;
+               end loop;
+
+               if Add_Switch then
+                  Add_Option
+                    (Switch,
+                     To      => Compilation_Options,
+                     Display => Opt.Verbose_Mode);
+               end if;
             end;
 
             List := Nam.Next;
