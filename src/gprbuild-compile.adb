@@ -3615,7 +3615,7 @@ package body Gprbuild.Compile is
             Queue.Get (Found, Source);
 
             if Opt.Use_GNU_Make_Jobserver then
-               Jobserver.Synchronize_Token_Status;
+               Jobserver.Monitor;
             end if;
 
             if Found then
@@ -3624,7 +3624,7 @@ package body Gprbuild.Compile is
             end if;
 
             if Opt.Use_GNU_Make_Jobserver
-              and then Awaiting_Job_Slot
+              and then Jobserver.Pending_Process
             then
                null;
             elsif Found then
@@ -3656,13 +3656,19 @@ package body Gprbuild.Compile is
          function No_Slot_Available return Boolean is
          begin
             if Opt.Use_GNU_Make_Jobserver then
-               if GPR.Debug.Debug_Flag_J then
-                  Ada.Text_IO.Put_Line
-                    ("[ Jobserver ] No_Slot_Available -> " & Boolean'Image
-                       ((Unavailable_Job_Slot and then Registered_Processes)));
-               end if;
+               declare
+                  Condition : constant Boolean :=
+                                (Unavailable_Job_Slot
+                                 and then Registered_Processes);
+               begin
+                  if GPR.Debug.Debug_Flag_J then
+                     Ada.Text_IO.Put_Line
+                       ("[ Jobserver ] No_Slot_Available -> "
+                        & Boolean'Image (Condition));
+                  end if;
 
-               return (Unavailable_Job_Slot and then Registered_Processes);
+                  return Condition;
+               end;
             else
                return (Outstanding_Compiles = Get_Maximum_Processes);
             end if;

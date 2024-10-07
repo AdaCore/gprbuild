@@ -47,22 +47,39 @@ package body GPR.Jobserver is
    procedure Release (Token : Character);
    --  Release the token to the pipe of the jobserver
 
-   protected body Token_Status_Object is
-      procedure Set (Status : Token_Status) is
+   protected body Task_State_Object is
+      procedure Set (State : Task_State) is
       begin
-         Value  := Status;
+         S := State;
       end Set;
-      function Get return Token_Status is
+      function Get return Task_State is (S);
+   end Task_State_Object;
+
+   protected body Task_Token_Status_Object is
+      procedure Set (Status : Task_Token_Status) is
       begin
-         return Value;
-      end Get;
-   end Token_Status_Object;
+         S := Status;
+      end Set;
+      function Get return Task_Token_Status is (S);
+   end Task_Token_Status_Object;
+
+   protected body Token_Process_State_Object is
+      procedure Set (State : Token_Process_State) is
+      begin
+         S := State;
+      end Set;
+      function Get return Token_Process_State is (S);
+   end Token_Process_State_Object;
+
+   protected body Sync_Proc_Task_Object is
+      procedure Set (Value : Boolean) is
+      begin
+         V := Value;
+      end Set;
+      function Synced return Boolean is (V);
+   end Sync_Proc_Task_Object;
 
    protected body Preorder_Auth_Object is
-      procedure Reset is
-      begin
-         Is_Set := False;
-      end Reset;
       procedure Set (Auth : Boolean) is
       begin
          Value  := Auth;
@@ -71,12 +88,12 @@ package body GPR.Jobserver is
       entry Get (Auth : out Boolean) when Is_Set is
       begin
          Auth   := Value;
+         Is_Set := False;
       end Get;
    end Preorder_Auth_Object;
 
    task body Jobserver_Task is
       Job_Done : Boolean := False;
-      Status   : Token_Status;
    begin
       loop
          exit when Job_Done;
@@ -84,6 +101,9 @@ package body GPR.Jobserver is
             Auth : Boolean;
          begin
             Preorder_Auth_Object.Get (Auth);
+            Task_State_Object.Set (Busy);
+            Task_Token_Status_Object.Set (Unknown);
+            Sync_Proc_Task_Object.Set (True);
             if GPR.Debug.Debug_Flag_J then
                Ada.Text_IO.Put_Line
                  ("[ Jobserver ] Jobserver_Task unlocked ; Auth = "
@@ -94,8 +114,8 @@ package body GPR.Jobserver is
                   if not (IC_STR.is_regular_file (IC_STR.int (HR)) = 0)
                     or else not (IC_STR.is_regular_file (IC_STR.int (HW)) = 0)
                   then
-                     Status := Error;
-                     Token_Status_Object.Set (Status);
+                     Task_State_Object.Set (Error);
+                     Task_Token_Status_Object.Set (Unknown);
                      Job_Done := True;
                   end if;
                end if;
@@ -104,19 +124,15 @@ package body GPR.Jobserver is
                   case Current_Connection_Method is
                      when Named_Pipe =>
                         if Read (HRW, Char'Address, 1) /= 1 then
-                           Status := Unavailable;
-                           Token_Status_Object.Set (Status);
+                           Task_Token_Status_Object.Set (Unavailable);
                         else
-                           Status := Available;
-                           Token_Status_Object.Set (Status);
+                           Task_Token_Status_Object.Set (Available);
                         end if;
                      when Simple_Pipe =>
                         if Read (HR, Char'Address, 1) /= 1 then
-                           Status := Unavailable;
-                           Token_Status_Object.Set (Status);
+                           Task_Token_Status_Object.Set (Unavailable);
                         else
-                           Status := Available;
-                           Token_Status_Object.Set (Status);
+                           Task_Token_Status_Object.Set (Available);
                         end if;
                      when Undefined | Windows_Semaphore =>
                         null;
@@ -126,13 +142,13 @@ package body GPR.Jobserver is
                if GPR.Debug.Debug_Flag_J then
                   Ada.Text_IO.Put_Line
                     ("[ Jobserver ] Jobserver_Task ended ; Token_Status = "
-                     & Status'Img);
+                     & Task_Token_Status_Object.Get'Img);
                end if;
             else
                Job_Done := True;
             end if;
          end;
-         Preorder_Auth_Object.Reset;
+         Task_State_Object.Set (Idle);
       end loop;
    end Jobserver_Task;
 
@@ -142,7 +158,6 @@ package body GPR.Jobserver is
 
    procedure Finalize is
    begin
-      Token_Status_Object.Set (Not_Needed);
       Preorder_Auth_Object.Set (Auth => False);
    end Finalize;
 
@@ -299,25 +314,34 @@ package body GPR.Jobserver is
 
    procedure Preorder_Token is
       Preorder_Condition : constant Boolean :=
-                             ((Cached_Token_Status = Not_Needed
-                              or else Cached_Token_Status = Unavailable)
-                              and then Token_Status_Object.Get /= Available);
+                             (Token_Process_State_Object.Get = Idle
+                              or else
+                                (Sync_Proc_Task_Object.Synced
+                                 and then
+                                 Task_State_Object.Get = Idle
+                                 and then
+                                 Task_Token_Status_Object.Get = Unavailable));
    begin
       if GPR.Debug.Debug_Flag_J then
          Ada.Text_IO.Put_Line ("[ Jobserver ] Preorder_Token");
-         Ada.Text_IO.Put_Line ("   [ Jobserver ] Token_Status : "
-                               & Cached_Token_Status'Img & " ; Auth = "
+         Ada.Text_IO.Put_Line ("   [ Proc ] "
+                               & Token_Process_State_Object.Get'Img
+                               & " ; Auth = "
                                & Boolean'Image (Preorder_Condition));
+         Ada.Text_IO.Put_Line ("   [ Task ] "
+                               & Task_State_Object.Get'Img & " - "
+                               & Task_Token_Status_Object.Get'Img);
       end if;
 
       if Preorder_Condition
       then
-         if Cached_Token_Status = Not_Needed then
-            Token_Status_Object.Set (Pending);
-         end if;
-
+         Sync_Proc_Task_Object.Set (False);
          Preorder_Auth_Object.Set (Auth => True);
-         Synchronize_Token_Status;
+         Token_Process_State_Object.Set (Pending);
+         if GPR.Debug.Debug_Flag_J then
+            Ada.Text_IO.Put_Line ("   [ Proc ] New process state : "
+                                  & Token_Process_State_Object.Get'Img);
+         end if;
       end if;
    end Preorder_Token;
 
@@ -332,14 +356,20 @@ package body GPR.Jobserver is
    begin
       if GPR.Debug.Debug_Flag_J then
          Ada.Text_IO.Put_Line ("[ Jobserver ] Register_Token_Id");
-         Ada.Text_IO.Put_Line ("   [ Jobserver ] Token_Status : "
-                               & Cached_Token_Status'Img);
+         Ada.Text_IO.Put_Line ("   [ Proc ] "
+                               & Token_Process_State_Object.Get'Img);
+         Ada.Text_IO.Put_Line ("   [ Task ] "
+                               & Task_State_Object.Get'Img & " - "
+                               & Task_Token_Status_Object.Get'Img);
       end if;
 
-      if Cached_Token_Status = Available then
+      if Task_Token_Status_Object.Get = Available then
          Source_Id_Token_Map.Insert (Key, Char);
-         Token_Status_Object.Set (Not_Needed);
-         Synchronize_Token_Status;
+         Token_Process_State_Object.Set (Idle);
+         if GPR.Debug.Debug_Flag_J then
+            Ada.Text_IO.Put_Line ("   [ Proc ] New process state : "
+                                  & Token_Process_State_Object.Get'Img);
+         end if;
       else
          raise JS_Process_Error with "Tried to register a token when no" &
            " token was available";
@@ -377,43 +407,39 @@ package body GPR.Jobserver is
    -- Synchronize_Token_Status --
    ------------------------------
 
-   procedure Synchronize_Token_Status is
-      Tmp_Token_Status : Token_Status;
+   procedure Monitor is
+      Tmp_Task_State : Task_State;
    begin
-      Tmp_Token_Status := Token_Status_Object.Get;
+      Tmp_Task_State := Task_State_Object.Get;
 
-      if Tmp_Token_Status = Error then
-         if GPR.Debug.Debug_Flag_J then
-            Ada.Text_IO.Put_Line ("[ Jobserver ] Synchronize_Token_Status");
-            Ada.Text_IO.Put_Line ("   [ Jobserver ] " & Cached_Token_Status'Img
-                                  & " -> " & Tmp_Token_Status'Img);
-         end if;
-
+      if Task_State_Object.Get = Error then
          raise JS_Access_Error with "Connection to the jobserver have been"
            & " lost. Make sure you prefixed your gprbuild command with a """
            & '+' & """ in your makefile.";
       end if;
 
       if GPR.Debug.Debug_Flag_J then
-         Ada.Text_IO.Put_Line ("[ Jobserver ] Synchronize_Token_Status");
-         Ada.Text_IO.Put_Line ("   [ Jobserver ] " & Cached_Token_Status'Img
-                               & " -> " & Tmp_Token_Status'Img);
+         Ada.Text_IO.Put_Line ("[ Jobserver ] Monitor");
+         Ada.Text_IO.Put_Line ("   [ Proc ] "
+                               & Token_Process_State_Object.Get'Img);
+         Ada.Text_IO.Put_Line ("   [ Task ] " & Tmp_Task_State'Img
+                               & " - " & Task_Token_Status_Object.Get'Img);
       end if;
 
-      if Cached_Token_Status = Pending
-        and then Cached_Token_Status = Tmp_Token_Status
+      if Task_State_Object.Get = Busy
+        and then Last_Task_State = Busy
       then
-         Pending_State_Count := Pending_State_Count + 1;
+         Busy_State_Count := Busy_State_Count + 1;
          if GPR.Debug.Debug_Flag_J then
-            Ada.Text_IO.Put_Line ("   [ Jobserver ] Pending_State_Count = "
-                                  & Pending_State_Count'Img);
+            Ada.Text_IO.Put_Line ("   [ Info ] Busy_State_Count = "
+                                  & Busy_State_Count'Img);
          end if;
       else
-         Pending_State_Count := 0;
+         Busy_State_Count := 0;
       end if;
 
-      Cached_Token_Status := Tmp_Token_Status;
-   end Synchronize_Token_Status;
+      Last_Task_State := Tmp_Task_State;
+   end Monitor;
 
    -----------------------------
    -- Unregister_All_Token_Id --
@@ -440,21 +466,11 @@ package body GPR.Jobserver is
    begin
       if GPR.Debug.Debug_Flag_J then
          Ada.Text_IO.Put_Line ("[ Jobserver ] Unregister_Token_Id");
-         Ada.Text_IO.Put_Line ("   [ Jobserver ] Token_Status : "
-                               & Cached_Token_Status'Img);
       end if;
 
       Release (Token => Source_Id_Token_Map.Element (Key));
       Source_Id_Token_Map.Delete (Key);
-
-      if Cached_Token_Status = Unavailable then
-         if Token_Status_Object.Get /= Available then
-            Token_Status_Object.Set (Not_Needed);
-            Synchronize_Token_Status;
-         end if;
-      elsif Cached_Token_Status = Pending then
-         Pending_State_Count := 0;
-      end if;
+      Busy_State_Count := 0;
    end Unregister_Token_Id;
 
 end GPR.Jobserver;
