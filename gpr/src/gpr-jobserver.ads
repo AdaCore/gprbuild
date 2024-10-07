@@ -70,8 +70,12 @@ package GPR.Jobserver is
    --  Returns True if there are ongoing processes affiliated with a token,
    --  returns False if there are not.
 
-   procedure Synchronize_Token_Status;
-   --  Synchronize Cached_Token_Status with the real token status
+   function Pending_Process return Boolean;
+   --  Returns True if a token have been ordered,
+   --  returns False if not.
+
+   procedure Monitor;
+   --  Monitor the process status and state.
 
    procedure Finalize;
    --  Finalize Jobserver processes
@@ -88,22 +92,45 @@ private
 
    type Implemented_Connection_Type is array (Connection_Type) of Boolean;
 
-   type Token_Status is
-     (Not_Needed, Pending, Available, Unavailable, Error);
+   type Task_Token_Status is (Unknown, Available, Unavailable);
 
-   Cached_Token_Status     : Token_Status := Not_Needed;
-   Pending_State_Count     : Integer      := 0;
-   Max_Pending_State_Count : constant     := 5;
+   type Task_State is (Idle, Busy, Error);
 
-   protected Token_Status_Object is
-      procedure Set (Status : Token_Status);
-      function Get return Token_Status;
+   type Token_Process_State is (Idle, Pending);
+
+   Last_Task_State      : Task_State := Idle;
+   Busy_State_Count     : Integer    := 0;
+   Max_Busy_State_Count : constant   := 10;
+
+   protected Task_State_Object is
+      procedure Set (State : Task_State);
+      function Get return Task_State;
    private
-      Value  : Token_Status := Not_Needed;
-   end Token_Status_Object;
+      S : Task_State := Idle;
+   end Task_State_Object;
+
+   protected Task_Token_Status_Object is
+      procedure Set (Status : Task_Token_Status);
+      function Get return Task_Token_Status;
+   private
+      S : Task_Token_Status := Unknown;
+   end Task_Token_Status_Object;
+
+   protected Token_Process_State_Object is
+      procedure Set (State : Token_Process_State);
+      function Get return Token_Process_State;
+   private
+      S : Token_Process_State := Idle;
+   end Token_Process_State_Object;
+
+   protected Sync_Proc_Task_Object is
+      procedure Set (Value : Boolean);
+      function Synced return Boolean;
+   private
+      V : Boolean := True;
+   end Sync_Proc_Task_Object;
 
    protected Preorder_Auth_Object is
-      procedure Reset;
       procedure Set (Auth : Boolean);
       entry Get (Auth : out Boolean);
    private
@@ -119,12 +146,17 @@ private
    JS_Task : access Jobserver_Task;
 
    function Awaiting_Job_Slot return Boolean is
-     (Cached_Token_Status = Pending or else Cached_Token_Status = Unavailable);
+     (Task_State_Object.Get = Busy
+      or else not Sync_Proc_Task_Object.Synced
+      or else not (Task_Token_Status_Object.Get = Available));
 
    function Unavailable_Job_Slot return Boolean is
      ((if Current_Connection_Method = Named_Pipe
-      then (Cached_Token_Status = Pending
-        and then Pending_State_Count >= Max_Pending_State_Count)
-      else Cached_Token_Status = Unavailable));
+      then (Task_State_Object.Get = Busy
+        and then Busy_State_Count >= Max_Busy_State_Count)
+      else (Task_Token_Status_Object.Get = Unavailable)));
+
+   function Pending_Process return Boolean is
+     (Token_Process_State_Object.Get = Pending);
 
 end GPR.Jobserver;
