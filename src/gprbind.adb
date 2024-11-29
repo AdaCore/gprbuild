@@ -405,6 +405,13 @@ begin
                   --  Ignore -C, as the generated sources are always in Ada
 
                   elsif  Line (1 .. Last) /= "-C" then
+                     if Line (1 .. Last) = Dash_Static then
+                        Static_Libs := True;
+
+                     elsif Line (1 .. Last) = Dash_Shared then
+                        Static_Libs := False;
+                     end if;
+
                      Binding_Options_Table.Append (Line (1 .. Last));
                   end if;
 
