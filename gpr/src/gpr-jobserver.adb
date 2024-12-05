@@ -277,6 +277,10 @@ package body GPR.Jobserver is
       Idx := Index (Makeflags, JS_Auth, Going => Ada.Strings.Backward);
 
       if Idx = 0 then
+         Ada.Text_IO.Put_Line
+           ("warning: GNU make jobserver MAKEFLAGS detected but no "
+            & "--jobserver-auth switch to determine how to connect."
+            & "Make sure you are using GNU make 4.2 or later.");
          return;
       end if;
 
