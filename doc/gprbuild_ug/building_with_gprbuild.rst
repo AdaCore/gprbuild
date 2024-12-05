@@ -506,7 +506,7 @@ package Builder of the main project (attribute Switches):
   When linking an executable, if supported by the platform, create a map file
   with file name :file:`map file`.
 
-* :samp:`--gnu-make-jobserver`
+* :samp:`--autodetect-jobserver`
 
   Specify to GPRbuild that it should attempt to connect to GNU make jobserver
   in order to be instructed when it is allowed to spawn another simultaneous
@@ -514,7 +514,7 @@ package Builder of the main project (attribute Switches):
   This option should be used when GNU make contains :samp:`-j{num}` switch when
   invoking GPRbuild to ensure correct ressources allocation.
   
-  If :samp:`-j{num}` is set alongside :samp:`--gnu-make-jobserver`
+  If :samp:`-j{num}` is set alongside :samp:`--autodetect-jobserver`
   the former will be ignored.
 
 * :samp:`--no-indirect-imports`
@@ -580,7 +580,7 @@ package Builder of the main project (attribute Switches):
   processes and several simultaneous linking processes when there are several
   mains to be bound and/or linked.
 
-  Note: if :samp:`--gnu-make-jobserver` is set, then :samp:`-j{num}` will
+  Note: if :samp:`--autodetect-jobserver` is set, then :samp:`-j{num}` will
   simply be ignored.
 
 * :samp:`-k` (Keep going after compilation errors)
@@ -952,8 +952,8 @@ compilation process, then several compilation processes for several sources of
 possibly different languages are spawned concurrently.
 
 Furthermore, GPRbuild is GNU make jobserver compatible when using the switch
-:samp:`--gnu-make-jobserver`. This means if GPRbuild is embedded in a GNU make 
-recursive invocation and :samp:`--gnu-make-jobserver` is set, then GPRbuild
+:samp:`--autodetect-jobserver`. This means if GPRbuild is embedded in a GNU make 
+recursive invocation and :samp:`--autodetect-jobserver` is set, then GPRbuild
 will only spawn an additionnal compilation process if GNU make's jobserver
 allows it. This is particularly useful to ensure that GPRbuild comply to the
 ressource management of GNU make.
@@ -963,10 +963,10 @@ Example:
 ::
 
      build1:
-       +gprbuild -P prjA/prj.gpr --gnu-make-jobserver
+       +gprbuild -P prjA/prj.gpr --autodetect-jobserver
 
      build2:
-       +gprbuild -P prjB/prj.gpr --gnu-make-jobserver
+       +gprbuild -P prjB/prj.gpr --autodetect-jobserver
 
      build_all:
        +make build1 build2
@@ -974,7 +974,7 @@ Example:
 calling :samp:`make build_all -j4` will spawn two GPRbuild processes, resulting in
 two remaining and available slots for both GPRbuild compilation phase.
 
-Note: If :samp:`--gnu-make-jobserver` is set, then any :samp:`-j{num}` will simply
+Note: If :samp:`--autodetect-jobserver` is set, then any :samp:`-j{num}` will simply
 be ignored by GPRbuild and a warning will be issued.
 
 .. _Post-Compilation_Phase:
