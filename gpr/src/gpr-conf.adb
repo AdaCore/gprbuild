@@ -1471,12 +1471,9 @@ package body GPR.Conf is
 
       function Is_Base_Name (Path : String) return Boolean is
       begin
-         for I in Path'Range loop
-            if Path (I) = Directory_Separator or else Path (I) = '/' then
-               return False;
-            end if;
-         end loop;
-         return True;
+         return
+           (for all I in Path'Range =>
+              not (Path (I) = Directory_Separator or else Path (I) = '/'));
       end Is_Base_Name;
 
       --  Local Variables
