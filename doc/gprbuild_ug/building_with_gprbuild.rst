@@ -318,11 +318,13 @@ package Builder of the main project:
 
 * :samp:`--src-subdirs={subdir}`
 
-  This adds the given subdirectory (relative to each object directory of the
-  project tree) to the list of source directories of the project, one directory
-  per object directory. This is useful for overriding temporarily some source
-  files for the purpose of e.g. source instrumentation such as source coverage
-  or preprocessing. This option may be combined with :samp:`--subdirs`.
+  This adds the ``<project>-<subdir>`` subdirectory (relative to each object
+  directory of the project tree, replacing ``<project>`` with the lower cased
+  name of the project) to the list of source directories of the project, one
+  directory per object directory. This is useful for overriding temporarily
+  some source files for the purpose of e.g. source instrumentation such as
+  source coverage or preprocessing. This option may be combined with
+  :samp:`--subdirs`.
 
 * :samp:`--relocate-build-tree[={dir}]`
 
