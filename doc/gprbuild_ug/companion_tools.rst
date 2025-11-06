@@ -1855,10 +1855,12 @@ The switches for GPRclean are:
 
 * :samp:`--src-subdirs={subdir}`
 
-  This adds the given subdirectory (relative to each object directory of the
-  project tree) to the list of source directories of the project, one directory
-  per object directory. GPRclean will remove the project source files found
-  in these subdirectories. This option may be combined with :samp:`--subdirs`.
+  This adds the ``<project>-<subdir>`` subdirectory (relative to each object
+  directory of the project tree, replacing ``<project>`` with the lower cased
+  name of the project) to the list of source directories of the project, one
+  directory per object directory. GPRclean will remove the project source files
+  found in these subdirectories. This option may be combined with
+  :samp:`--subdirs`.
 
 * :samp:`--relocate-build-tree[={dir}]`
 
