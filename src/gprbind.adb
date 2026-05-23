@@ -640,17 +640,11 @@ begin
       Name_Len := 0;
 
       declare
-         Path_Of_Gnatbind : String_Access := GNATBIND;
+         Path_Of_Gnatbind : String_Access :=
+           (if Gnatbind_Path_Specified then FULL_GNATBIND else GNATBIND);
       begin
-
-         if Gnatbind_Path_Specified then
-            Path_Of_Gnatbind := FULL_GNATBIND;
-         end if;
-
          Finish_Program
-           (null,
-            Osint.E_Fatal,
-            "could not locate " & Path_Of_Gnatbind.all);
+           (null, Osint.E_Fatal, "could not locate " & Path_Of_Gnatbind.all);
       end;
 
    else
