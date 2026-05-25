@@ -81,10 +81,6 @@ inc_flags="-I$srcdir/src -I$srcdir/gpr/src -I$xmlada_src/sax -I$xmlada_src/dom \
 bin_progs="gprbuild gprconfig gprclean gprinstall gprname gprls"
 lib_progs="gprlib gprbind"
 
-# Install the gprconfig knowledge base
-rm -rf "$srcdir"/share/gprconfig
-cp -r "$kb_src"/db "$srcdir"/share/gprconfig
-
 # Windows and Unix differencies
 
 UName=`uname | cut -b -5`
@@ -100,8 +96,13 @@ else
 fi
 
 # Build
+
 if [ "x"${MODE} = "x" ] || [ ${MODE} = "build" ];
 then
+	# Install the gprconfig knowledge base
+	rm -rf "$srcdir"/share/gprconfig
+	cp -r "$kb_src"/db "$srcdir"/share/gprconfig
+
 	command $CC -c $CFLAGS "$srcdir"/gpr/src/gpr_imports.c
 
 	for bin in $bin_progs; do
