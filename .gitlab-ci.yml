@@ -72,6 +72,9 @@ include:
       artifacts: ["xunit-*.xml"]
       rules:
         - allow_failure: true
+  - component: $CI_SERVER_FQDN/it/gitlab-templates/gitleaks@~latest
+    inputs:
+      stage: check
 
 test:windows:
   when: manual
