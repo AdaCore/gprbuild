@@ -28,8 +28,8 @@
       <target name="^i686-pc-mingw32$" />
     </targets>
     <hosts negate="true">
-      <host name="^i686-pc-mingw32$" />
-      <host name="^x86_64-pc-mingw32$" />
+      <host name="^i686-.*-mingw32$" />
+      <host name="^x86_64-.*-mingw32$" />
     </hosts>
     <config>
    for Object_Lister use ("i686-pc-mingw32-nm", "-g", "--no-demangle");
@@ -47,8 +47,8 @@
       <target name="^x86_64-pc-mingw32$" />
     </targets>
     <hosts negate="true">
-      <host name="^i686-pc-mingw32$" />
-      <host name="^x86_64-pc-mingw32$" />
+      <host name="^i686-.*-mingw32$" />
+      <host name="^x86_64-.*-mingw32$" />
     </hosts>
     <config>
    for Object_Lister use ("x86_64-pc-mingw32-nm", "-g", "--no-demangle");
@@ -63,11 +63,30 @@
 
   <configuration>
     <targets>
+      <target name="^x86_64-w64-mingw32$" />
+    </targets>
+    <hosts negate="true">
+      <host name="^i686-.*-mingw32$" />
+      <host name="^x86_64-.*-mingw32$" />
+    </hosts>
+    <config>
+   for Object_Lister use ("x86_64-w64-mingw32-nm", "-g", "--no-demangle");
+   for Object_Lister_Matcher use " [TDRB] (.*)";
+
+   package Linker is
+      for Export_File_Format use "GNU";
+      for Export_File_Switch use "-Wl,--version-script=";
+   end Linker;
+    </config>
+  </configuration>
+
+  <configuration>
+    <targets>
       <target name="^i686-pc-mingw32$" />
     </targets>
     <hosts>
-      <host name="^i686-pc-mingw32$" />
-      <host name="^x86_64-pc-mingw32$" />
+      <host name="^i686-.*-mingw32$" />
+      <host name="^x86_64-.*-mingw32$" />
     </hosts>
     <config>
    for Object_Lister use ("nm", "-g", "--no-demangle");
@@ -85,8 +104,8 @@
       <target name="^x86_64-pc-mingw32$" />
     </targets>
     <hosts>
-      <host name="^i686-pc-mingw32$" />
-      <host name="^x86_64-pc-mingw32$" />
+      <host name="^i686-.*-mingw32$" />
+      <host name="^x86_64-.*-mingw32$" />
     </hosts>
     <config>
    for Object_Lister use ("nm", "-g", "--no-demangle");
@@ -367,8 +386,8 @@
       <target name="^i686-pc-mingw32$" />
     </targets>
     <hosts negate="true">
-      <host name="^i686-pc-mingw32$" />
-      <host name="^x86_64-pc-mingw32$" />
+      <host name="^i686-.*-mingw32$" />
+      <host name="^x86_64-.*-mingw32$" />
     </hosts>
     <config>
    for Archive_Builder  use ("i686-pc-mingw32-ar", "cr");
@@ -383,8 +402,8 @@
       <target name="^i686-pc-mingw32$" />
     </targets>
     <hosts>
-      <host name="^i686-pc-mingw32$" />
-      <host name="^x86_64-pc-mingw32$" />
+      <host name="^i686-.*-mingw32$" />
+      <host name="^x86_64-.*-mingw32$" />
     </hosts>
     <config>
    for Archive_Builder  use ("ar", "cr");
@@ -399,8 +418,8 @@
       <target name="^x86_64-pc-mingw32$" />
     </targets>
     <hosts negate="true">
-      <host name="^i686-pc-mingw32$" />
-      <host name="^x86_64-pc-mingw32$" />
+      <host name="^i686-.*-mingw32$" />
+      <host name="^x86_64-.*-mingw32$" />
     </hosts>
     <config>
    for Archive_Builder  use ("x86_64-pc-mingw32-ar", "cr");
@@ -412,11 +431,27 @@
 
   <configuration>
     <targets>
+      <target name="^x86_64-w64-mingw32$" />
+    </targets>
+    <hosts negate="true">
+      <host name="^i686-.*-mingw32$" />
+      <host name="^x86_64-.*-mingw32$" />
+    </hosts>
+    <config>
+   for Archive_Builder  use ("x86_64-w64-mingw32-ar", "cr");
+   for Archive_Builder_Append_Option use ("q");
+   for Archive_Indexer  use ("x86_64-w64-mingw32-ranlib");
+   for Archive_Suffix   use ".a";
+    </config>
+  </configuration>
+
+  <configuration>
+    <targets>
       <target name="^x86_64-pc-mingw32$" />
     </targets>
     <hosts>
-      <host name="^i686-pc-mingw32$" />
-      <host name="^x86_64-pc-mingw32$" />
+      <host name="^i686-.*-mingw32$" />
+      <host name="^x86_64-.*-mingw32$" />
     </hosts>
     <config>
    for Archive_Builder  use ("ar", "cr");
