@@ -101,7 +101,7 @@
 
   <configuration>
     <targets>
-      <target name="^x86_64-pc-mingw32$" />
+      <target name="^x86_64-.*-mingw32$" />
     </targets>
     <hosts>
       <host name="^i686-.*-mingw32$" />
@@ -447,7 +447,7 @@
 
   <configuration>
     <targets>
-      <target name="^x86_64-pc-mingw32$" />
+      <target name="^x86_64-.*-mingw32$" />
     </targets>
     <hosts>
       <host name="^i686-.*-mingw32$" />
