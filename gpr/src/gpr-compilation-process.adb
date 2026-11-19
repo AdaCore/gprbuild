@@ -134,7 +134,7 @@ package body GPR.Compilation.Process is
       if Environments.Contains (Key) then
          for C in Environments (Key).Iterate loop
             if Res /= Null_Unbounded_String then
-               Res := Res & Opts_Sep;
+               Append (Res, Opts_Sep);
             end if;
 
             Res := Res & Env_Maps.Key (C) & '=' & Env_Maps.Element (C);

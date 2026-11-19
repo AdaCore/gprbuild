@@ -1741,13 +1741,13 @@ package body Gprinstall.Install is
 
                if Vars = "" then
                   --  No variable specified, use default value
-                  Line := Line & "external(""";
-                  Line := Line & To_Upper (Dir_Name (Suffix => False));
-                  Line := Line & "_BUILD"", ";
+                  Append (Line, "external(""");
+                  Append (Line, To_Upper (Dir_Name (Suffix => False)));
+                  Append (Line, "_BUILD"", ");
 
                else
                   for K in 1 .. String_Split.Slice_Count (Variables) loop
-                     Line := Line & "external(""";
+                     Append (Line, "external(""");
                      Line := Line & String_Split.Slice (Variables, K) & """, ";
                   end loop;
                end if;
@@ -1756,11 +1756,12 @@ package body Gprinstall.Install is
             Line := Line & '"' & Default & '"';
 
             if not No_Build_Var then
-               Line := Line
-                 & (+(Natural (String_Split.Slice_Count (Variables)) * ')'));
+               Append
+                 (Line,
+                  +(Natural (String_Split.Slice_Count (Variables)) * ')'));
             end if;
 
-            Line := Line & ';';
+            Append (Line, ';');
 
             return -Line;
          end Get_Build_Line;
@@ -1952,7 +1953,7 @@ package body Gprinstall.Install is
             begin
                if P.Default then
                   --  This is the default value, add Dir_Name
-                  Line := Line & Dir_Name (Suffix => False);
+                  Append (Line, Dir_Name (Suffix => False));
 
                   --  Furthermore, if the build name is "default" do not output
 
@@ -1972,14 +1973,15 @@ package body Gprinstall.Install is
             Line := +"         for Source_Dirs use (""";
 
             if Has_Sources (Project) then
-               Line := Line
-                 & Relative_Path
-                 (Sources_Dir (Build_Name => False), To => Project_Dir);
+               Append
+                 (Line,
+                  Relative_Path
+                    (Sources_Dir (Build_Name => False), To => Project_Dir));
 
                Gen_Dir_Name (Sources_Subdir, Line);
             end if;
 
-            Line := Line & """);";
+            Append (Line, """);");
 
             V.Append (-Line);
 
@@ -1991,12 +1993,13 @@ package body Gprinstall.Install is
                Line := +"         for Object_Dir use """;
             end if;
 
-            Line := Line
-              & Relative_Path
-                  (Lib_Dir (Build_Name => False), To => Project_Dir);
+            Append
+              (Line,
+               Relative_Path
+                 (Lib_Dir (Build_Name => False), To => Project_Dir));
 
             Gen_Dir_Name (Lib_Subdir, Line);
-            Line := Line & """;";
+            Append (Line, """;");
 
             V.Append (-Line);
 
@@ -2007,26 +2010,29 @@ package body Gprinstall.Install is
                if Lib_Dir /= ALI_Dir then
                   Line := +"         for Library_ALI_Dir use """;
 
-                  Line := Line
-                    & Relative_Path
-                    (ALI_Dir (Build_Name => False), To => Project_Dir);
+                  Append
+                    (Line,
+                     Relative_Path
+                       (ALI_Dir (Build_Name => False), To => Project_Dir));
 
                   Gen_Dir_Name (ALI_Subdir, Line);
-                  Line := Line & """;";
+                  Append (Line, """;");
                   V.Append (-Line);
                end if;
 
                Line := +"         for Library_Kind use """;
-               Line := Line & Image (Project.Library_Kind);
-               Line := Line & """;";
+               Append (Line, Image (Project.Library_Kind));
+               Append (Line, """;");
                V.Append (-Line);
 
                if Project.Standalone_Library /= No then
                   if not Is_Static (Project) then
                      Line := +"         for Library_Standalone use """;
-                     Line := Line & To_Lower
-                       (Standalone'Image (Project.Standalone_Library));
-                     Line := Line & """;";
+                     Append
+                       (Line,
+                        To_Lower
+                          (Standalone'Image (Project.Standalone_Library)));
+                     Append (Line, """;");
                      V.Append (-Line);
                   end if;
 
@@ -2148,7 +2154,7 @@ package body Gprinstall.Install is
             begin
                for V of Langs loop
                   if not First then
-                     Res := Res & ", ";
+                     Append (Res, ", ");
                   end if;
 
                   Res := Res & '"' & V & '"';
@@ -2847,9 +2853,9 @@ package body Gprinstall.Install is
                end if;
             end if;
 
-            Line := Line & "project ";
-            Line := Line & Get_Name_String (Project.Display_Name);
-            Line := Line & " is";
+            Append (Line, "project ");
+            Append (Line, Get_Name_String (Project.Display_Name));
+            Append (Line, " is");
             Content.Append (-Line);
 
             if Has_Sources (Project) or Project.Library then
